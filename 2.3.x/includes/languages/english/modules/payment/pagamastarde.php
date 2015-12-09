@@ -1,10 +1,10 @@
 <?php
 /**
- * Pagantis payment module for oscommerce
+ * PagaMasTarde payment module for oscommerce
  *
- * @package     Pagantis
+ * @package     PagaMasTarde
  * @author      Epsilon Eridani CB <contact@epsilon-eridani.com>
- * @copyright   Copyright (c) 2014  Pagantis (http://www.pagamastarde.com)
+ * @copyright   Copyright (c) 2014  Paga+Tarde (http://www.pagamastarde.com)
  *
  * @license     Released under the GNU General Public License
  *

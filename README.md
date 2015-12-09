@@ -1,7 +1,7 @@
 pagamastarde-oscommerce
 ================
 
-Módulo de pago de pagamastarde.com para osCommerce (v.2.3.x)
+Módulo de pago de Paga+Tarde para osCommerce (v.2.3.x)
 
 ## Instrucciones de Instalación
 
@@ -10,9 +10,9 @@ Módulo de pago de pagamastarde.com para osCommerce (v.2.3.x)
 3. Sube el contenido de la carpeta que coincida con tu versión de oscommerce al directorio root ( / ) de tu instalación oscommerce.
 4. Si tu tienda tiene más idiomas, copia el fichero de idiomas en la carpeta correspondiente y edítalo para ajustar los textos
   - includes/languages/OTRO_IDIOMA/modules/payment/pagamastarde.php
-5. Desde el panel de osCommerce de tu tienda, accede a Modulos > Pago. Pulsa el botón Instalar Módulo y selecciona el módulo pagamastarde.
-6. Una vez instalado, selecciona el módulo Pagantis de la lista de módulos disponibles y pulsa Editar.
-7. Configura el código de cuenta y la clave de firma con la información de tu cuenta que encontrarás en [el panel de gestión de Pagamastarde](https://bo.pagamastarde.com/shop). Ten en cuenta que para hacer cobros reales deberás activar tu cuenta de pagamastarde.
+5. Desde el panel de osCommerce de tu tienda, accede a Modulos > Pago. Pulsa el botón Instalar Módulo y selecciona el módulo Paga+Tarde.
+6. Una vez instalado, selecciona el módulo Paga+Tarde de la lista de módulos disponibles y pulsa Editar.
+7. Configura el código de cuenta y la clave de firma con la información de tu cuenta que encontrarás en [el panel de gestión de Paga+Tarde](https://bo.pagamastarde.com/shop). Ten en cuenta que para hacer cobros reales deberás activar tu cuenta de Paga+Tarde.
 
 ### Soporte
 

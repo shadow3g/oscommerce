@@ -35,6 +35,19 @@
         exit;
     }
 
+    $mode = ((MODULE_PAYMENT_PAGAMASTARDE_MODE == 'Test') ? 'test' : 'real');
+    if ( $mode == 'real'){
+      $pagamastarde_secret = trim( MODULE_PAYMENT_PAGAMASTARDE_SECRET );
+    }else{
+      $pagamastarde_secret = trim( MODULE_PAYMENT_PAGAMASTARDE_TEST_SECRET );
+    }
+    $signature_check = sha1($pagamastarde_secret.$notification['account_id'].$notification['api_version'].$notification['event'].$notification['data']['id']);
+    if ($signature_check != $notification['signature'] ){
+      //hack detected - not implemented yet
+      die( 'Fallo en el proceso de pago. Su pedido ha sido cancelado.' );
+      exit;
+    }
+
 
     if(isset($notification['event']) && $notification['event'] == 'charge.created')  {
 

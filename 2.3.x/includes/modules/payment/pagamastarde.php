@@ -35,7 +35,7 @@
 
       $this->form_action_url = "https://pmt.pagantis.com/v1/installments";
 
-      $this->allowCurrencyCode = array( 'EUR' );
+      $this->allowCurrencyCode = array( 'EUR','USD' );
 
     }
 
@@ -670,10 +670,10 @@
       }
 
       tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Paga Más Tarde', 'MODULE_PAYMENT_PAGAMASTARDE_STATUS', 'False', 'Do you want to accept Paga Mas Tarde payments?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Codigo de la cuenta de TEST', 'MODULE_PAYMENT_PAGAMASTARDE_TEST_ACCOUNT_ID', '', 'Codigo de tu cuenta de TEST de Paga Mas Tarde', '6', '4', now())");
-      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Clave de firma de TEST', 'MODULE_PAYMENT_PAGAMASTARDE_TEST_SECRET', '', 'Clave de firma de tu cuenta de TEST de Paga Mas Tarde.', '6', '4', now())");
-      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Codigo de la cuenta REAL', 'MODULE_PAYMENT_PAGAMASTARDE_ACCOUNT_ID', '', 'Codigo de tu cuenta REAL de Paga Mas Tarde', '6', '4', now())");
-      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Clave de firma REAL', 'MODULE_PAYMENT_PAGAMASTARDE_SECRET', '', 'Clave de firma de tu cuenta REAL de Paga Mas Tarde.', '6', '4', now())");
+      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('TEST Public Key', 'MODULE_PAYMENT_PAGAMASTARDE_TEST_ACCOUNT_ID', '', 'Codigo de tu cuenta de TEST de Paga Mas Tarde', '6', '4', now())");
+      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('TEST Secret Key', 'MODULE_PAYMENT_PAGAMASTARDE_TEST_SECRET', '', 'Clave de firma de tu cuenta de TEST de Paga Mas Tarde.', '6', '4', now())");
+      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('REAL Public Key', 'MODULE_PAYMENT_PAGAMASTARDE_ACCOUNT_ID', '', 'Codigo de tu cuenta REAL de Paga Mas Tarde', '6', '4', now())");
+      tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('REAL Secret Key', 'MODULE_PAYMENT_PAGAMASTARDE_SECRET', '', 'Clave de firma de tu cuenta REAL de Paga Mas Tarde.', '6', '4', now())");
       tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Modo de pago', 'MODULE_PAYMENT_PAGAMASTARDE_MODE', 'Test', 'Change payment mode?', '6', '3', 'tep_cfg_select_option(array(\'Test\', \'Real\'), ', now())");
       tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Descuento - asumir comisiones', 'MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT', 'False', 'Do you want to asume comissions?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
       tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_PAGAMASTARDE_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");

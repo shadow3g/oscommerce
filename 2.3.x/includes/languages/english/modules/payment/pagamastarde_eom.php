@@ -10,20 +10,14 @@
  *
  */
 global $customer_id, $order, $sendto, $currency, $pagamastardeOrderGeneratedInConfirmation, $shipping;
-if ( MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT == 'True' ){
-  $discount = 1;
-}else{
-  $discount = 0;
-}
-$widget =   '<div style="width:200px;top:-20px;" class="pmt-custom pmt-detail pmt-simulator" data-pmt-num-quota="4" data-pmt-style="neutral" data-pmt-type="3" data-pmt-discount="'.$discount.'" data-pmt-amount="'.(float)( $order->info['total']  ).'" data-pmt-expanded="no"></div>
-  <script type ="text/javascript" src ="https://cdn.pagamastarde.com/pmt-simulator/2/js/pmt-simulator.min.js">
-  </script>';
-define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_TITLE', 'Paga Más Tarde');
-define('MODULE_PAYMENT_PAGAMASTARDE_FINANCING','Financiación');
-define('MODULE_PAYMENT_PAGAMASTARDE_MONTH','mes');
-define('MODULE_PAYMENT_PAGAMASTARDE_MONTHS','meses');
-define('MODULE_PAYMENT_PAGAMASTARDE_FOR','durante');
-define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_DESCRIPTION', '
+
+
+define('MODULE_PAYMENT_PAGAMASTARDE_EOM_TEXT_TITLE', 'Paga a fin de mes');
+define('MODULE_PAYMENT_PAGAMASTARDE_EOM_FINANCING','Paga al final de mes');
+define('MODULE_PAYMENT_PAGAMASTARDE_EOM_MONTH','mes');
+define('MODULE_PAYMENT_PAGAMASTARDE_EOM_MONTHS','meses');
+define('MODULE_PAYMENT_PAGAMASTARDE_EOM_FOR','durante');
+define('MODULE_PAYMENT_PAGAMASTARDE_EOM_TEXT_DESCRIPTION', '
 <strong>Paga+Tarde</strong><br /><br/>
           Paga+Tarde es una plataforma de financiación online. Escoge Paga+Tarde como tu método de pago para permitir el pago a plazos.
           <br /><br/>
@@ -33,6 +27,6 @@ define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_DESCRIPTION', '
 <img src="images/icon_popup.gif" border="0">
 <a target="_blank" style="text-decoration: underline; font-weight: bold;" href="http://docs.pagamastarde.com/">Documentación</a>');
 
-define('MODULE_PAYMENT_PAGAMASTARDE_SHOP_TEXT_TITLE', MODULE_PAYMENT_PAGAMASTARDE_FINANCING .": ".$widget);
+define('MODULE_PAYMENT_PAGAMASTARDE_EOM_SHOP_TEXT_TITLE', MODULE_PAYMENT_PAGAMASTARDE_EOM_FINANCING);
 
 ?>

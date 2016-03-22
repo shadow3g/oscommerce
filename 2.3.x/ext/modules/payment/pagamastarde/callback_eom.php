@@ -13,7 +13,7 @@
 chdir('../../../../');
 require('includes/application_top.php');
 
-if (!defined('MODULE_PAYMENT_PAGAMASTARDE_STATUS') || (MODULE_PAYMENT_PAGAMASTARDE_STATUS  != 'True')) {
+if (!defined('MODULE_PAYMENT_PAGAMASTARDE_EOM_STATUS') || (MODULE_PAYMENT_PAGAMASTARDE_EOM_STATUS  != 'True')) {
   exit;
 }
 
@@ -33,11 +33,11 @@ if(isset($notification['event']) && $notification['event'] == 'sale.created')  {
   exit;
 }
 
-$mode = ((MODULE_PAYMENT_PAGAMASTARDE_MODE == 'Test') ? 'test' : 'real');
+$mode = ((MODULE_PAYMENT_PAGAMASTARDE_EOM_MODE == 'Test') ? 'test' : 'real');
 if ( $mode == 'real'){
-  $pagamastarde_secret = trim( MODULE_PAYMENT_PAGAMASTARDE_SECRET );
+  $pagamastarde_secret = trim( MODULE_PAYMENT_PAGAMASTARDE_EOM_SECRET );
 }else{
-  $pagamastarde_secret = trim( MODULE_PAYMENT_PAGAMASTARDE_TEST_SECRET );
+  $pagamastarde_secret = trim( MODULE_PAYMENT_PAGAMASTARDE_EOM_TEST_SECRET );
 }
 $signature_check = sha1($pagamastarde_secret.$notification['account_id'].$notification['api_version'].$notification['event'].$notification['data']['id']);
 if ($signature_check != $notification['signature'] ){
@@ -97,16 +97,16 @@ if(isset($notification['event']) && $notification['event'] == 'charge.created') 
         if (tep_db_num_rows($order_query) > 0) {
           $order = tep_db_fetch_array($order_query);
 
-          if ($order['orders_status'] == MODULE_PAYMENT_PAGAMASTARDE_PREPARE_ORDER_STATUS_ID) {
+          if ($order['orders_status'] == MODULE_PAYMENT_PAGAMASTARDE_EOM_PREPARE_ORDER_STATUS_ID) {
             $sql_data_array = array('orders_id' => $order_id_from_pagantis,
-            'orders_status_id' => MODULE_PAYMENT_PAGAMASTARDE_PREPARE_ORDER_STATUS_ID,
+            'orders_status_id' => MODULE_PAYMENT_PAGAMASTARDE_EOM_PREPARE_ORDER_STATUS_ID,
             'date_added' => 'now()',
             'customer_notified' => '0',
             'comments' => '');
 
             tep_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
 
-            tep_db_query("update " . TABLE_ORDERS . " set orders_status = '" . (MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID) . "', last_modified = now() where orders_id = '" . (int)$order_id_from_pagantis . "'");
+            tep_db_query("update " . TABLE_ORDERS . " set orders_status = '" . (MODULE_PAYMENT_PAGAMASTARDE_EOM_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAGAMASTARDE_EOM_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID) . "', last_modified = now() where orders_id = '" . (int)$order_id_from_pagantis . "'");
           }
 
           $total_query = tep_db_query("select value from " . TABLE_ORDERS_TOTAL . " where orders_id = '" . (int)$order_id_from_pagantis . "' and class = 'ot_total' limit 1");
@@ -115,7 +115,7 @@ if(isset($notification['event']) && $notification['event'] == 'charge.created') 
           $order_state_msg  = 'Paga+Tarde payment: '.$notification['data']['id'];
 
           $sql_data_array = array('orders_id' => $order_id_from_pagantis,
-          'orders_status_id' => (MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID),
+          'orders_status_id' => (MODULE_PAYMENT_PAGAMASTARDE_EOM_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAGAMASTARDE_EOM_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID),
           'date_added' => 'now()',
           'customer_notified' => '0',
           'comments' => $order_state_msg);
@@ -166,7 +166,7 @@ if(isset($notification['event']) && $notification['event'] == 'charge.created') 
     //add order history
     $order_state_msg  = 'Upsell Payment: '.number_format($notification['data']['amount']/100,2,'.','').'€, P+T id: "'.$notification['data']['id']. '", Order Id: '.$order_id_from_pagantis;
     $sql_data_array = array('orders_id' => $order_id_from_pagantis,
-    'orders_status_id' => (MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID),
+    'orders_status_id' => (MODULE_PAYMENT_PAGAMASTARDE_EOM_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAGAMASTARDE_EOM_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID),
     'date_added' => 'now()',
     'customer_notified' => '0',
     'comments' => $order_state_msg);
@@ -196,7 +196,7 @@ if(isset($notification['event']) && $notification['event'] == 'refund.created') 
   //add order history
   $order_state_msg  = 'Refund Payment: '.number_format($refund['amount']/100,2,'.','').'€, P+T id: "'.$refund['id']. '", Order Id: '.$order_id_from_pagantis;
   $sql_data_array = array('orders_id' => $order_id_from_pagantis,
-  'orders_status_id' => (MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID),
+  'orders_status_id' => (MODULE_PAYMENT_PAGAMASTARDE_EOM_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAGAMASTARDE_EOM_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID),
   'date_added' => 'now()',
   'customer_notified' => '0',
   'comments' => $order_state_msg);

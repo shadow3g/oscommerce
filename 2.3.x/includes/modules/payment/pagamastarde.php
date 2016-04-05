@@ -397,7 +397,7 @@
             'address[zipcode]' => $order->customer['postcode'],
             'callback_url' => $callback_url,
             'discount[full]' => $dicount,
-            'phone' => $order->customer['telephone']
+            'mobile_phone' => $order->customer['telephone']
         );
         //product descirption
         $desciption=[];

@@ -414,7 +414,7 @@
         foreach ($order->products as $product){
           $arrayHiddenFields["items[".$i."][description]"]=$product['name'] . " (".$product['qty'].") ";
           $arrayHiddenFields["items[".$i."][quantity]"]=$product['qty'];
-          $arrayHiddenFields["items[".$i."][amount]"]=$product['final_price'] * $product['qty'];
+          $arrayHiddenFields["items[".$i."][amount]"]=round (($product['final_price'] + ( $product['tax']* $product['final_price'] / 100 ) ) * $product['qty'],2);
           $desciption[]=$product['name'] . " ( ".$product['qty']." )";
           $i++;
         }

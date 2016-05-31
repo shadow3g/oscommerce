@@ -71,14 +71,6 @@ if(isset($notification['event']) && $notification['event'] == 'charge.created') 
     $order_total_amount = (int) ( $order_total['value'] * 100 );
     $pagantis_order_total_amount = $notification['data']['amount'];
 
-    //accounting insert - standard sale
-    $sql_data_array = array('orders_id' => $order_id_from_pagantis,
-                'orders_price' => $notification['data']['amount'],
-              'payment_method' => '9',
-              'payment_date' => 'now()',
-              'payment_field' => '0');
-    tep_db_perform(TABLE_ORDERS_ACCOUNTING, $sql_data_array);
-
     $total_amount_error = abs($order_total_amount - $pagantis_order_total_amount);
 
     if($total_amount_error > 1)
@@ -181,14 +173,6 @@ if(isset($notification['event']) && $notification['event'] == 'charge.created') 
 
     tep_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
 
-    //accounting insert - upsell
-    $sql_data_array = array('orders_id' => $order_id_from_pagantis,
-                'orders_price' => $notification['data']['amount'],
-              'payment_method' => '9',
-              'payment_date' => 'now()',
-              'payment_field' => '0');
-    tep_db_perform(TABLE_ORDERS_ACCOUNTING, $sql_data_array);
-
     //add order amount
     //$total_query = tep_db_query("update " . TABLE_ORDERS_TOTAL . " set value = value + " . $notification['data']['amount']/100 . "  where orders_id = '" . (int)$order_id_from_pagantis . "' and class in ('ot_total','ot_subtotal') limit 1");
   }
@@ -218,14 +202,6 @@ if(isset($notification['event']) && $notification['event'] == 'refund.created') 
   'comments' => $order_state_msg);
 
   tep_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
-
-  //accounting insert - refund
-  $sql_data_array = array('orders_id' => $order_id_from_pagantis,
-            'orders_price' => $refund['amount'],
-            'payment_method' => '9',
-            'payment_date' => 'now()',
-            'payment_field' => '0');
-  tep_db_perform(TABLE_ORDERS_ACCOUNTING, $sql_data_array);
 
   //add order amount
   //$total_query = tep_db_query("update " . TABLE_ORDERS_TOTAL . " set value = value - " . $refund['amount']/100 . "  where orders_id = '" . (int)$order_id_from_pagantis . "' and class in ('ot_total','ot_subtotal') limit 1");

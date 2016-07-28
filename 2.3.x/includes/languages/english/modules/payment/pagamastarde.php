@@ -15,8 +15,13 @@ if ( MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT == 'True' ){
 }else{
   $discount = 0;
 }
-$widget =   '<div style="width:200px;top:-20px;" class="pmt-custom pmt-detail pmt-simulator" data-pmt-num-quota="4" data-pmt-style="neutral" data-pmt-type="3" data-pmt-discount="'.$discount.'" data-pmt-amount="'.(float)( $order->info['total']  ).'" data-pmt-expanded="no"></div>
-  <script type ="text/javascript" src ="https://cdn.pagamastarde.com/pmt-simulator/2/js/pmt-simulator.min.js">
+$widget =   '<div class="PmtSimulator" data-pmt-num-quota="4" data-pmt-style="not_aplicable" data-pmt-type="3" data-pmt-discount="'.$discount.'" data-pmt-amount="'.(float)( $order->info['total']  ).'" data-pmt-expanded="no"></div>
+  <script type ="text/javascript" src ="https://cdn.pagamastarde.com/pmt-simulator/3/js/pmt-simulator.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      pmtSimulator.simulator_app.setPublicKey("'.MODULE_PAYMENT_PAGAMASTARDE_ACCOUNT_ID.'");
+      pmtSimulator.simulator_app.load_jquery();
+    });
   </script>';
 define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_TITLE', 'Paga Más Tarde');
 define('MODULE_PAYMENT_PAGAMASTARDE_FINANCING','Financiación');

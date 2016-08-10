@@ -19,7 +19,7 @@ class pagamastarde {
   */
   function pagamastarde() {
     global $order;
-    $this->signature = 'pagamastarde|pagamastarde|1.3|1.0';
+    $this->signature = 'pagamastarde|pagamastarde|1.4|1.0';
     $this->code = 'pagamastarde';
     $this->title = MODULE_PAYMENT_PAGAMASTARDE_TEXT_TITLE;
     $this->description = MODULE_PAYMENT_PAGAMASTARDE_TEXT_DESCRIPTION;
@@ -386,6 +386,10 @@ class pagamastarde {
       'address[city]' => $order->delivery['city'],
       'address[province]' =>$order->customer['state'],
       'address[zipcode]' => $order->customer['postcode'],
+      'shipping[street]' => $order->delivery['street_address'],
+      'shipping[city]' => $order->delivery['city'],
+      'shipping[province]' =>$order->delivery['state'],
+      'shipping[zipcode]' => $order->delivery['postcode'],
       'callback_url' => $callback_url,
       'discount[full]' => $dicount,
       'mobile_phone' => $order->customer['telephone']
@@ -449,6 +453,10 @@ class pagamastarde {
     'address[city]' => $order->delivery['city'],
     'address[province]' =>$order->customer['state'],
     'address[zipcode]' => $order->customer['postcode'],
+    'shipping[street]' => $order->delivery['street_address'],
+    'shipping[city]' => $order->delivery['city'],
+    'shipping[province]' =>$order->delivery['state'],
+    'shipping[zipcode]' => $order->delivery['postcode'],
     'callback_url' => $callback_url,
     'discount[full]' => $dicount,
     'mobile_phone' => $order->customer['telephone'],

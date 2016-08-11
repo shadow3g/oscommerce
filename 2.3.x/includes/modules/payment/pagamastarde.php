@@ -370,7 +370,7 @@ class pagamastarde {
       $_SERVER['REQUEST_URI'])).'/ext/modules/payment/pagamastarde/callback.php';
 
       $message = $pagamastarde_secret.$pagamastarde_account_id.$current_order_id.$amount.$thiscurrency.$pagamastarde_ok_url.$pagamastarde_nok_url.$callback_url.$dicount;
-      $signature = sha1($message);
+      $signature = hash('sha512', $message);
       $arrayHiddenFields = array (
       'order_id' => $current_order_id,
       'email' => $order->customer['email_address'],

@@ -491,37 +491,45 @@ class pagamastarde {
 
   if ($iframe == 'true'){
     //$process_button_string  contains the html of the pmt form
-    $iframe_html = "<script src='ext/modules/payment/pagamastarde/fancybox/jquery.fancybox.pack.js'></script>
-    <link rel='stylesheet' href='ext/modules/payment/pagamastarde/fancybox/jquery.fancybox.css' type='text/css' media='screen' />";
+    $iframe_html = '<!-- The Modal -->
+    <div id="myModal" class="paylater_modal">
+      <!-- Modal content -->
+      <div class="paylater_modal-content">
+        <span id="paylater_close">x</span>
+        <iframe id="iframe-pagantis" name="iframe-pagantis" style="width:100%;height:600px;display:block"></iframe>
+      </div>
+    </div>';
+    $iframe_html .= "<link rel='stylesheet' href='ext/modules/payment/pagamastarde/assets/css/iframe.css' type='text/css' media='screen' />";
     $iframe_html .='<script type="text/javascript">
-    jQuery(document).ready(function() {
-      if (jQuery.isFunction(jQuery.fancybox) ){
-        $("#tdb5").on("click", function (e) {
-          e.preventDefault(); // avoids calling success.php from the link
-          //post data to get form url.
-          $.ajax({
-            type: "POST",
-            url: "ext/modules/payment/pagamastarde/getPmtUrl.php",
-            data: $( "form[name*=\'checkout_confirmation\']" ).serialize(),
-            success: function(data, textStatus, jqXHR)
-            {
-              $.fancybox({
-                // fancybox API options
-                type: "iframe",
-                fitToView: false,
-                openEffect: "none",
-                closeEffect: "none",
-                "width"  : 920,
-                "minHeight" : 230,
-                "href": data
-              }); // fancybox
-            },
-            error: function(){ $( "form[name*=\'checkout_confirmation\']" ).submit();},
-          });
+    el = document.getElementsByName("checkout_confirmation")[0];
 
-        }); // on
-      }
-    }); //ready
+
+    var closeModal = function closeModal(evt) {
+     evt.preventDefault();
+     document.getElementById("myModal").style.display = "none";
+    };
+
+    var openModal = function openModal(evt) {
+     evt.preventDefault();
+     document.getElementsByName("checkout_confirmation")[0].setAttribute("target", "iframe-pagantis");
+     document.getElementsByName("checkout_confirmation")[0].submit();
+     document.getElementById("iframe-pagantis").style.display = "block";
+     document.getElementById("myModal").style.display = "block";
+    };
+
+    var elements = document.querySelectorAll("#paylater_close, #myModal");
+     Array.prototype.forEach.call(elements, function(el){
+     el.addEventListener("click", closeModal);
+    });
+
+    document.addEventListener("DOMContentLoaded", function(event) {
+      openModal(event);
+
+      var buttons = document.querySelectorAll(\'button[type="submit"]\');
+      Array.prototype.forEach.call(buttons, function(button){
+          button.addEventListener("click", openModal);
+        });
+      });
     </script>';
     $process_button_string=$iframe_html.$process_button_string;
   }

@@ -19,7 +19,7 @@ class pagamastarde {
   */
   function pagamastarde() {
     global $order;
-    $this->signature = 'pagamastarde|pagamastarde|1.4|1.0';
+    $this->signature = 'pagamastarde|pagamastarde|1.6|2.3';
     $this->code = 'pagamastarde';
     $this->title = MODULE_PAYMENT_PAGAMASTARDE_TEXT_TITLE;
     $this->description = MODULE_PAYMENT_PAGAMASTARDE_TEXT_DESCRIPTION;

@@ -10,7 +10,6 @@
 *
 */
 
-
 class pagamastarde {
   var $code, $title, $description, $enabled;
 
@@ -312,7 +311,6 @@ class pagamastarde {
           }
 
           // end - proceso estandar para generar el pedido
-
           $pagamastardeOrderGeneratedInConfirmation = $insert_id;
           $pagamastardeCartIDinConfirmation = $cartID;
           tep_session_register('pagamastardeOrderGeneratedInConfirmation');
@@ -440,34 +438,34 @@ EOT;
         $iframe_html .= "<link rel='stylesheet' href='ext/modules/payment/pagamastarde/assets/css/iframe.css' type='text/css' media='screen' />";
         $iframe_html .= <<<EOT
         <script type="text/javascript">
-        var submitButton = document.getElementsByName('checkout_confirmation')[0];
+          var submitButton = document.getElementsByName('checkout_confirmation')[0];
 
-        var closeModal = function closeModal(evt) {
-          evt.preventDefault();
-          document.getElementById('myModal').style.display = 'none';
-        };
+          var closeModal = function closeModal(evt) {
+            evt.preventDefault();
+            document.getElementById('myModal').style.display = 'none';
+          };
 
-        var openModal = function openModal(evt) {
-          evt.preventDefault();
-          submitButton.setAttribute('target', 'iframe-pagantis');
-          submitButton.submit();
-          document.getElementById('iframe-pagantis').style.display = 'block';
-          document.getElementById('myModal').style.display = 'block';
-        };
+          var openModal = function openModal(evt) {
+            evt.preventDefault();
+            submitButton.setAttribute('target', 'iframe-pagantis');
+            submitButton.submit();
+            document.getElementById('iframe-pagantis').style.display = 'block';
+            document.getElementById('myModal').style.display = 'block';
+          };
 
-        var closingElements = document.querySelectorAll('#paylater_close, #myModal');
-        Array.prototype.forEach.call(closingElements, function(el){
-          el.addEventListener('click', closeModal);
-        });
-
-        document.addEventListener('DOMContentLoaded', function(event) {
-          openModal(event);
-
-          var buttons = document.querySelectorAll('button[type="submit"]');
-          Array.prototype.forEach.call(buttons, function(button){
-            button.addEventListener('click', openModal);
+          var closingElements = document.querySelectorAll('#paylater_close, #myModal');
+          Array.prototype.forEach.call(closingElements, function(el){
+            el.addEventListener('click', closeModal);
           });
-        });
+
+          document.addEventListener('DOMContentLoaded', function(event) {
+            openModal(event);
+
+            var buttons = document.querySelectorAll('button[type="submit"]');
+            Array.prototype.forEach.call(buttons, function(button){
+              button.addEventListener('click', openModal);
+            });
+          });
         </script>
 EOT;
 

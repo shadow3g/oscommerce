@@ -350,15 +350,29 @@ class pagamastarde {
       $currency='EUR';
       $thiscurrency = $currency;
 
+
+      if (MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT == 'False'){
+        $dicount="false";
+      }else{
+        $dicount="true";
+      }
+
+      if (MODULE_PAYMENT_PAGAMASTARDE_IFRAME == 'False'){
+        $iframe="false";
+      }else{
+        $iframe="true";
+      }
+
       $pagamastarde_ok_url = trim( tep_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL', false));
-      $pagamastarde_nok_url = trim( tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
+      $pagamastarde_nok_url = trim( tep_href_link(FILENAME_CHECKOUT_SHIPPING, 'error_message=Pago fallido, por favor vuelve a intentarlo.', 'SSL', false));
+      $pagamastarde_cancelled_url = trim( tep_href_link(FILENAME_CHECKOUT_PAYMENT, '', 'SSL', false));
       //dynamic callback
       $callback_url =dirname(  sprintf(    "%s://%s%s",
       isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
       $_SERVER['SERVER_NAME'],
       $_SERVER['REQUEST_URI'])).'/ext/modules/payment/pagamastarde/callback.php';
 
-      $message = $pagamastarde_secret.$pagamastarde_account_id.$current_order_id.$amount.$thiscurrency.$pagamastarde_ok_url.$pagamastarde_nok_url.$callback_url.$dicount;
+      $message = $pagamastarde_secret.$pagamastarde_account_id.$current_order_id.$amount.$thiscurrency.$pagamastarde_ok_url.$pagamastarde_nok_url.$callback_url.$dicount.$pagamastarde_cancelled_url;
       $signature = hash('sha512', $message);
       $arrayHiddenFields = array (
         'order_id' => $current_order_id,
@@ -381,7 +395,9 @@ class pagamastarde {
         'shipping[zipcode]' => $order->delivery['postcode'],
         'callback_url' => $callback_url,
         'discount[full]' => $dicount,
-        'mobile_phone' => $order->customer['telephone']
+        'mobile_phone' => $order->customer['telephone'],
+        'cancelled_url' => $pagamastarde_cancelled_url,
+        'iframe' => $iframe
       );
       //product descirption
       $desciption=[];
@@ -399,73 +415,6 @@ class pagamastarde {
         $arrayHiddenFields["items[".$i."][quantity]"]=$product['qty'];
         $arrayHiddenFields["items[".$i."][amount]"]=round (($product['final_price'] + ( $product['tax']* $product['final_price'] / 100 ) ) * $product['qty'],2);
         $desciption[]=$product['name'] . " ( ".$product['qty']." )";
-        $i++;
-      }
-      $arrayHiddenFields['description'] = implode(",",$desciption);
-
-      if (MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT == 'False'){
-        $dicount="false";
-      }else{
-        $dicount="true";
-      }
-
-      if (MODULE_PAYMENT_PAGAMASTARDE_IFRAME == 'False'){
-        $iframe="false";
-      }else{
-        $iframe="true";
-      }
-
-      $pagamastarde_ok_url = trim( tep_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL', false));
-      $pagamastarde_nok_url = trim( tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
-      //dynamic callback
-      $callback_url =dirname(  sprintf(    "%s://%s%s",
-      isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
-      $_SERVER['SERVER_NAME'],
-      $_SERVER['REQUEST_URI'])).'/ext/modules/payment/pagamastarde/callback.php';
-
-      $message = $pagamastarde_secret.$pagamastarde_account_id.$current_order_id.$amount.$thiscurrency.$pagamastarde_ok_url.$pagamastarde_nok_url.$callback_url.$dicount;
-      $signature = sha1($message);
-      $arrayHiddenFields = array (
-        'order_id' => $current_order_id,
-        'email' => $order->customer['email_address'],
-        'full_name' =>$order->customer['firstname'] . ' ' . $order->customer['lastname'],
-        'amount' => $amount,
-        'currency' => $currency,
-        //'description' => MODULE_PAYMENT_PAGAMASTARDE_SUBJECT.' '.$current_order_id,
-        'ok_url' => $pagamastarde_ok_url,
-        'nok_url' => $pagamastarde_nok_url,
-        'account_id' => $pagamastarde_account_id,
-        'signature' => $signature,
-        'address[street]' => $order->customer['street_address'],
-        'address[city]' => $order->delivery['city'],
-        'address[province]' =>$order->customer['state'],
-        'address[zipcode]' => $order->customer['postcode'],
-        'shipping[street]' => $order->delivery['street_address'],
-        'shipping[city]' => $order->delivery['city'],
-        'shipping[province]' =>$order->delivery['state'],
-        'shipping[zipcode]' => $order->delivery['postcode'],
-        'callback_url' => $callback_url,
-        'discount[full]' => $dicount,
-        'mobile_phone' => $order->customer['telephone'],
-        'iframe' => $iframe
-      );
-      //product descirption
-      $desciption=[];
-      $i=0;
-
-      foreach ($order->products as $product){
-        $arrayHiddenFields["items[".$i."][description]"]=$product['name'] . " (".$product['qty'].") ";
-        $arrayHiddenFields["items[".$i."][quantity]"]=$product['qty'];
-        $arrayHiddenFields["items[".$i."][amount]"]=round (($product['final_price'] + ( $product['tax']* $product['final_price'] / 100 ) ) * $product['qty'],2);
-        $desciption[]=$product['name'] . " ( ".$product['qty']." )";
-        $i++;
-      }
-      if (isset($shipping['id'])){
-        $arrayHiddenFields["items[".$i."][description]"]=strip_tags($shipping['title']);
-        $arrayHiddenFields["items[".$i."][quantity]"]=1;
-        $arrayHiddenFields["items[".$i."][amount]"]=$shipping['cost'];
-        $arrayHiddenFields["items[".$i."][amount]"]=round (($shipping['cost'] + ( $shipping['tax'] * $shipping['cost'] / 100 ) ) ,2);
-        $desciption[]=strip_tags($shipping['title']);
         $i++;
       }
       $arrayHiddenFields['description'] = implode(",",$desciption);

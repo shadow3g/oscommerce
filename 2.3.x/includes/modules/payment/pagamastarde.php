@@ -429,43 +429,43 @@ class pagamastarde {
         //$process_button_string  contains the html of the pmt form
         $iframe_html = <<<EOT
         <!-- The Modal -->
-        <div id="myModal" class="paylater_modal">
+        <div id='myModal' class='paylater_modal'>
           <!-- Modal content -->
-          <div class="paylater_modal-content">
-            <span id="paylater_close">x</span>
-            <iframe id="iframe-pagantis" name="iframe-pagantis" style="width:100%;height:600px;display:block"></iframe>
+          <div class='paylater_modal-content'>
+            <span id='paylater_close'>x</span>
+            <iframe id='iframe-pagantis' name='iframe-pagantis' style='width:100%;height:600px;display:block'></iframe>
           </div>
         </div>
 EOT;
         $iframe_html .= "<link rel='stylesheet' href='ext/modules/payment/pagamastarde/assets/css/iframe.css' type='text/css' media='screen' />";
         $iframe_html .= <<<EOT
         <script type="text/javascript">
-        el = document.getElementsByName("checkout_confirmation")[0];
+        var submitButton = document.getElementsByName('checkout_confirmation')[0];
 
         var closeModal = function closeModal(evt) {
           evt.preventDefault();
-          document.getElementById("myModal").style.display = "none";
+          document.getElementById('myModal').style.display = 'none';
         };
 
         var openModal = function openModal(evt) {
           evt.preventDefault();
-          document.getElementsByName("checkout_confirmation")[0].setAttribute("target", "iframe-pagantis");
-          document.getElementsByName("checkout_confirmation")[0].submit();
-          document.getElementById("iframe-pagantis").style.display = "block";
-          document.getElementById("myModal").style.display = "block";
+          submitButton.setAttribute('target', 'iframe-pagantis');
+          submitButton.submit();
+          document.getElementById('iframe-pagantis').style.display = 'block';
+          document.getElementById('myModal').style.display = 'block';
         };
 
-        var elements = document.querySelectorAll("#paylater_close, #myModal");
-        Array.prototype.forEach.call(elements, function(el){
-          el.addEventListener("click", closeModal);
+        var closingElements = document.querySelectorAll('#paylater_close, #myModal');
+        Array.prototype.forEach.call(closingElements, function(el){
+          el.addEventListener('click', closeModal);
         });
 
-        document.addEventListener("DOMContentLoaded", function(event) {
+        document.addEventListener('DOMContentLoaded', function(event) {
           openModal(event);
 
           var buttons = document.querySelectorAll('button[type="submit"]');
           Array.prototype.forEach.call(buttons, function(button){
-            button.addEventListener("click", openModal);
+            button.addEventListener('click', openModal);
           });
         });
         </script>

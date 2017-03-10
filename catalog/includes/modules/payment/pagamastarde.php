@@ -21,15 +21,14 @@ class pagamastarde
     {
         global $order;
 
-        if ($_SESSION['currency'] != 'EUR') {
-            return false;
-        }
-
         $this->code = 'pagamastarde';
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGAMASTARDE_TEXT_ADMIN_TITLE; // Payment module title in Admin
         } else {
             $this->title = MODULE_PAYMENT_PAGAMASTARDE_TEXT_CATALOG_TITLE; // Payment module title in Catalog
+            if ($_SESSION['currency'] != 'EUR') {
+                return false;
+            }
         }
         $this->description = MODULE_PAYMENT_PAGAMASTARDE_TEXT_DESCRIPTION;
         $this->enabled = ((MODULE_PAYMENT_PAGAMASTARDE_STATUS == 'True') ? true : false);
@@ -43,7 +42,7 @@ class pagamastarde
         }
 
         $this->form_action_url = 'https://pmt.pagantis.com/v1/installments';
-        $this->version = '2.1';
+        $this->version = '2.2';
     }
 
     // class methods

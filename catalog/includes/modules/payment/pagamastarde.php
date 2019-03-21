@@ -10,7 +10,7 @@
  *
  */
 
-define('TABLE_PAGAMASTARDE', 'pagamastarde');
+define('TABLE_PAGANTIS', 'pagantis');
 
 class pagamastarde
 {
@@ -21,7 +21,7 @@ class pagamastarde
     {
         global $order;
 
-        $this->code = 'pagamastarde';
+        $this->code = 'pagantis';
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGAMASTARDE_TEXT_ADMIN_TITLE; // Payment module title in Admin
         } else {
@@ -47,7 +47,7 @@ class pagamastarde
 
     // class methods
     /**
-    * Calculate zone matches and flag settings to determine whether this module should display to customers or not
+    * Here you can implement using payment zones (refer to standard PayPal module as reference)
     */
     public function update_status()
     {
@@ -72,7 +72,8 @@ class pagamastarde
     }
 
     /*
-    *  validacion inicial
+    * Here you may define client side javascript that will verify any input fields you use in the payment method
+    * selection page. Refer to standard cc module as reference (cc.php).
     */
     public function javascript_validation()
     {
@@ -81,6 +82,7 @@ class pagamastarde
 
     /*
     * Llamada cuando el usuario esta en la pantalla de eleccion de tipo de pago
+     * This function outputs the payment method title/text and if required, the input fields.
     *
     * Si hay un pedido generado previamente y no confirmado, se borra
     * Caso de uso:
@@ -94,12 +96,12 @@ class pagamastarde
     */
     public function selection()
     {
-        return array('id' => $this->code,
-        'module' => $this->title);
+        return array('id' => $this->code, 'module' => $this->title);
     }
 
     /*
-    * Validacion antes de pasar a pantalla confirmacion
+    * Use this function implement any checks of any conditions after payment method has been selected. You most probably
+    *  don't need to implement anything here.
     */
     public function pre_confirmation_check()
     {
@@ -107,6 +109,8 @@ class pagamastarde
     }
 
     /*
+     * Implement any checks or processing on the order information before proceeding to payment confirmation. You most
+    probably don't need to implement anything here.
     * Llamada cuando el usuario entra en la pantalla de confirmacion
     *
     * Se genera el pedido:
@@ -132,7 +136,7 @@ class pagamastarde
         global $order;
         $this->order_id = md5(serialize($order->products) .''. serialize($order->customer) .''. serialize($order->delivery));
         $_SESSION['order_id'] = $this->order_id;
-        $sql = sprintf("insert into " . TABLE_PAGAMASTARDE . " (order_id) values ('%s')", $this->order_id);
+        $sql = sprintf("insert into " . TABLE_PAGANTIS . " (order_id) values ('%s')", $this->order_id);
         tep_db_query($sql);
         $base_url = dirname(
             sprintf(
@@ -308,7 +312,7 @@ class pagamastarde
     {
         global $messageStack, $order, $db;
         $this->order_id = $_SESSION['order_id'];
-        $sql = sprintf("select json from %s where order_id='%s' order by id desc limit 1", TABLE_PAGAMASTARDE, $this->order_id);
+        $sql = sprintf("select json from %s where order_id='%s' order by id desc limit 1", TABLE_PAGANTIS, $this->order_id);
         $check_query = tep_db_query($sql);
         while ($check = tep_db_fetch_array($check_query)) {
             $this->notification = json_decode(stripcslashes($check['json']), true);
@@ -358,7 +362,7 @@ class pagamastarde
     {
         global $insert_id, $order, $currencies;
         $this->order_id = $_SESSION['order_id'];
-        $sql = sprintf("select json from %s where order_id='%s' order by id desc limit 1", TABLE_PAGAMASTARDE, $this->order_id);
+        $sql = sprintf("select json from %s where order_id='%s' order by id desc limit 1", TABLE_PAGANTIS, $this->order_id);
         $check_query = tep_db_query($sql);
         while ($check = tep_db_fetch_array($check_query)) {
             $this->notification = json_decode(stripcslashes($check['json']), true);
@@ -412,6 +416,9 @@ class pagamastarde
         return $this->_check;
     }
 
+    /*
+     * This is where you define module's configurations (displayed in admin).
+     */
     public function install()
     {
         global $messageStack;
@@ -437,9 +444,9 @@ class pagamastarde
 
     public function _check_install_pmt_table()
     {
-        $CheckTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGAMASTARDE."'");
+        $CheckTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS."'");
         if (tep_db_num_rows($CheckTable) <= 0) {
-            $sql = "CREATE TABLE " . TABLE_PAGAMASTARDE . " (
+            $sql = "CREATE TABLE " . TABLE_PAGANTIS . " (
             `id` int(11) NOT NULL auto_increment,
             `insert_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `order_id` varchar(150) NOT NULL,
@@ -450,13 +457,16 @@ class pagamastarde
         }
     }
 
+    /*
+     * Standard functionality to uninstall the module.
+     */
     public function remove()
     {
-        $CheckTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGAMASTARDE."'");
+        $CheckTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS."'");
         if (tep_db_num_rows($CheckTable) > 0) {
             tep_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key in ('" . implode("', '", $this->keys()) . "')");
         }
-        tep_db_query("drop table " . TABLE_PAGAMASTARDE);
+        tep_db_query("drop table " . TABLE_PAGANTIS);
     }
 
     /**

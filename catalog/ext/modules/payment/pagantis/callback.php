@@ -10,9 +10,9 @@
  *
  */
 
-define('TABLE_PAGAMASTARDE', 'pagamastarde');
+define('TABLE_PAGANTIS', 'pagantis');
 chdir('../../../../');
-require('includes/application_top.php');
+require('includes/application_top.php'); //TODO NOT EXISTS
 
 $json = file_get_contents('php://input');
 $notification = json_decode($json, true);
@@ -33,7 +33,7 @@ if ($signature_check != $notification['signature'] && $signature_check_sha512 !=
   die( 'Fallo en el proceso de pago. Su pedido ha sido cancelado.' );
   exit;
 } else {
-  $sql ="update " . TABLE_PAGAMASTARDE . " set json = '".addslashes($json)."' where order_id = '".$notification['data']['order_id']."'";
+  $sql ="update " . TABLE_PAGANTIS . " set json = '".addslashes($json)."' where order_id = '".$notification['data']['order_id']."'";
   tep_db_query($sql);
   echo 'OK';
 }

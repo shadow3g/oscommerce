@@ -13,11 +13,9 @@ use Pagantis\ModuleUtils\Model\Response\JsonSuccessResponse;
 use Pagantis\ModuleUtils\Model\Response\JsonExceptionResponse;
 use Pagantis\ModuleUtils\Model\Log\LogEntry;
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+define('__ROOT__', dirname(dirname(__FILE__)));
 
-class WcPagantisNotify extends WcPagantisGateway
+class pagantisNofify extends WcPagantisGateway
 {
     /** @var mixed $pagantisOrder */
     protected $pagantisOrder;
@@ -28,8 +26,8 @@ class WcPagantisNotify extends WcPagantisGateway
     /** @var $string */
     public $order;
 
-    /** @var mixed $woocommerceOrderId */
-    protected $woocommerceOrderId = '';
+    /** @var mixed $oscommerceOrderId */
+    protected $oscommerceOrderId = '';
 
     /** @var mixed $cfg */
     protected $cfg;
@@ -37,8 +35,8 @@ class WcPagantisNotify extends WcPagantisGateway
     /** @var Client $orderClient */
     protected $orderClient;
 
-    /** @var  WC_Order $woocommerceOrder */
-    protected $woocommerceOrder;
+    /** @var  WC_Order $oscommerceOrder */
+    protected $oscommerceOrder;
 
     /** @var mixed $pagantisOrderId */
     protected $pagantisOrderId = '';
@@ -63,7 +61,7 @@ class WcPagantisNotify extends WcPagantisGateway
             $this->processMerchantOrder();
         } catch (\Exception $exception) {
             $jsonResponse = new JsonExceptionResponse();
-            $jsonResponse->setMerchantOrderId($this->woocommerceOrderId);
+            $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
             $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
             $jsonResponse->setException($exception);
             $response = $jsonResponse->toJson();
@@ -73,13 +71,13 @@ class WcPagantisNotify extends WcPagantisGateway
             if (!isset($response)) {
                 $this->confirmPagantisOrder();
                 $jsonResponse = new JsonSuccessResponse();
-                $jsonResponse->setMerchantOrderId($this->woocommerceOrderId);
+                $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
                 $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
             }
         } catch (\Exception $exception) {
             $this->rollbackMerchantOrder();
             $jsonResponse = new JsonExceptionResponse();
-            $jsonResponse->setMerchantOrderId($this->woocommerceOrderId);
+            $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
             $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
             $jsonResponse->setException($exception);
             $jsonResponse->toJson();
@@ -102,8 +100,8 @@ class WcPagantisNotify extends WcPagantisGateway
      */
     private function checkConcurrency()
     {
-        $this->woocommerceOrderId = $_GET['order-received'];
-        if ($this->woocommerceOrderId == '') {
+        $this->oscommerceOrderId = $_GET['order-received'];
+        if ($this->oscommerceOrderId == '') {
             throw new QuoteNotFoundException();
         }
     }
@@ -114,7 +112,7 @@ class WcPagantisNotify extends WcPagantisGateway
     private function getMerchantOrder()
     {
         try {
-            $this->woocommerceOrder = new WC_Order($this->woocommerceOrderId);
+            $this->oscommerceOrder = new WC_Order($this->oscommerceOrderId);
         } catch (\Exception $e) {
             throw new MerchantOrderNotFoundException();
         }
@@ -128,7 +126,7 @@ class WcPagantisNotify extends WcPagantisGateway
         global $wpdb;
         $this->checkDbTable();
         $tableName = $wpdb->prefix.self::ORDERS_TABLE;
-        $queryResult = $wpdb->get_row("select order_id from $tableName where id='".$this->woocommerceOrderId."'");
+        $queryResult = $wpdb->get_row("select order_id from $tableName where id='".$this->oscommerceOrderId."'");
         $this->pagantisOrderId = $queryResult->order_id;
 
         if ($this->pagantisOrderId == '') {
@@ -142,7 +140,7 @@ class WcPagantisNotify extends WcPagantisGateway
     private function getPagantisOrder()
     {
         try {
-            $this->cfg = get_option('woocommerce_pagantis_settings');
+            $this->cfg = get_option('oscommerce_pagantis_settings');
             $this->orderClient = new Client($this->cfg['pagantis_public_key'], $this->cfg['pagantis_private_key']);
             $this->pagantisOrder = $this->orderClient->getOrder($this->pagantisOrderId);
         } catch (\Exception $e) {
@@ -159,7 +157,7 @@ class WcPagantisNotify extends WcPagantisGateway
         try {
             $this->checkPagantisStatus(array('AUTHORIZED'));
         } catch (\Exception $e) {
-            if ($this->woocommerceOrderId!='') {
+            if ($this->oscommerceOrderId!='') {
                 throw new AlreadyProcessedException();
             } else {
                 if ($this->pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
@@ -179,12 +177,12 @@ class WcPagantisNotify extends WcPagantisGateway
     {
         $validStatus   = array('on-hold', 'pending', 'failed');
         $isValidStatus = apply_filters(
-            'woocommerce_valid_order_statuses_for_payment_complete',
+            'oscommerce_valid_order_statuses_for_payment_complete',
             $validStatus,
             $this
         );
 
-        if (!$this->woocommerceOrder->has_status($isValidStatus)) {
+        if (!$this->oscommerceOrder->has_status($isValidStatus)) {
             throw new AlreadyProcessedException();
         }
     }
@@ -195,7 +193,7 @@ class WcPagantisNotify extends WcPagantisGateway
     private function validateAmount()
     {
         $pagantisAmount = $this->pagantisOrder->getShoppingCart()->getTotalAmount();
-        $wcAmount = intval(strval(100 * $this->woocommerceOrder->get_total()));
+        $wcAmount = intval(strval(100 * $this->oscommerceOrder->get_total()));
         if ($pagantisAmount != $wcAmount) {
             throw new AmountMismatchException($pagantisAmount, $wcAmount);
         }
@@ -304,14 +302,14 @@ class WcPagantisNotify extends WcPagantisGateway
      */
     private function saveOrder()
     {
-        global $woocommerce;
-        $paymentResult = $this->woocommerceOrder->payment_complete();
+        global $oscommerce;
+        $paymentResult = $this->oscommerceOrder->payment_complete();
         if ($paymentResult) {
-            $this->woocommerceOrder->add_order_note("Notification received via $this->origin");
-            $this->woocommerceOrder->reduce_order_stock();
-            $this->woocommerceOrder->save();
+            $this->oscommerceOrder->add_order_note("Notification received via $this->origin");
+            $this->oscommerceOrder->reduce_order_stock();
+            $this->oscommerceOrder->save();
 
-            $woocommerce->cart->empty_cart();
+            $oscommerce->cart->empty_cart();
             sleep(3);
         } else {
             throw new UnknownException('Order can not be saved');
@@ -330,8 +328,8 @@ class WcPagantisNotify extends WcPagantisGateway
 
         $wpdb->update(
             $tableName,
-            array('wc_order_id'=>$this->woocommerceOrderId),
-            array('id' => $this->woocommerceOrderId),
+            array('wc_order_id'=>$this->oscommerceOrderId),
+            array('id' => $this->oscommerceOrderId),
             array('%s'),
             array('%d')
         );
@@ -340,7 +338,7 @@ class WcPagantisNotify extends WcPagantisGateway
     /** STEP 9 CPO - Confirmation Pagantis Order */
     private function rollbackMerchantOrder()
     {
-        $this->woocommerceOrder->update_status('pending', __('Pending payment', 'woocommerce'));
+        $this->oscommerceOrder->update_status('pending', __('Pending payment', 'oscommerce'));
     }
 
     /**
@@ -361,24 +359,7 @@ class WcPagantisNotify extends WcPagantisGateway
             $wpdb->insert($tableName, array('log' => $logEntryJson));
         }
     }
-
-    /**
-     * GETTERS & SETTERS
-     */
-
-    /**
-     * @return mixed
-     */
-    public function getOrigin()
-    {
-        return $this->origin;
-    }
-
-    /**
-     * @param mixed $origin
-     */
-    public function setOrigin($origin)
-    {
-        $this->origin = $origin;
-    }
 }
+
+$pgNotify = new pagantisNofify();
+$pgNotify->processInformation();

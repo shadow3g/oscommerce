@@ -35,19 +35,14 @@ class pagantis
                 return false;
             }
         }
-        $this->description = MODULE_PAYMENT_PAGANTIS_TEXT_DESCRIPTION;
-        $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
-        $this->sort_order = MODULE_PAYMENT_PAGANTIS_SORT_ORDER;
 
+        $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
         if ((int)MODULE_PAYMENT_PAGANTIS_ORDER_STATUS_ID > 0) {
             $this->order_status = MODULE_PAYMENT_PAGANTIS_ORDER_STATUS_ID;
         }
         if (is_object($order)) {
             $this->update_status();
         }
-
-        $this->form_action_url = 'https://pmt.pagantis.com/v1/installments';
-        $this->version = '2.2';
     }
 
     // class methods
@@ -205,7 +200,7 @@ class pagantis
         $orderShoppingCart = new \Pagantis\OrdersApiClient\Model\Order\ShoppingCart();
         $orderShoppingCart
             ->setDetails($details)
-            ->setOrderReference($order->info['id'])
+            ->setOrderReference($this->order_id)
             ->setPromotedAmount(0)
             ->setTotalAmount(number_format($order->info['total'] * 100, 0, '', ''))
         ;
@@ -284,8 +279,9 @@ class pagantis
         }
     }
 
-
-
+    /**
+     *
+     */
     public function before_process()
     {
         global $messageStack, $order, $db;
@@ -445,7 +441,7 @@ class pagantis
     {
         return array('MODULE_PAYMENT_PAGANTIS_STATUS',
            'MODULE_PAYMENT_PAGANTIS_PK',
-           'MODULE_PAYMENT_PAGANTIS_PSK',
+           'MODULE_PAYMENT_PAGANTIS_SK',
            'MODULE_PAYMENT_PAGANTIS_SIMULATOR');
     }
 }

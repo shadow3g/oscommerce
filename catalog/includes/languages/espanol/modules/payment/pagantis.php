@@ -26,7 +26,7 @@
         }
         var priceSelector = "'.$priceSelector.'";
         if (priceSelector === \'default\') {
-            priceSelector = \'div.summary.entry-summary span.woocommerce-Price-amount.amount\';
+            priceSelector = \'div.summary.entry-summary span.oscommerce-Price-amount.amount\';
         }
         var quantitySelector = "'.$qantitySelector.'";
         if (quantitySelector === \'default\') {

@@ -24,7 +24,7 @@
   }
 
   $widget = '';
-  if ( MODULE_PAYMENT_PAGAMASTARDE_WIDGET == 'True' ) {
+  if ( MODULE_PAYMENT_PAGANTIS_SIMULATOR == 'True' ) {
     $widget =   '<div class="PmtSimulator" data-pmt-num-quota="4" data-pmt-style="neutral" data-pmt-type="3" data-pmt-discount="'.$discount.'" data-pmt-amount="'.(float)( $order->info['total']  ).'" data-pmt-expanded="no"></div>
       <script type ="text/javascript" src ="https://cdn.pagamastarde.com/pmt-simulator/3/js/pmt-simulator.min.js">
       </script>

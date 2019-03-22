@@ -10,9 +10,14 @@
  *
  */
 
-define('TABLE_PAGANTIS', 'pagantis');
+use Pagantis\ModuleUtils\Exception\OrderNotFoundException;
+use Pagantis\OrdersApiClient\Model\Order\User\Address;
+use Pagantis\ModuleUtils\Exception\UnknownException;
 
-class pagamastarde
+define('TABLE_PAGANTIS', 'pagantis');
+define('__ROOT__', dirname(dirname(__FILE__)));
+
+class pagantis
 {
     /**
     * Constructor
@@ -20,22 +25,22 @@ class pagamastarde
     public function __construct()
     {
         global $order;
-
+        $this->version = '8.0.0';
         $this->code = 'pagantis';
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
-            $this->title = MODULE_PAYMENT_PAGAMASTARDE_TEXT_ADMIN_TITLE; // Payment module title in Admin
+            $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE; // Payment module title in Admin
         } else {
-            $this->title = MODULE_PAYMENT_PAGAMASTARDE_TEXT_CATALOG_TITLE; // Payment module title in Catalog
+            $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_CATALOG_TITLE; // Payment module title in Catalog
             if ($_SESSION['currency'] != 'EUR') {
                 return false;
             }
         }
-        $this->description = MODULE_PAYMENT_PAGAMASTARDE_TEXT_DESCRIPTION;
-        $this->enabled = ((MODULE_PAYMENT_PAGAMASTARDE_STATUS == 'True') ? true : false);
-        $this->sort_order = MODULE_PAYMENT_PAGAMASTARDE_SORT_ORDER;
+        $this->description = MODULE_PAYMENT_PAGANTIS_TEXT_DESCRIPTION;
+        $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
+        $this->sort_order = MODULE_PAYMENT_PAGANTIS_SORT_ORDER;
 
-        if ((int)MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID > 0) {
-            $this->order_status = MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID;
+        if ((int)MODULE_PAYMENT_PAGANTIS_ORDER_STATUS_ID > 0) {
+            $this->order_status = MODULE_PAYMENT_PAGANTIS_ORDER_STATUS_ID;
         }
         if (is_object($order)) {
             $this->update_status();
@@ -52,9 +57,9 @@ class pagamastarde
     public function update_status()
     {
         global $order, $db;
-        if ($this->enabled && (int)MODULE_PAYMENT_PAGAMASTARDE_ZONE > 0 && isset($order->billing['country']['id'])) {
+        if ($this->enabled && (int)MODULE_PAYMENT_PAGANTIS_ZONE > 0 && isset($order->billing['country']['id'])) {
             $check_flag = false;
-            $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_PAGAMASTARDE_ZONE . "' and zone_country_id = '" . (int)$order->billing['country']['id'] . "' order by zone_id");
+            $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_PAGANTIS_ZONE . "' and zone_country_id = '" . (int)$order->billing['country']['id'] . "' order by zone_id");
             while ($check = tep_db_fetch_array($check_query)) {
                 if ($check['zone_id'] < 1) {
                     $check_flag = true;
@@ -133,11 +138,78 @@ class pagamastarde
     */
     public function process_button()
     {
+        require_once(__ROOT__.'/vendor/autoload.php');
         global $order;
-        $this->order_id = md5(serialize($order->products) .''. serialize($order->customer) .''. serialize($order->delivery));
-        $_SESSION['order_id'] = $this->order_id;
-        $sql = sprintf("insert into " . TABLE_PAGANTIS . " (order_id) values ('%s')", $this->order_id);
-        tep_db_query($sql);
+
+        if (!isset($order)) {
+            throw new UnknownException(_("Order not found"));
+        }
+
+        $userAddress = new Address();
+        $userAddress
+            ->setZipCode($order->billing['postcode'])
+            ->setFullName($order->billing['firstname'] . ' ' . $order->billing['lastname'])
+            ->setCountryCode('ES')
+            ->setCity($order->billing['city'])
+            ->setAddress($order->billing['street_address'])
+        ;
+
+        $orderBillingAddress = $userAddress;
+
+        $orderShippingAddress = new Address();
+        $orderShippingAddress
+            ->setZipCode($order->delivery['postcode'])
+            ->setFullName($order->billing['firstname'] . ' ' . $order->billing['lastname'])
+            ->setCountryCode('ES')
+            ->setCity($order->delivery['city'])
+            ->setAddress($order->delivery['street_address'])
+            ->setFixPhone($order->customer['telephone'])
+            ->setMobilePhone($order->customer['telephone'])
+        ;
+
+        $orderUser = new \Pagantis\OrdersApiClient\Model\Order\User();
+        $orderUser
+            ->setAddress($userAddress)
+            ->setFullName($order->billing['firstname'] . ' ' . $order->billing['lastname'])
+            ->setBillingAddress($orderBillingAddress)
+            ->setEmail($order->customer['email_address'])
+            ->setFixPhone($order->customer['telephone'])
+            ->setMobilePhone($order->customer['telephone'])
+            ->setShippingAddress($orderShippingAddress)
+        ;
+
+        /* TODO
+        foreach ($previousOrders as $previousOrder) {
+            $orderHistory = new \Pagantis\OrdersApiClient\Model\Order\User\OrderHistory();
+            $orderElement = wc_get_order($previousOrder);
+            $orderCreated = $orderElement->get_date_created();
+            $orderHistory
+                ->setAmount(intval(100 * $orderElement->get_total()))
+                ->setDate(new \DateTime($orderCreated->date('Y-m-d H:i:s')))
+            ;
+            $orderUser->addOrderHistory($orderHistory);
+        }*/
+
+        $details = new \Pagantis\OrdersApiClient\Model\Order\ShoppingCart\Details();
+        $shippingCost = number_format($order->info['shipping_cost'], 2, '.', '');
+        $details->setShippingCost(intval(strval(100 * $shippingCost)));
+        foreach ($order->products as $item) {
+            $product = new \Pagantis\OrdersApiClient\Model\Order\ShoppingCart\Details\Product();
+            $product
+                ->setAmount(number_format($product['final_price'] * $product['qty'], 2, '.', ''))
+                ->setQuantity($item['qty'])
+                ->setDescription($item['name']);
+            $details->addProduct($product);
+        }
+
+        $orderShoppingCart = new \Pagantis\OrdersApiClient\Model\Order\ShoppingCart();
+        $orderShoppingCart
+            ->setDetails($details)
+            ->setOrderReference($order->info['id'])
+            ->setPromotedAmount(0)
+            ->setTotalAmount(number_format($order->info['total'] * 100, 0, '', ''))
+        ;
+
         $base_url = dirname(
             sprintf(
                 "%s://%s%s",
@@ -147,166 +219,72 @@ class pagamastarde
             )
         );
         $callback_url = $base_url . '/ext/modules/payment/pagamastarde/callback.php';
-        $pagamastarde_ok_url = htmlspecialchars_decode(tep_href_link(FILENAME_CHECKOUT_PROCESS, 'action=confirm', 'SSL', true, false));
-        $pagamastarde_nok_url = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
-        $cancelled_url = trim(tep_href_link(FILENAME_CHECKOUT_PROCESS, '', 'SSL', false));
-        $amount = number_format($order->info['total'] * 100, 0, '', '');
-        $currency = $order->info['currency'];
-        if (MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT == 'False') {
-            $discount = 'false';
-        } else {
-            $discount = 'true';
-        }
-        if (MODULE_PAYMENT_PAGAMASTARDE_TESTMODE == 'Test') {
-            $secret_key = MODULE_PAYMENT_PAGAMASTARDE_TSK;
-            $public_key = MODULE_PAYMENT_PAGAMASTARDE_TK;
-        } else {
-            $secret_key = MODULE_PAYMENT_PAGAMASTARDE_PSK;
-            $public_key = MODULE_PAYMENT_PAGAMASTARDE_PK;
-        }
-        $message = $secret_key.
-        $public_key.
-        $this->order_id.
-        $amount.
-        $currency.
-        $pagamastarde_ok_url.
-        $pagamastarde_nok_url.
-        $callback_url.
-        $discount.
-        $cancelled_url;
-        $signature = hash('sha512', $message);
+        $okUrl = htmlspecialchars_decode(tep_href_link(FILENAME_CHECKOUT_PROCESS, 'action=confirm', 'SSL', true, false));
+        $koUrl = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
+        $cancelUrl = trim(tep_href_link(FILENAME_CHECKOUT_PROCESS, '', 'SSL', false));
+        $orderConfigurationUrls = new \Pagantis\OrdersApiClient\Model\Order\Configuration\Urls();
+        $orderConfigurationUrls
+            ->setCancel($cancelUrl)
+            ->setKo($koUrl)
+            ->setAuthorizedNotificationCallback($callback_url)
+            ->setRejectedNotificationCallback($callback_url)
+            ->setOk($okUrl)
+        ;
 
-        // extra parameters for logged users
-        $sign_up = '';
-        $dob = '';
-        $order_total = 0;
-        $order_count = 0;
-        $is_guest = 'true';
-        if (trim($_SESSION['customer_id']) != '') {
-            $is_guest = 'false';
-            $sql = sprintf(
-                "SELECT customers_info_date_account_created, customers_dob, customers_gender
-                FROM %s
-                JOIN %s ON customers_info.customers_info_id = customers.customers_id
-                Where  customers.customers_id = %d",
-                TABLE_CUSTOMERS,
-                TABLE_CUSTOMERS_INFO,
-                $_SESSION['customer_id']
-            );
+        $orderChannel = new \Pagantis\OrdersApiClient\Model\Order\Configuration\Channel();
+        $orderChannel
+            ->setAssistedSale(false)
+            ->setType(\Pagantis\OrdersApiClient\Model\Order\Configuration\Channel::ONLINE)
+        ;
+        $orderConfiguration = new \Pagantis\OrdersApiClient\Model\Order\Configuration();
+        $orderConfiguration
+            ->setChannel($orderChannel)
+            ->setUrls($orderConfigurationUrls)
+        ;
 
-            $check_query = tep_db_query($sql);
-            while ($check = tep_db_fetch_array($check_query)) {
-                $sign_up = substr($check['customers_info_date_account_created'], 0, 10);
-                $dob = substr($check['customers_dob'], 0, 10);
-                $gender = $check['customers_gender'] == 'm' ? 'male' : 'female';
-            }
-
-            $sql = sprintf(
-                "select orders_total.value from %s join %s on orders_status.orders_status_id = orders.orders_status
-            join %s on orders.orders_id = orders_total.orders_id and orders_total.class = 'ot_total'
-            where customers_id=%d and orders_status.orders_status_name in ('Processing','Delivered')
-            order by orders.orders_id",
-                TABLE_ORDERS_STATUS,
-                TABLE_ORDERS,
-                TABLE_ORDERS_TOTAL,
-                $_SESSION['customer_id']
-            );
-            $check_query = tep_db_query($sql);
-
-            while ($check = tep_db_fetch_array($check_query)) {
-                $order_total += $check['value'];
-                $order_count += 1;
-            }
-        }
-        $billing_dob = '';
-        if ($order->billing['firstname'] == $order->customer['firstname'] &&
-            $order->billing['lastname'] == $order->customer['lastname'] ) {
-              $billing_dob = $dob;
-        }
-
-        $submit_data = array(
-          'account_id' => $public_key,
-          'currency' => $currency,
-          'ok_url' => $pagamastarde_ok_url,
-          'nok_url' => $pagamastarde_nok_url,
-          'cancelled_url' => $cancelled_url,
-          'callback_url' => $callback_url,
-          'order_id' => $this->order_id,
-          'amount' => $amount,
-          'signature' => $signature,
-          'discount[full]' => $discount,
-          'dob' => $billing_dob,
-
-          'full_name' =>$order->billing['firstname'] . ' ' . $order->billing['lastname'],
-          'email' => $order->customer['email_address'],
-          'mobile_phone' => $order->customer['telephone'],
-          'address[street]' => $order->billing['street_address'],
-          'address[city]' => $order->billing['city'],
-          'address[province]' =>$order->billing['state'],
-          'address[zipcode]' => $order->billing['postcode'],
-
-          'loginCustomer[is_guest]' => $is_guest,
-          'loginCustomer[gender]' => $gender,
-          'loginCustomer[full_name]' => $order->customer['firstname'] . ' ' . $order->customer['lastname'],
-          'loginCustomer[num_orders]' => $order_count,
-          'loginCustomer[amount_orders]' => $order_total,
-          'loginCustomer[member_since]' => $sign_up,
-          'loginCustomer[street]' => $order->customer['street_address'],
-          'loginCustomer[city]' => $order->customer['city'],
-          'loginCustomer[province]' =>$order->customer['state'],
-          'loginCustomer[zipcode]' => $order->customer['postcode'],
-          'loginCustomer[company]' => $order->customer['company'],
-          'loginCustomer[dob]' => $dob,
-
-          'billing[street]' => $order->billing['street_address'],
-          'billing[city]' => $order->billing['city'],
-          'billing[province]' =>$order->billing['state'],
-          'billing[zipcode]' => $order->billing['postcode'],
-          'billing[company]' => $order->billing['company'],
-
-          'shipping[street]' => $order->delivery['street_address'],
-          'shipping[city]' => $order->delivery['city'],
-          'shipping[province]' =>$order->delivery['state'],
-          'shipping[zipcode]' => $order->delivery['postcode'],
-          'shipping[company]' => $order->delivery['company'],
-
-          'metadata[module_version]' => $this->version,
-          'metadata[platform]' => 'oscommerce '.PROJECT_VERSION
+        $metadataOrder = new \Pagantis\OrdersApiClient\Model\Order\Metadata();
+        $metadata = array(
+            'oscommerce' => PROJECT_VERSION,
+            'pagantis'         => $this->version,
+            'php'         => phpversion()
         );
+        foreach ($metadata as $key => $metadatum) {
+            $metadataOrder->addMetadata($key, $metadatum);
+        }
+        $orderApiClient = new \Pagantis\OrdersApiClient\Model\Order();
+        $orderApiClient
+            ->setConfiguration($orderConfiguration)
+            ->setMetadata($metadataOrder)
+            ->setShoppingCart($orderShoppingCart)
+            ->setUser($orderUser)
+        ;
 
-        //product descirption
-        $i=0;
-        if (isset($order->info['shipping_method'])) {
-            $submit_data["items[".$i."][description]"]=$order->info['shipping_method'];
-            $submit_data["items[".$i."][quantity]"]=1;
-            $submit_data["items[".$i."][amount]"]=number_format($order->info['shipping_cost'], 2, '.', '');
-            $desciption[]=$order->info['shipping_method'];
-            $i++;
+        $publicKey = MODULE_PAYMENT_PAGANTIS_PK;
+        $secretKey = MODULE_PAYMENT_PAGANTIS_SK;
+        $orderClient = new \Pagantis\OrdersApiClient\Client($publicKey, $secretKey);
+        $pagantisOrder = $orderClient->createOrder($orderApiClient);
+        if ($pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
+            $url = $pagantisOrder->getActionUrls()->getForm();
+            $this->insertRow($order->get_id(), $pagantisOrder->getId()); //TODO
+        } else {
+            throw new OrderNotFoundException();
         }
 
-        foreach ($order->products as $product) {
-            $submit_data["items[".$i."][description]"]=$product['name'];
-            $submit_data["items[".$i."][quantity]"]=$product['qty'];
-            $submit_data["items[".$i."][amount]"]=number_format($product['final_price'] * $product['qty'], 2, '.', '');
-            $desciption[]=$product['name'] . " (".$product['qty'].")";
-            $i++;
+        if ($url=="") {
+            throw new UnknownException(_("No ha sido posible obtener una respuesta de Pagantis"));
+        } elseif (getenv('PAGANTIS_FORM_DISPLAY_TYPE')=='0') { //TODO
+            tep_redirect($url);
+            return;
+        } else {
+            $template_fields = array(
+                'url' => $url,
+                'checkoutUrl'   => $cancelUrl
+            );
+            wc_get_template('iframe.php', $template_fields, '', $this->template_path); //TODO
         }
-        $submit_data['description'] = implode(",", $desciption);
-
-        //$this->notify('NOTIFY_PAYMENT_AUTHNETSIM_PRESUBMIT_HOOK');
-
-        if (MODULE_PAYMENT_PAGAMASTARDE_TESTMODE == 'Test') {
-            $submit_data['x_Test_Request'] = 'TRUE';
-        }
-        $submit_data[tep_session_name()] = tep_session_id();
-
-        $process_button_string = "\n";
-        foreach ($submit_data as $key => $value) {
-            $process_button_string .= tep_draw_hidden_field($key, $value) . "\n";
-        }
-
-        return $process_button_string;
     }
+
+
 
     public function before_process()
     {
@@ -317,13 +295,9 @@ class pagamastarde
         while ($check = tep_db_fetch_array($check_query)) {
             $this->notification = json_decode(stripcslashes($check['json']), true);
         }
-        if (MODULE_PAYMENT_PAGAMASTARDE_TESTMODE == 'Test') {
-            $secret_key = MODULE_PAYMENT_PAGAMASTARDE_TSK;
-            $public_key = MODULE_PAYMENT_PAGAMASTARDE_TK;
-        } else {
-            $secret_key = MODULE_PAYMENT_PAGAMASTARDE_PSK;
-            $public_key = MODULE_PAYMENT_PAGAMASTARDE_PK;
-        }
+
+        $secret_key = MODULE_PAYMENT_PAGANTIS_PSK;
+        $public_key = MODULE_PAYMENT_PAGANTIS_PK;
         $notififcation_check = true;
         $signature_check = sha1($secret_key.
         $this->notification['account_id'].
@@ -348,7 +322,7 @@ class pagamastarde
             $this->transaction_id = $this->notification['data']['id'];
             return;
         } else {
-            $messageStack->add_session('checkout_payment', MODULE_PAYMENT_PAGAMASTARDE_TEXT_DECLINED_MESSAGE, 'error');
+            $messageStack->add_session('checkout_payment', MODULE_PAYMENT_PAGANTIS_TEXT_DECLINED_MESSAGE, 'error');
             tep_redirect(tep_href_link(FILENAME_CHECKOUT_PAYMENT, '', 'SSL', true, false));
         }
     }
@@ -367,12 +341,12 @@ class pagamastarde
         while ($check = tep_db_fetch_array($check_query)) {
             $this->notification = json_decode(stripcslashes($check['json']), true);
         }
-        if (MODULE_PAYMENT_PAGAMASTARDE_TESTMODE == 'Test') {
-            $secret_key = MODULE_PAYMENT_PAGAMASTARDE_TSK;
-            $public_key = MODULE_PAYMENT_PAGAMASTARDE_TK;
+        if (MODULE_PAYMENT_PAGANTIS_TESTMODE == 'Test') {
+            $secret_key = MODULE_PAYMENT_PAGANTIS_TSK;
+            $public_key = MODULE_PAYMENT_PAGANTIS_TK;
         } else {
-            $secret_key = MODULE_PAYMENT_PAGAMASTARDE_PSK;
-            $public_key = MODULE_PAYMENT_PAGAMASTARDE_PK;
+            $secret_key = MODULE_PAYMENT_PAGANTIS_PSK;
+            $public_key = MODULE_PAYMENT_PAGANTIS_PK;
         }
         $notififcation_check = true;
         $signature_check = sha1($secret_key.
@@ -409,7 +383,7 @@ class pagamastarde
     public function check()
     {
         if (!isset($this->_check)) {
-            $check_query = tep_db_query("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_PAGAMASTARDE_STATUS'");
+            $check_query = tep_db_query("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_PAGANTIS_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
         $this->_check_install_pmt_table();
@@ -422,22 +396,15 @@ class pagamastarde
     public function install()
     {
         global $messageStack;
-        if (defined('MODULE_PAYMENT_PAGAMASTARDE_STATUS')) {
-            $messageStack->add_session('Paga+Tarde - Authorize.net protocol module already installed.', 'error');
-            tep_redirect(tep_href_link(FILENAME_MODULES, 'set=payment&module=pagamastarde', 'NONSSL'));
+        if (defined('MODULE_PAYMENT_PAGANTIS_STATUS')) {
+            $messageStack->add_session('Pagantis already installed.', 'error');
+            tep_redirect(tep_href_link(FILENAME_MODULES, 'set=payment&module=pagantis', 'NONSSL'));
             return 'failed';
         }
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Paga+Tarde Module', 'MODULE_PAYMENT_PAGAMASTARDE_STATUS', 'True', 'Do you want to accept Paga+Tarde payments?', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('TEST Public Key', 'MODULE_PAYMENT_PAGAMASTARDE_TK', 'tk_XXXX', 'The test public key used for the Paga+Tarde service', '6', '0', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('TEST Secret Key', 'MODULE_PAYMENT_PAGAMASTARDE_TSK', 'secret', 'The test secret key used for the Paga+Tarde service', '6', '0', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('REAL Public Key', 'MODULE_PAYMENT_PAGAMASTARDE_PK', 'pk_XXXX', 'The real public key used for the Paga+Tarde service', '6', '0', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('REAL Secret Key', 'MODULE_PAYMENT_PAGAMASTARDE_PSK', 'secret', 'The real public key used for the Paga+Tarde service', '6', '0', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Discount', 'MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT', 'False', 'Do you want to asume loan comissions?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Include Widget', 'MODULE_PAYMENT_PAGAMASTARDE_WIDGET', 'False', 'Do you want to include the Paga+Tarde widget in the checkout page?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Transaction Mode', 'MODULE_PAYMENT_PAGAMASTARDE_TESTMODE', 'Test', 'Transaction mode used for processing orders.<br><strong>Production</strong>=Live processing with real account credentials<br><strong>Test</strong>=Simulations with real account credentials', '6', '0', 'tep_cfg_select_option(array(\'Test\', \'Production\'), ', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_PAGAMASTARDE_SORT_ORDER', '0', 'Sort order of displaying payment options to the customer. Lowest is displayed first.', '6', '0', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_PAGAMASTARDE_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '2', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Order Status', 'MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID', '2', 'Set the status of orders made with this payment module to this value', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Paga+Tarde Module', 'MODULE_PAYMENT_PAGANTIS_STATUS', 'True', '', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Public Key', 'MODULE_PAYMENT_PAGANTIS_PK', 'pk_XXXX', 'Public key', '6', '0', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Secret Key', 'MODULE_PAYMENT_PAGANTIS_SK', 'secret', 'Secret key', '6', '0', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Include Widget', 'MODULE_PAYMENT_PAGANTIS_SIMULATOR', 'False', 'Do you want to include the Paga+Tarde widget in the checkout page?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
         $this->_check_install_pmt_table();
     }
@@ -476,16 +443,9 @@ class pagamastarde
     */
     public function keys()
     {
-        return array('MODULE_PAYMENT_PAGAMASTARDE_STATUS',
-           'MODULE_PAYMENT_PAGAMASTARDE_TK',
-           'MODULE_PAYMENT_PAGAMASTARDE_TSK',
-           'MODULE_PAYMENT_PAGAMASTARDE_PK',
-           'MODULE_PAYMENT_PAGAMASTARDE_PSK',
-           'MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT',
-           'MODULE_PAYMENT_PAGAMASTARDE_WIDGET',
-           'MODULE_PAYMENT_PAGAMASTARDE_TESTMODE',
-           'MODULE_PAYMENT_PAGAMASTARDE_SORT_ORDER',
-           'MODULE_PAYMENT_PAGAMASTARDE_ZONE',
-           'MODULE_PAYMENT_PAGAMASTARDE_ORDER_STATUS_ID');
+        return array('MODULE_PAYMENT_PAGANTIS_STATUS',
+           'MODULE_PAYMENT_PAGANTIS_PK',
+           'MODULE_PAYMENT_PAGANTIS_PSK',
+           'MODULE_PAYMENT_PAGANTIS_SIMULATOR');
     }
 }

@@ -1,47 +1,61 @@
 <?php
 /**
- * PagaMasTarde payment module for oscommerce
+ * Pagantis payment module for oscommerce
  *
- * @package     PagaMasTarde
- * @author      Albert Fatsini <afatsini@digitalorigin.com>
- * @copyright   Copyright (c) 2017  Paga+Tarde (http://www.pagamastarde.com)
+ * @package     Pagantis
+ * @author      Integrations team <integrations@pagantis.com>
+ * @copyright   Copyright (c) 2019  Pagantis (http://www.pagantis.com)
  *
  * @license     Released under the GNU General Public License
  *
  */
 
   global $customer_id, $order;
-  if ( MODULE_PAYMENT_PAGAMASTARDE_DISCOUNT == 'True' ){
-    $discount = 1;
-  }else{
-    $discount = 0;
-  }
 
-  if ( MODULE_PAYMENT_PAGAMASTARDE_TESTMODE == 'Test' ){
-    $key = MODULE_PAYMENT_PAGAMASTARDE_TK;
-  }else{
-    $key = MODULE_PAYMENT_PAGAMASTARDE_PK;
-  }
-
+  $publicKey = MODULE_PAYMENT_PAGAMASTARDE_PK;
   $widget = '';
-  if ( MODULE_PAYMENT_PAGANTIS_SIMULATOR == 'True' ) {
-    $widget =   '<div class="PmtSimulator" data-pmt-num-quota="4" data-pmt-style="neutral" data-pmt-type="3" data-pmt-discount="'.$discount.'" data-pmt-amount="'.(float)( $order->info['total']  ).'" data-pmt-expanded="no"></div>
-      <script type ="text/javascript" src ="https://cdn.pagamastarde.com/pmt-simulator/3/js/pmt-simulator.min.js">
-      </script>
-      <script>
-       (function(){
-         pmtSimulator.simulator_app.setPublicKey("'.$key.'");
-         setTimeout(function(){pmtSimulator.simulator_app.load_jquery();},1000);
-       })();
-      </script>';
-  }
+  if ( MODULE_PAYMENT_PAGANTIS_SIMULATOR == 'True' )
+  {
+      $widget = '<script>
+    var simulatorId = null;
+    function loadSimulator()
+    {
+        var positionSelector = "'.$positionSelector.'";
+        if (positionSelector === \'default\') {
+            positionSelector = \'.PagantisSimulator\';
+        }
+        var priceSelector = "'.$priceSelector.'";
+        if (priceSelector === \'default\') {
+            priceSelector = \'div.summary.entry-summary span.woocommerce-Price-amount.amount\';
+        }
+        var quantitySelector = "'.$qantitySelector.'";
+        if (quantitySelector === \'default\') {
+            quantitySelector = \'div.quantity>input\';
+        }
+        if (typeof pmtSDK != \'undefined\') {
+            pmtSDK.simulator.init({
+                publicKey: "'.$publicKey.'",
+                type: "'.$simulatorType.'",
+                selector: positionSelector,
+                itemQuantitySelector: quantitySelector,
+                itemAmountSelector: priceSelector
+            });
+            clearInterval(simulatorId);
+        }
+    }
+    simulatorId = setInterval(function () {
+        loadSimulator();
+    }, 2000);
+</script>
+<div class="PagantisSimulator"></div>';
+}
 
-  define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_CATALOG_TITLE', 'Finaciación con Paga+Tarde'. $widget);  // Payment option title as displayed to the customer
+  define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_CATALOG_TITLE', 'Instant financing'. $widget);  // Payment option title as displayed to the customer
 
-  define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_ADMIN_TITLE', 'Paga+Tarde');
+  define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_ADMIN_TITLE', 'Pagantis');
 
-  define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_DESCRIPTION', '<strong>Paga+Tarde</strong><br /><br/>
-            Paga+Tarde es una plataforma de financiación online. Escoge Paga+Tarde como tu método de pago para permitir el pago a plazos.
+  define('MODULE_PAYMENT_PAGAMASTARDE_TEXT_DESCRIPTION', '<strong>Pagantis</strong><br /><br/>
+            Pay up to 12 comfortable installments with Pagantis. Completely online and sympathetic request, and the answer is immediate!
             <br /><br/>
   <img src="images/icon_popup.gif" border="0">
   <a target="_blank" style="text-decoration: underline; font-weight: bold;" href="https://bo.pagamastarde.com/">Login al panel de Paga+Tarde</a>

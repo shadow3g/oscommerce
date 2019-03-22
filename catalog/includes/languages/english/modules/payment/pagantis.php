@@ -1,10 +1,10 @@
 <?php
 /**
- * PagaMasTarde payment module for oscommerce
+ * Pagantis payment module for oscommerce
  *
- * @package     PagaMasTarde
- * @author      Albert Fatsini <afatsini@digitalorigin.com>
- * @copyright   Copyright (c) 2017  Paga+Tarde (http://www.pagamastarde.com)
+ * @package     Pagantis
+ * @author      Integrations team <integrations@pagantis.com>
+ * @copyright   Copyright (c) 2019  Pagantis (http://www.pagantis.com)
  *
  * @license     Released under the GNU General Public License
  *

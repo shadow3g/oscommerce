@@ -1,0 +1,32 @@
+version: "3.5"
+
+services:
+  oscommerce-dev:
+    container_name: oscommerce-dev
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    depends_on:
+      - db-dev
+    environment:
+      - OSCOMMERCE_DB_HOST=db-dev
+      - OSCOMMERCE_DB_USER=root
+      - OSCOMMERCE_DB_PASSWORD=root
+      - OSCOMMERCE_DB_NAME=oscommerce
+    ports:
+      - "8095:80"
+    working_dir: /var/www/html/
+    extra_hosts:
+      - "oscommerce-dev.docker:127.0.0.1"
+  db-dev:
+    image: mysql:5.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=oscommerce
+  selenium:
+    image: selenium/standalone-chrome:3.11.0
+    ports:
+      - "4444:4444"
+    extra_hosts:
+      - "oscommerce-test.docker:${DOCKERHOST}"
+      - "oscommerce-dev.docker:${DOCKERHOST}"

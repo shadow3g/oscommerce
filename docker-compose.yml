@@ -13,6 +13,9 @@ services:
       - OSCOMMERCE_DB_USER=root
       - OSCOMMERCE_DB_PASSWORD=root
       - OSCOMMERCE_DB_NAME=oscommerce
+      - OSCOMMERCE_URL=http://oscommerce-dev.docker:8095
+      - OSCOMMERCE_ADMIN=root
+      - OSCOMMERCE_PASSWORD=root
     ports:
       - "8095:80"
     working_dir: /var/www/html/

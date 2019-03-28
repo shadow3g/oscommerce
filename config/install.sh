@@ -17,5 +17,6 @@ fi
 echo "CONNECTED";
 
 mysql -h $OSCOMMERCE_DB_HOST -u $OSCOMMERCE_DB_USER -p$OSCOMMERCE_DB_PASSWORD $OSCOMMERCE_DB_NAME < /var/www/html/install/oscommerce.sql
+mysql -h $OSCOMMERCE_DB_HOST -u $OSCOMMERCE_DB_USER -p$OSCOMMERCE_DB_PASSWORD $OSCOMMERCE_DB_NAME < /var/www/html/admin/includes/admin_user.sql
 
 exec "$@"

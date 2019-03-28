@@ -17,6 +17,8 @@ RUN cd /tmp \
 RUN chmod +x /*.sh
 
 COPY ./config/configure.php /var/www/html/includes
+COPY ./config/configure_admin.php /var/www/html/admin/includes/configure.php
+COPY ./config/admin_user.sql /var/www/html/admin/includes
 
 ENTRYPOINT ["/install.sh"]
 

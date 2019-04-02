@@ -33,5 +33,8 @@
   "autoload-dev": {
     "psr-4": { "Test\\Buy\\": "test/buy/", "Test\\": "test/" }
   },
-  "minimum-stability": "stable"
+  "minimum-stability": "stable",
+  "config": {
+      "vendor-dir" : "catalog/ext/modules/payment/pagantis/vendor"
+      }
 }

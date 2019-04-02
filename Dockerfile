@@ -22,4 +22,6 @@ COPY ./config/admin_user.sql /var/www/html/admin/includes
 
 ENTRYPOINT ["/install.sh"]
 
+#RUN rm -rf /var/www/html/install
+
 CMD ["apache2-foreground"]

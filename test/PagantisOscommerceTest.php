@@ -8,6 +8,7 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverElement;
 use Facebook\WebDriver\WebDriverExpectedCondition;
+use Facebook\WebDriver\Remote\RemoteWebElement;
 use Faker\Factory;
 use PHPUnit\Framework\TestCase;
 
@@ -17,9 +18,18 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class PagantisOscommerceTest extends TestCase
 {
-    const WC3URL = 'http://oscommerce-test.docker:8091';
+    const OSCURL = 'http://oscommerce-test.docker:8095';
 
-    const BACKOFFICE_FOLDER = '/wp-admin';
+    const BACKOFFICE_FOLDER = '/admin';
+
+    /**
+     * Const title
+     */
+    const TITLE = 'Oscommerce';
+    /**
+     * Const admin_title
+     */
+    const ADMIN_TITLE = 'osCommerce Online Merchant Administration Tool';
 
     /**
      * @var array
@@ -110,7 +120,7 @@ abstract class PagantisOscommerceTest extends TestCase
     /**
      * @param $name
      *
-     * @return \Facebook\WebDriver\Remote\RemoteWebElement
+     * @return RemoteWebElement
      */
     public function findByName($name)
     {
@@ -120,7 +130,7 @@ abstract class PagantisOscommerceTest extends TestCase
     /**
      * @param $id
      *
-     * @return \Facebook\WebDriver\Remote\RemoteWebElement
+     * @return RemoteWebElement
      */
     public function findById($id)
     {
@@ -130,7 +140,7 @@ abstract class PagantisOscommerceTest extends TestCase
     /**
      * @param $className
      *
-     * @return \Facebook\WebDriver\Remote\RemoteWebElement
+     * @return RemoteWebElement
      */
     public function findByClass($className)
     {
@@ -140,7 +150,7 @@ abstract class PagantisOscommerceTest extends TestCase
     /**
      * @param $css
      *
-     * @return \Facebook\WebDriver\Remote\RemoteWebElement
+     * @return RemoteWebElement
      */
     public function findByCss($css)
     {
@@ -150,7 +160,7 @@ abstract class PagantisOscommerceTest extends TestCase
     /**
      * @param $xpath
      *
-     * @return \Facebook\WebDriver\Remote\RemoteWebElement
+     * @return RemoteWebElement
      */
     public function findByXpath($xpath)
     {
@@ -160,7 +170,7 @@ abstract class PagantisOscommerceTest extends TestCase
     /**
      * @param $link
      *
-     * @return \Facebook\WebDriver\Remote\RemoteWebElement
+     * @return RemoteWebElement
      */
     public function findByLinkText($link)
     {

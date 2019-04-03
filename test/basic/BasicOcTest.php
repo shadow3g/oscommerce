@@ -11,19 +11,23 @@ use Test\PagantisOscommerceTest;
  *
  * @group oscommerce-basic
  */
-class BasicWc3Test extends PagantisOscommerceTest
+class BasicOcTest extends PagantisOscommerceTest
 {
     /**
      * Const title
      */
-    const TITLE = 'Oscommerce';
+    const TITLE = 'osCommerce';
+    /**
+     * Const admin_title
+     */
+    const ADMIN_TITLE = 'osCommerce Online Merchant Administration Tool';
 
     /**
      * testTitleOscommerce3
      */
     public function testTitleOscommerce3()
     {
-        $this->webDriver->get(self::WC3URL);
+        $this->webDriver->get(self::OSCURL);
         $condition = WebDriverExpectedCondition::titleContains(self::TITLE);
         $this->webDriver->wait()->until($condition);
         $this->assertTrue((bool) $condition);
@@ -35,8 +39,8 @@ class BasicWc3Test extends PagantisOscommerceTest
      */
     public function testBackOfficeTitleOscommerce()
     {
-        $this->webDriver->get(self::WC3URL.self::BACKOFFICE_FOLDER);
-        $condition = WebDriverExpectedCondition::titleContains(self::TITLE);
+        $this->webDriver->get(self::OSCURL.self::BACKOFFICE_FOLDER);
+        $condition = WebDriverExpectedCondition::titleContains(self::ADMIN_TITLE);
         $this->webDriver->wait()->until($condition);
         $this->assertTrue((bool) $condition);
         $this->quit();

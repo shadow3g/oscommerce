@@ -11,51 +11,29 @@
  */
 
   global $customer_id, $order;
+  if ( MODULE_PAYMENT_PAGANTIS_DISCOUNT == 'True' ){
+    $discount = 1;
+  }else{
+    $discount = 0;
+  }
 
-  $publicKey = MODULE_PAYMENT_PAGANTIS_PK;
+  if ( MODULE_PAYMENT_PAGANTIS_TESTMODE == 'Test' ){
+    $key = MODULE_PAYMENT_PAGANTIS_TK;
+  }else{
+    $key = MODULE_PAYMENT_PAGANTIS_PK;
+  }
+
   $widget = '';
-  if ( MODULE_PAYMENT_PAGANTIS_SIMULATOR == 'True' )
-  {
-      $widget = '<script>
-    var simulatorId = null;
-    function loadSimulator()
-    {
-        var positionSelector = "'.$positionSelector.'";
-        if (positionSelector === \'default\') {
-            positionSelector = \'.PagantisSimulator\';
-        }
-        var priceSelector = "'.$priceSelector.'";
-        if (priceSelector === \'default\') {
-            priceSelector = \'div.summary.entry-summary span.oscommerce-Price-amount.amount\';
-        }
-        var quantitySelector = "'.$qantitySelector.'";
-        if (quantitySelector === \'default\') {
-            quantitySelector = \'div.quantity>input\';
-        }
-        if (typeof pmtSDK != \'undefined\') {
-            pmtSDK.simulator.init({
-                publicKey: "'.$publicKey.'",
-                type: "'.$simulatorType.'",
-                selector: positionSelector,
-                itemQuantitySelector: quantitySelector,
-                itemAmountSelector: priceSelector
-            });
-            clearInterval(simulatorId);
-        }
-    }
-    simulatorId = setInterval(function () {
-        loadSimulator();
-    }, 2000);
-</script>
-<div class="PagantisSimulator"></div>';
-}
+  if ( MODULE_PAYMENT_PAGANTIS_SIMULATOR == 'True' ) {
+    $widget =   '<br/>';
+  }
 
-  define('MODULE_PAYMENT_PAGANTIS_TEXT_CATALOG_TITLE', 'Instant financing'. $widget);  // Payment option title as displayed to the customer
+  define('MODULE_PAYMENT_PAGANTIS_TEXT_CATALOG_TITLE', 'Instant financing');  // Payment option title as displayed to the customer
 
   define('MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE', 'Pagantis');
 
   define('MODULE_PAYMENT_PAGANTIS_TEXT_DESCRIPTION', '<strong>Pagantis</strong><br /><br/>
-            Pay up to 12 comfortable installments with Pagantis. Completely online and sympathetic request, and the answer is immediate!
+            Pagantis es una plataforma de financiación online. Escoge Pagantis como tu método de pago para permitir el pago a plazos.
             <br /><br/>
   <img src="images/icon_popup.gif" border="0">
   <a target="_blank" style="text-decoration: underline; font-weight: bold;" href="https://bo.pagamastarde.com/">Login al panel de Pagantis</a>

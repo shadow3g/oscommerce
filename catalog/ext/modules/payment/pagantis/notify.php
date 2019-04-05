@@ -15,7 +15,15 @@ use Pagantis\ModuleUtils\Model\Log\LogEntry;
 
 define('__ROOT__', dirname(dirname(__FILE__)));
 
-class pagantisNofify extends WcPagantisGateway
+define('TABLE_PAGANTIS', 'pagantis');
+define('TABLE_PAGANTIS_LOG', 'pagantis_log');
+define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
+define('TABLE_PAGANTIS_ORDERS', 'pagantis_orders');
+define('TABLE_PAGANTIS_CONCURRENCY', 'pagantis_concurrency');
+chdir('../../../../');
+require('includes/application_top.php');
+
+class pagantisNotify
 {
     /** @var mixed $pagantisOrder */
     protected $pagantisOrder;
@@ -35,11 +43,35 @@ class pagantisNofify extends WcPagantisGateway
     /** @var Client $orderClient */
     protected $orderClient;
 
-    /** @var  WC_Order $oscommerceOrder */
+    /** @var Order $oscommerceOrder */
     protected $oscommerceOrder;
 
     /** @var mixed $pagantisOrderId */
     protected $pagantisOrderId = '';
+
+
+    /**
+     * pagantisNotify constructor.
+     */
+    public function __construct()
+    {
+        $this->oscommerceOrderId = '7e93cd07dbeba82f6d77965f9bec2c7a';
+        $this->getPagantisOrderId();
+        $result = ($this->pagantisOrderId);
+        $result = unserialize($result);
+        foreach ($result as $var => $content) {
+            $GLOBALS[$var] = unserialize($content);
+            tep_session_register($var);
+        }
+
+        header("Location: http://oscommerce-dev.docker:8095/checkout_process.php");
+
+    }
+
+    public static function __callStatic($name, $arguments)
+    {
+        // TODO: Implement __callStatic() method.
+    }
 
     /**
      * Validation vs PagantisClient
@@ -49,7 +81,7 @@ class pagantisNofify extends WcPagantisGateway
      */
     public function processInformation()
     {
-        require_once(__ROOT__.'/vendor/autoload.php');
+        require_once(__ROOT__.'/pagantis/vendor/autoload.php');
         try {
             $this->checkConcurrency();
             $this->getMerchantOrder();
@@ -96,14 +128,14 @@ class pagantisNofify extends WcPagantisGateway
      */
 
     /**
-     * @throws QuoteNotFoundException
+     * @throws Exception
      */
     private function checkConcurrency()
     {
-        $this->oscommerceOrderId = $_GET['order-received'];
-        if ($this->oscommerceOrderId == '') {
-            throw new QuoteNotFoundException();
-        }
+        $this->getQuoteId();
+        $this->checkConcurrencyTable();
+        $this->unblockConcurrency();
+        $this->blockConcurrency();
     }
 
     /**
@@ -111,9 +143,9 @@ class pagantisNofify extends WcPagantisGateway
      */
     private function getMerchantOrder()
     {
-        try {
-            $this->oscommerceOrder = new WC_Order($this->oscommerceOrderId);
-        } catch (\Exception $e) {
+        var_dump($this->oscommerceOrder);
+        die;
+        if (!isset($this->oscommerceOrder)) {
             throw new MerchantOrderNotFoundException();
         }
     }
@@ -123,11 +155,11 @@ class pagantisNofify extends WcPagantisGateway
      */
     private function getPagantisOrderId()
     {
-        global $wpdb;
-        $this->checkDbTable();
-        $tableName = $wpdb->prefix.self::ORDERS_TABLE;
-        $queryResult = $wpdb->get_row("select order_id from $tableName where id='".$this->oscommerceOrderId."'");
-        $this->pagantisOrderId = $queryResult->order_id;
+        $query = "select pmt_order_id from ".TABLE_PAGANTIS_ORDERS." where os_order_id='".$this->oscommerceOrderId."'";
+        $resultsSelect = tep_db_query($query);
+        while ($orderRow = tep_db_fetch_array($resultsSelect)) {
+            $this->pagantisOrderId = $orderRow['pmt_order_id'];
+        }
 
         if ($this->pagantisOrderId == '') {
             throw new NoIdentificationException();
@@ -140,8 +172,9 @@ class pagantisNofify extends WcPagantisGateway
     private function getPagantisOrder()
     {
         try {
-            $this->cfg = get_option('oscommerce_pagantis_settings');
-            $this->orderClient = new Client($this->cfg['pagantis_public_key'], $this->cfg['pagantis_private_key']);
+            $publicKey     = trim(MODULE_PAYMENT_PAGANTIS_PK);
+            $secretKey     = trim(MODULE_PAYMENT_PAGANTIS_SK);
+            $this->orderClient   = new \Pagantis\OrdersApiClient\Client($publicKey, $secretKey);
             $this->pagantisOrder = $this->orderClient->getOrder($this->pagantisOrderId);
         } catch (\Exception $e) {
             throw new OrderNotFoundException();
@@ -175,14 +208,7 @@ class pagantisNofify extends WcPagantisGateway
      */
     private function checkMerchantOrderStatus()
     {
-        $validStatus   = array('on-hold', 'pending', 'failed');
-        $isValidStatus = apply_filters(
-            'oscommerce_valid_order_statuses_for_payment_complete',
-            $validStatus,
-            $this
-        );
-
-        if (!$this->oscommerceOrder->has_status($isValidStatus)) {
+        if (!$this->oscommerceOrder->info['order_status']!=='1') {
             throw new AlreadyProcessedException();
         }
     }
@@ -226,42 +252,68 @@ class pagantisNofify extends WcPagantisGateway
     /**
      * UTILS FUNCTIONS
      */
+
     /** STEP 1 CC - Check concurrency */
+
     /**
-     * Check if orders table exists
+     * @throws QuoteNotFoundException
      */
-    private function checkDbTable()
+    private function getQuoteId()
     {
-        global $wpdb;
-        $tableName = $wpdb->prefix.self::ORDERS_TABLE;
-
-        if ($wpdb->get_var("SHOW TABLES LIKE '$tableName'") != $tableName) {
-            $charset_collate = $wpdb->get_charset_collate();
-            $sql             = "CREATE TABLE $tableName (id int, order_id varchar(50), wc_order_id varchar(50), 
-                  UNIQUE KEY id (id)) $charset_collate";
-
-            require_once(ABSPATH.'wp-admin/includes/upgrade.php');
-            dbDelta($sql);
+        $this->oscommerceOrderId = $_GET['order_id'];
+        if ($this->oscommerceOrderId == '') {
+            throw new QuoteNotFoundException();
         }
     }
 
     /**
-     * Check if logs table exists
+     * Check if concurrency table exists
      */
-    private function checkDbLogTable()
+    private function checkConcurrencyTable()
     {
-        global $wpdb;
-        $tableName = $wpdb->prefix.self::LOGS_TABLE;
-
-        if ($wpdb->get_var("SHOW TABLES LIKE '$tableName'") != $tableName) {
-            $charset_collate = $wpdb->get_charset_collate();
-            $sql = "CREATE TABLE $tableName ( id int NOT NULL AUTO_INCREMENT, log text NOT NULL, 
-                    createdAt timestamp DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY id (id)) $charset_collate";
-
-            require_once(ABSPATH.'wp-admin/includes/upgrade.php');
-            dbDelta($sql);
+        $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS_CONCURRENCY."'");
+        if (tep_db_num_rows($checkTable) == 0) {
+            $sql = "CREATE TABLE IF NOT EXISTS ".TABLE_PAGANTIS_CONCURRENCY." (
+                            id int NOT NULL,
+                            `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                            UNIQUE KEY id(id))";
+            tep_db_query($sql);
         }
         return;
+    }
+
+    /**
+     * Unlock the concurrency
+     *
+     * @param null $orderId
+     * @throws Exception
+     */
+    private function unblockConcurrency($orderId = null)
+    {
+        try {
+            if ($orderId == null) {
+                $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where  timestamp<".(time() - 5);
+                tep_db_query($query);
+            } elseif ($this->$orderId!='') {
+                $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where id=".$this->$orderId;
+                tep_db_query($query);
+            }
+        } catch (Exception $exception) {
+            throw new ConcurrencyException();
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function blockConcurrency()
+    {
+        try {
+            $query = "INSERT INTO ".TABLE_PAGANTIS_CONCURRENCY." (id) VALUES ('$this->oscommerceOrderId')";
+            tep_db_query($query);
+        } catch (Exception $exception) {
+            throw new ConcurrencyException();
+        }
     }
 
     /** STEP 2 GMO - Get Merchant Order */
@@ -361,5 +413,5 @@ class pagantisNofify extends WcPagantisGateway
     }
 }
 
-$pgNotify = new pagantisNofify();
+$pgNotify = new pagantisNotify();
 $pgNotify->processInformation();

@@ -13,17 +13,14 @@ use Pagantis\ModuleUtils\Model\Response\JsonSuccessResponse;
 use Pagantis\ModuleUtils\Model\Response\JsonExceptionResponse;
 use Pagantis\ModuleUtils\Model\Log\LogEntry;
 
-define('__ROOT__', dirname(dirname(__FILE__)));
 
 define('TABLE_PAGANTIS', 'pagantis');
 define('TABLE_PAGANTIS_LOG', 'pagantis_log');
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
 define('TABLE_PAGANTIS_ORDERS', 'pagantis_orders');
 define('TABLE_PAGANTIS_CONCURRENCY', 'pagantis_concurrency');
-chdir('../../../../');
-require('includes/application_top.php');
 
-class pagantisNotify
+class notifyController
 {
     /** @var mixed $pagantisOrder */
     protected $pagantisOrder;
@@ -49,30 +46,6 @@ class pagantisNotify
     /** @var mixed $pagantisOrderId */
     protected $pagantisOrderId = '';
 
-
-    /**
-     * pagantisNotify constructor.
-     */
-    public function __construct()
-    {
-        $this->oscommerceOrderId = '7e93cd07dbeba82f6d77965f9bec2c7a';
-        $this->getPagantisOrderId();
-        $result = ($this->pagantisOrderId);
-        $result = unserialize($result);
-        foreach ($result as $var => $content) {
-            $GLOBALS[$var] = unserialize($content);
-            tep_session_register($var);
-        }
-
-        header("Location: http://oscommerce-dev.docker:8095/checkout_process.php");
-
-    }
-
-    public static function __callStatic($name, $arguments)
-    {
-        // TODO: Implement __callStatic() method.
-    }
-
     /**
      * Validation vs PagantisClient
      *
@@ -81,7 +54,7 @@ class pagantisNotify
      */
     public function processInformation()
     {
-        require_once(__ROOT__.'/pagantis/vendor/autoload.php');
+        require_once('vendor/autoload.php');
         try {
             $this->checkConcurrency();
             $this->getMerchantOrder();
@@ -133,9 +106,9 @@ class pagantisNotify
     private function checkConcurrency()
     {
         $this->getQuoteId();
-        $this->checkConcurrencyTable();
-        $this->unblockConcurrency();
-        $this->blockConcurrency();
+        //$this->checkConcurrencyTable();
+        //$this->unblockConcurrency();
+        //$this->blockConcurrency();
     }
 
     /**
@@ -143,9 +116,9 @@ class pagantisNotify
      */
     private function getMerchantOrder()
     {
-        var_dump($this->oscommerceOrder);
-        die;
-        if (!isset($this->oscommerceOrder)) {
+        global $order;
+        $this->oscommerceOrder = $order;
+        if (!isset($order->info)) {
             throw new MerchantOrderNotFoundException();
         }
     }
@@ -190,16 +163,12 @@ class pagantisNotify
         try {
             $this->checkPagantisStatus(array('AUTHORIZED'));
         } catch (\Exception $e) {
-            if ($this->oscommerceOrderId!='') {
-                throw new AlreadyProcessedException();
+            if ($this->pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
+                $status = $this->pagantisOrder->getStatus();
             } else {
-                if ($this->pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
-                    $status = $this->pagantisOrder->getStatus();
-                } else {
-                    $status = '-';
-                }
-                throw new WrongStatusException($status);
+                $status = '-';
             }
+            throw new WrongStatusException($status);
         }
     }
 
@@ -208,7 +177,7 @@ class pagantisNotify
      */
     private function checkMerchantOrderStatus()
     {
-        if (!$this->oscommerceOrder->info['order_status']!=='1') {
+        if ($this->oscommerceOrder->info['order_status']!=='1') {
             throw new AlreadyProcessedException();
         }
     }
@@ -219,9 +188,10 @@ class pagantisNotify
     private function validateAmount()
     {
         $pagantisAmount = $this->pagantisOrder->getShoppingCart()->getTotalAmount();
-        $wcAmount = intval(strval(100 * $this->oscommerceOrder->get_total()));
-        if ($pagantisAmount != $wcAmount) {
-            throw new AmountMismatchException($pagantisAmount, $wcAmount);
+        $ocAmount = intval($this->oscommerceOrder->info['total'] * 100);
+
+        if ($pagantisAmount != $ocAmount) {
+            throw new AmountMismatchException($pagantisAmount, $ocAmount);
         }
     }
 
@@ -260,8 +230,7 @@ class pagantisNotify
      */
     private function getQuoteId()
     {
-        $this->oscommerceOrderId = $_GET['order_id'];
-        if ($this->oscommerceOrderId == '') {
+        if ($this->getOscommerceOrderId() == '') {
             throw new QuoteNotFoundException();
         }
     }
@@ -295,7 +264,7 @@ class pagantisNotify
                 $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where  timestamp<".(time() - 5);
                 tep_db_query($query);
             } elseif ($this->$orderId!='') {
-                $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where id=".$this->$orderId;
+                $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where id='$orderId'";
                 tep_db_query($query);
             }
         } catch (Exception $exception) {
@@ -349,24 +318,6 @@ class pagantisNotify
     /** STEP 6 CMOS - Check Merchant Order Status */
     /** STEP 7 VA - Validate Amount */
     /** STEP 8 PMO - Process Merchant Order */
-    /**
-     * @throws \Exception
-     */
-    private function saveOrder()
-    {
-        global $oscommerce;
-        $paymentResult = $this->oscommerceOrder->payment_complete();
-        if ($paymentResult) {
-            $this->oscommerceOrder->add_order_note("Notification received via $this->origin");
-            $this->oscommerceOrder->reduce_order_stock();
-            $this->oscommerceOrder->save();
-
-            $oscommerce->cart->empty_cart();
-            sleep(3);
-        } else {
-            throw new UnknownException('Order can not be saved');
-        }
-    }
 
     /**
      * Save the merchant order_id with the related identification
@@ -394,24 +345,36 @@ class pagantisNotify
     }
 
     /**
-     * @param $exceptionMessage
-     *
-     * @throws \Zend_Db_Exception
+     * @param $exception
      */
     private function insertLog($exception)
     {
-        global $wpdb;
-
         if ($exception instanceof \Exception) {
-            $this->checkDbLogTable();
             $logEntry= new LogEntry();
             $logEntryJson = $logEntry->error($exception)->toJson();
 
-            $tableName = $wpdb->prefix.self::LOGS_TABLE;
-            $wpdb->insert($tableName, array('log' => $logEntryJson));
+            $query = "insert into ".TABLE_PAGANTIS_LOG."(log) values ('$logEntryJson')";
+            tep_db_query($query);
         }
     }
-}
 
-$pgNotify = new pagantisNotify();
-$pgNotify->processInformation();
+    /***
+     * SETTERS Y GETTERS
+     */
+
+    /**
+     * @return mixed
+     */
+    public function getOscommerceOrderId()
+    {
+        return $this->oscommerceOrderId;
+    }
+
+    /**
+     * @param $oscommerceOrderId
+     */
+    public function setOscommerceOrderId($oscommerceOrderId)
+    {
+        $this->oscommerceOrderId = $oscommerceOrderId;
+    }
+}

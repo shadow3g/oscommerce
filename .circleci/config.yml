@@ -87,8 +87,8 @@ jobs:
                 --user pagamastarde \
                 --repo oscommerce \
                 --tag $CIRCLE_TAG \
-                --name paylater-$CIRCLE_TAG.zip \
-                --file paylater-$CIRCLE_TAG.zip
+                --name pagantis-$CIRCLE_TAG.zip \
+                --file pagantis-$CIRCLE_TAG.zip
 workflows:
   version: 2
   test-build:

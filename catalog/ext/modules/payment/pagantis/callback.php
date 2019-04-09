@@ -5,7 +5,7 @@ chdir('../../../../');
 require('includes/application_top.php');
 
 if (isset($_GET['order_id'])) {
-    $query = "select globals from ".TABLE_PAGANTIS_ORDERS." where os_order_id='".$_GET['order_id']."' limit 1";
+    $query = "select globals from ".TABLE_PAGANTIS_ORDERS." where os_order_reference='".$_GET['order_id']."' limit 1";
     $resultsSelect = tep_db_query($query);
     while ($orderRow = tep_db_fetch_array($resultsSelect)) {
         $globals = $orderRow['pmt_order_id'];
@@ -19,5 +19,6 @@ if (isset($_GET['order_id'])) {
 } else {
     $destUrl = tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', true, false);
 }
+
 header("Location: $destUrl");
 exit;

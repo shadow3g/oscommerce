@@ -143,8 +143,6 @@ class pagantisNotify
      */
     private function getMerchantOrder()
     {
-        var_dump($this->oscommerceOrder);
-        die;
         if (!isset($this->oscommerceOrder)) {
             throw new MerchantOrderNotFoundException();
         }

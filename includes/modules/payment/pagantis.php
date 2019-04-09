@@ -205,8 +205,7 @@ class pagantis
             $global_vars['payment'] = serialize($payment);
             $global_vars['comments'] = serialize($comments);
             $global_vars['$customer_default_address_id'] = serialize($customer_default_address_id);
-            $global_vars['cartId'] = serialize($cartID)
-print_R($GLOBALS);die;
+            $global_vars['cartId'] = serialize($cartID);
             if (!isset($order)) {
                 throw new UnknownException("Order not found");
             }

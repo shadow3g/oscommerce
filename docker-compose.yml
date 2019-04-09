@@ -9,10 +9,10 @@ services:
     depends_on:
       - db-dev
     volumes:
-      - ./catalog/ext/modules/payment/pagantis/:/var/www/html/ext/modules/payment/pagantis
-      - ./catalog/includes/languages/english/modules/payment/pagantis.php:/var/www/html/includes/languages/english/modules/payment/pagantis.php
-      - ./catalog/includes/languages/espanol/modules/payment/pagantis.php:/var/www/html/includes/languages/espanol/modules/payment/pagantis.php
-      - ./catalog/includes/modules/payment/pagantis.php:/var/www/html/includes/modules/payment/pagantis.php
+      - ./ext/modules/payment/pagantis/:/var/www/html/ext/modules/payment/pagantis
+      - ./includes/languages/english/modules/payment/pagantis.php:/var/www/html/includes/languages/english/modules/payment/pagantis.php
+      - ./includes/languages/espanol/modules/payment/pagantis.php:/var/www/html/includes/languages/espanol/modules/payment/pagantis.php
+      - ./includes/modules/payment/pagantis.php:/var/www/html/includes/modules/payment/pagantis.php
     environment:
       - OSCOMMERCE_DB_HOST=db-dev
       - OSCOMMERCE_DB_USER=root
@@ -27,6 +27,31 @@ services:
     extra_hosts:
       - "oscommerce-dev.docker:127.0.0.1"
   db-dev:
+    image: mysql:5.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=oscommerce
+  oscommerce-test:
+    container_name: oscommerce-test
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    depends_on:
+      - db-test
+    environment:
+      - OSCOMMERCE_DB_HOST=db-test
+      - OSCOMMERCE_DB_USER=root
+      - OSCOMMERCE_DB_PASSWORD=root
+      - OSCOMMERCE_DB_NAME=oscommerce
+      - OSCOMMERCE_URL=http://oscommerce-test.docker:8096
+      - OSCOMMERCE_ADMIN=root
+      - OSCOMMERCE_PASSWORD=root
+    ports:
+      - "8096:80"
+    working_dir: /var/www/html/
+    extra_hosts:
+      - "oscommerce-test.docker:127.0.0.1"
+  db-test:
     image: mysql:5.5
     environment:
       - MYSQL_ROOT_PASSWORD=root

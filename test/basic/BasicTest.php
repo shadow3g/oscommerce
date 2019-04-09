@@ -6,12 +6,12 @@ use Facebook\WebDriver\WebDriverExpectedCondition;
 use Test\PagantisOscommerceTest;
 
 /**
- * Class BasicOc3Test
+ * Class BasicOscommerceTest
  * @package Test\Basic
  *
  * @group oscommerce-basic
  */
-class BasicOcTest extends PagantisOscommerceTest
+class BasicTestTest extends PagantisOscommerceTest
 {
     /**
      * Const title
@@ -23,9 +23,9 @@ class BasicOcTest extends PagantisOscommerceTest
     const ADMIN_TITLE = 'osCommerce Online Merchant Administration Tool';
 
     /**
-     * testTitleOscommerce3
+     * testTitleOscommerce
      */
-    public function testTitleOscommerce3()
+    public function testTitleOscommerce()
     {
         $this->webDriver->get(self::OSCURL);
         $condition = WebDriverExpectedCondition::titleContains(self::TITLE);

@@ -16,7 +16,7 @@ use Pagantis\ModuleUtils\Model\Log\LogEntry;
 
 define('TABLE_PAGANTIS_LOG', 'pagantis_log');
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
-define('TABLE_PAGANTIS_ORDERS', 'pagantis_orders');
+define('TABLE_PAGANTIS_ORDERS', 'pagantis_order');
 define('TABLE_PAGANTIS_CONCURRENCY', 'pagantis_concurrency');
 
 class notifyController
@@ -68,13 +68,16 @@ class notifyController
             $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
             $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
             $jsonResponse->setException($exception);
-            $response = $jsonResponse->toJson();
             $this->insertLog($exception);
             $shippingUrl = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
 
             if ($this->origin == 'notify') {
                 $jsonResponse->printResponse();
             } else {
+                if (get_class($exception) == 'AlreadyProcessedException') {
+                    return;
+                }
+
                 header("Location: $shippingUrl");
                 exit;
             }
@@ -173,8 +176,8 @@ class notifyController
         try {
             $this->checkPagantisStatus(array('AUTHORIZED'));
         } catch (\Exception $e) {
-            if ($this->findOscommerceOrderId()!=='') {
-                return;
+            if ($this->findOscommerceOrderId()!='') {
+                throw new AlreadyProcessedException();
             } else {
                 if ($this->pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
                     $status = $this->pagantisOrder->getStatus();
@@ -361,7 +364,10 @@ class notifyController
     private function rollbackMerchantOrder()
     {
         global $insert_id;
-        $query = "update orders set order_status='1' where orders_id='$insert_id' ";
+        $query = "update orders set orders_status='1' where orders_id='$insert_id' ";
+        tep_db_query($query);
+
+        $query = "update ".TABLE_PAGANTIS_ORDERS." set os_order_id='' where os_order_reference='$this->oscommerceOrderId'";
         tep_db_query($query);
     }
 

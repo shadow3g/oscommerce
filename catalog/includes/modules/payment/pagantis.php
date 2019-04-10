@@ -6,7 +6,7 @@ use Pagantis\ModuleUtils\Exception\UnknownException;
 
 define('TABLE_PAGANTIS_LOG', 'pagantis_log');
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
-define('TABLE_PAGANTIS_ORDERS', 'pagantis_orders');
+define('TABLE_PAGANTIS_ORDERS', 'pagantis_order');
 define('TABLE_PAGANTIS_CONCURRENCY', 'pagantis_concurrency');
 define('__ROOT__', dirname(dirname(__FILE__)));
 

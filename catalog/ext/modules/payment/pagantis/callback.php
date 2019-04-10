@@ -1,6 +1,6 @@
 <?php
 
-define('TABLE_PAGANTIS_ORDERS', 'pagantis_orders');
+define('TABLE_PAGANTIS_ORDERS', 'pagantis_order');
 chdir('../../../../');
 require('includes/application_top.php');
 

@@ -11,6 +11,7 @@ use Pagantis\ModuleUtils\Exception\UnknownException;
 use Pagantis\ModuleUtils\Exception\WrongStatusException;
 use Pagantis\ModuleUtils\Model\Response\JsonSuccessResponse;
 use Pagantis\ModuleUtils\Model\Response\JsonExceptionResponse;
+use Pagantis\ModuleUtils\Exception\ConcurrencyException;
 use Pagantis\ModuleUtils\Model\Log\LogEntry;
 
 
@@ -64,8 +65,9 @@ class notifyController
             $this->validateAmount();
             //$this->processMerchantOrder(); //ESTE PASO SE HACE EN EL CHECKOUT_PROCESS
         } catch (\Exception $exception) {
+            $this->unblockConcurrency($this->oscommerceOrderId);
             $jsonResponse = new JsonExceptionResponse();
-            $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
+            $jsonResponse->setMerchantOrderId($this->merchantOrderId);
             $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
             $jsonResponse->setException($exception);
             $this->insertLog($exception);
@@ -74,7 +76,7 @@ class notifyController
             if ($this->origin == 'notify') {
                 $jsonResponse->printResponse();
             } else {
-                if (get_class($exception) == 'AlreadyProcessedException') {
+                if ($exception->getMessage() == AlreadyProcessedException::ERROR_MESSAGE) {
                     return;
                 }
 
@@ -90,19 +92,21 @@ class notifyController
             $this->confirmPagantisOrder();
             $this->updateBdInfo();
             $jsonResponse = new JsonSuccessResponse();
-            $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
+            $jsonResponse->setMerchantOrderId($this->merchantOrderId);
             $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
+            $this->unblockConcurrency($this->oscommerceOrderId);
         } catch (\Exception $exception) {
             $this->rollbackMerchantOrder();
+            $this->unblockConcurrency($this->oscommerceOrderId);
             $jsonResponse = new JsonExceptionResponse();
-            $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
+            $jsonResponse->setMerchantOrderId($this->merchantOrderId);
             $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
             $jsonResponse->setException($exception);
             $jsonResponse->toJson();
             $this->insertLog($exception);
         }
 
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if ($this->origin == 'notify') {
             $jsonResponse->printResponse();
         } else {
             return $jsonResponse;
@@ -119,9 +123,9 @@ class notifyController
     private function checkConcurrency()
     {
         $this->getQuoteId();
-        //$this->checkConcurrencyTable();
-        //$this->unblockConcurrency();
-        //$this->blockConcurrency();
+        $this->checkConcurrencyTable();
+        $this->unblockConcurrency();
+        $this->blockConcurrency();
     }
 
     /**
@@ -273,7 +277,7 @@ class notifyController
             if ($orderId == null) {
                 $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where  timestamp<".(time() - 5);
                 tep_db_query($query);
-            } elseif ($this->$orderId!='') {
+            } elseif ($orderId!='') {
                 $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where id='$orderId'";
                 tep_db_query($query);
             }
@@ -288,8 +292,17 @@ class notifyController
     private function blockConcurrency()
     {
         try {
+            $query = "SELECT timestamp FROM ".TABLE_PAGANTIS_CONCURRENCY." where id='$this->oscommerceOrderId'";
+            $resultsSelect = tep_db_query($query);
+            $orderRow = tep_db_fetch_array($resultsSelect);
+
+            if (isset($orderRow['timestamp'])) {
+                throw new ConcurrencyException();
+            }
+
             $query = "INSERT INTO ".TABLE_PAGANTIS_CONCURRENCY." (id) VALUES ('$this->oscommerceOrderId')";
             tep_db_query($query);
+
         } catch (Exception $exception) {
             throw new ConcurrencyException();
         }
@@ -334,6 +347,7 @@ class notifyController
         $query = "select os_order_id from ".TABLE_PAGANTIS_ORDERS." where os_order_reference='".$this->oscommerceOrderId."'";
         $resultsSelect = tep_db_query($query);
         $orderRow = tep_db_fetch_array($resultsSelect);
+        $this->merchantOrderId = $orderRow['os_order_id'];
 
         return $orderRow['os_order_id'];
     }
@@ -347,11 +361,12 @@ class notifyController
      */
     private function updateBdInfo()
     {
-        global $insert_id, $order;
+        global $insert_id;
+        $this->merchantOrderId = $insert_id;
         $query = "update ".TABLE_PAGANTIS_ORDERS." set os_order_id='$insert_id' where os_order_reference='$this->oscommerceOrderId'";
         tep_db_query($query);
 
-        $comment = "Pagantis id=$this->pagantisOrderId/Via=".$this->origin;
+        $comment = "Pagantis id=$this->pagantisOrderId/Via=".ucfirst($this->origin);
         $query = "insert into ".TABLE_ORDERS_STATUS_HISTORY ."(comments, orders_id, orders_status_id, customer_notified, date_added) values
             ('$comment', ".$insert_id.", '2', -1, now() )";
         tep_db_query($query);

@@ -242,13 +242,13 @@ class pagantis
 
             $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php';
             $checkoutProcessUrl = htmlspecialchars_decode(
-                tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->os_order_reference", 'SSL', true, false)
+                tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->os_order_reference&from=order", 'SSL', true, false)
             );
             $cancelUrl              = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
             $orderConfigurationUrls = new \Pagantis\OrdersApiClient\Model\Order\Configuration\Urls();
             $orderConfigurationUrls
                 ->setCancel($cancelUrl)
-                ->setKo($checkoutProcessUrl)
+                ->setKo($cancelUrl)
                 ->setAuthorizedNotificationCallback($callback_url)
                 ->setRejectedNotificationCallback($callback_url)
                 ->setOk($checkoutProcessUrl);
@@ -285,7 +285,7 @@ class pagantis
             $pagantisOrder = $orderClient->createOrder($orderApiClient);
             if ($pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
                 $url = $pagantisOrder->getActionUrls()->getForm();
-                $this->insertRow($this->order_id, $pagantisOrder->getId(), serialize($global_vars));
+                $this->insertRow($this->os_order_reference, $pagantisOrder->getId(), serialize($global_vars));
             } else {
                 throw new OrderNotFoundException();
             }
@@ -297,13 +297,7 @@ class pagantis
                 $output.= tep_draw_hidden_field("formUrl", $url) . "\n";
                 $output.= tep_draw_hidden_field("cancelUrl", $cancelUrl) . "\n";
                 return $output;
-            } /*else {
-                $template_fields = array(
-                    'url'         => $url,
-                    'checkoutUrl' => $cancelUrl
-                );
-                wc_get_template('iframe.php', $template_fields, '', $this->template_path); //TODO
-            }*/ //
+            } //TODO IFRAME
         } catch (\Exception $exception) {
             tep_redirect($cancelUrl);
             return;
@@ -398,7 +392,7 @@ class pagantis
         tep_db_query($sql);
 
         $sql = "CREATE TABLE IF NOT EXISTS " . TABLE_PAGANTIS_CONCURRENCY . " (
-                            id int NOT NULL,
+                            id varchar(50) NOT NULL,
                             `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                             UNIQUE KEY id(id))";
         tep_db_query($sql);

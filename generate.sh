@@ -24,8 +24,8 @@ then
     catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-basic
     echo oscommerce-configure
     catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure
-#    echo oscommerce-product-page
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-product-page
+    echo oscommerce-register
+    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-register
 #    echo oscommerce-buy-unregistered
 #    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-buy-unregistered
 #    echo oscommerce-cancel-buy-unregistered

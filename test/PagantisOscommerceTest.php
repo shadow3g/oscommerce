@@ -25,7 +25,7 @@ abstract class PagantisOscommerceTest extends TestCase
     /**
      * Const title
      */
-    const TITLE = 'Oscommerce';
+    const TITLE = 'osCommerce';
     /**
      * Const admin_title
      */
@@ -42,9 +42,11 @@ abstract class PagantisOscommerceTest extends TestCase
         'birthdate'     => '05/05/2005',
         'firstname'     => 'Jøhn',
         'lastname'      => 'Dōè',
-        'email'         => 'john_wc@digitalorigin.com',
+        'email'         => 'john_oc@pagantis.com',
+        'longpwd'       => 'd53cd467ba49022e4f821',
         'company'       => 'Digital Origin SL',
         'zip'           => '08023',
+        'country'       => '195',
         'city'          => 'Barcelona',
         'phone'         => '600123123',
         'dni'           => '09422447Z',
@@ -72,17 +74,17 @@ abstract class PagantisOscommerceTest extends TestCase
     {
         $faker = Factory::create();
         $this->configuration['dni'] = $this->getDNI();
-        $this->configuration['birthdate'] =
-            $faker->numberBetween(1, 28) . '/' .
-            $faker->numberBetween(1, 12). '/1975'
-        ;
+//        $this->configuration['birthdate'] =
+//            $faker->numberBetween(1, 28) . '/' .
+//            $faker->numberBetween(1, 12). '/1975'
+//        ;
         $this->configuration['firstname'] = $faker->firstName;
         $this->configuration['lastname'] = $faker->lastName . ' ' . $faker->lastName;
         $this->configuration['company'] = $faker->company;
         $this->configuration['zip'] = '28'.$faker->randomNumber(3, true);
         $this->configuration['street'] = $faker->streetAddress;
         $this->configuration['phone'] = '6' . $faker->randomNumber(8);
-        $this->configuration['email'] = date('ymd') . '@pagamastarde.com';
+        $this->configuration['email'] = date('ymd') . '@pagantis.com';
         parent::__construct($name, $data, $dataName);
     }
     /**

@@ -297,13 +297,7 @@ class pagantis
                 $output.= tep_draw_hidden_field("formUrl", $url) . "\n";
                 $output.= tep_draw_hidden_field("cancelUrl", $cancelUrl) . "\n";
                 return $output;
-            } /*else {
-                $template_fields = array(
-                    'url'         => $url,
-                    'checkoutUrl' => $cancelUrl
-                );
-                wc_get_template('iframe.php', $template_fields, '', $this->template_path); //TODO
-            }*/ //
+            }
         } catch (\Exception $exception) {
             tep_redirect($cancelUrl);
             return;

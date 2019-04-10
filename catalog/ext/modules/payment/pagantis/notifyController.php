@@ -45,9 +45,6 @@ class notifyController
     /** @var mixed $pagantisOrderId */
     protected $pagantisOrderId = '';
 
-    /** @var String $order_status */
-    protected $orderStatus;
-
     /**
      * Validation vs PagantisClient
      *
@@ -78,10 +75,6 @@ class notifyController
             if ($this->origin == 'notify') {
                 $jsonResponse->printResponse();
             } else {
-                if (get_class($exception)=='AlreadyProcessedException') {
-                    return;
-                }
-
                 header("Location: $shippingUrl");
                 exit;
             }
@@ -181,7 +174,7 @@ class notifyController
             $this->checkPagantisStatus(array('AUTHORIZED'));
         } catch (\Exception $e) {
             if ($this->findOscommerceOrderId()!=='') {
-                throw new AlreadyProcessedException();
+                return;
             } else {
                 if ($this->pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
                     $status = $this->pagantisOrder->getStatus();
@@ -357,7 +350,10 @@ class notifyController
 
         $comment = "Pagantis id=$this->pagantisOrderId/Via=".$this->origin;
         $query = "insert into ".TABLE_ORDERS_STATUS_HISTORY ."(comments, orders_id, orders_status_id, customer_notified, date_added) values
-            ('$comment', ".$insert_id.", '".$this->orderStatus."', -1, now() )";
+            ('$comment', ".$insert_id.", '2', -1, now() )";
+        tep_db_query($query);
+
+        $query = "update ".TABLE_ORDERS." set orders_status='2' where orders_id='$insert_id'";
         tep_db_query($query);
     }
 
@@ -365,7 +361,7 @@ class notifyController
     private function rollbackMerchantOrder()
     {
         global $insert_id;
-        $query = "update orders set order_status='1' where id='$insert_id' ";
+        $query = "update orders set order_status='1' where orders_id='$insert_id' ";
         tep_db_query($query);
     }
 

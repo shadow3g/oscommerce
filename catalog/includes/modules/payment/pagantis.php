@@ -44,8 +44,7 @@ class pagantis
                                    'PAGANTIS_DISPLAY_MIN_AMOUNT'=>1,
                                    'PAGANTIS_URL_OK'=>'',
                                    'PAGANTIS_URL_KO'=>'',
-                                   'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
-                                   'PAGANTIS_ORDER_STATUS'=>'6'
+                                   'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!'
     );
 
     /**
@@ -317,10 +316,9 @@ class pagantis
     public function before_process()
     {
         include_once('./ext/modules/payment/pagantis/notifyController.php');
-        $this->pgNotify = new notifyController();var_dump($_GET['from']);var_dump($_POST);die;
+        $this->pgNotify = new notifyController();
         $this->pgNotify->setOscommerceOrderId($_GET['order_id']);
         $this->pgNotify->setOrigin(isset($_GET['from']) ? ($_GET['from']) : 'order');
-        $this->pgNotify->setOrderStatus($this->extraConfig['PAGANTIS_ORDER_STATUS']);
         $this->pgNotify->processInformation();
     }
 
@@ -364,7 +362,6 @@ class pagantis
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Public Key', 'MODULE_PAYMENT_PAGANTIS_PK', '', 'MANDATORY. You can get in your pagantis profile', '6', '0', now())");
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Secret Key', 'MODULE_PAYMENT_PAGANTIS_SK', '', 'MANDATORY. You can get in your pagantis profile', '6', '0', now())");
 
-        //tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name, public_flag, downloads_flag) values (6, 1, 'Pagantis [Transactions]', 0, 0)");
         $this->installPagantisTables();
     }
 
@@ -482,13 +479,13 @@ where orders.customers_id='%s' and orders_status_history.orders_status_id in ('2
      */
     private function insertRow($orderId, $pagantisOrderId, $globalVars)
     {
-        $query = "select * from ". TABLE_PAGANTIS_ORDERS ." where os_order_id='$orderId'";
+        $query = "select * from ". TABLE_PAGANTIS_ORDERS ." where os_order_reference='$orderId'";
         $resultsSelect = tep_db_query($query);
         $countResults = tep_db_num_rows($resultsSelect);
         if ($countResults == 0) {
-            $query = "INSERT INTO ". TABLE_PAGANTIS_ORDERS ."(os_order_reference, PAGANTIS_order_id, globals) values ('$this->os_order_reference', '$pagantisOrderId','$globalVars')";
+            $query = "INSERT INTO ". TABLE_PAGANTIS_ORDERS ."(os_order_reference, pagantis_order_id, globals) values ('$orderId', '$pagantisOrderId','$globalVars')";
         } else {
-            $query = "UPDATE " . TABLE_PAGANTIS_ORDERS . " set PAGANTIS_order_id='$pagantisOrderId' where os_order_reference='$orderId'";
+            $query = "UPDATE " . TABLE_PAGANTIS_ORDERS . " set pagantis_order_id='$pagantisOrderId' where os_order_reference='$orderId'";
         }
         tep_db_query($query);
     }

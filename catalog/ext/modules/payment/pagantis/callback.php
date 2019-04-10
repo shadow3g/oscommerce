@@ -14,10 +14,9 @@ if (isset($_GET['order_id'])) {
     foreach ((array)$result as $var => $content) {
         $GLOBALS[$var] = unserialize($content);
         tep_session_register($var);
-        //$_SESSION[$var] = unserialize($content);
-        //echo "$var  ";
     }
-    $destUrl = tep_href_link(FILENAME_CHECKOUT_PROCESS, htmlentities("order_id=".$_GET['order_id']."&from=notify"), 'SSL', true, false);
+    $destUrl = tep_href_link(FILENAME_CHECKOUT_PROCESS, '', 'SSL', true, false);
+    $destUrl.="?order_id=$_GET[order_id]&from=notify";
 } else {
     $destUrl = tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', true, false);
 }

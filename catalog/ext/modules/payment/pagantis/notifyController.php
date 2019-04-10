@@ -14,7 +14,6 @@ use Pagantis\ModuleUtils\Model\Response\JsonExceptionResponse;
 use Pagantis\ModuleUtils\Model\Log\LogEntry;
 
 
-define('TABLE_PAGANTIS', 'pagantis');
 define('TABLE_PAGANTIS_LOG', 'pagantis_log');
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
 define('TABLE_PAGANTIS_ORDERS', 'pagantis_orders');
@@ -46,6 +45,9 @@ class notifyController
     /** @var mixed $pagantisOrderId */
     protected $pagantisOrderId = '';
 
+    /** @var String $order_status */
+    protected $orderStatus;
+
     /**
      * Validation vs PagantisClient
      *
@@ -63,7 +65,7 @@ class notifyController
             $this->checkOrderStatus();
             $this->checkMerchantOrderStatus();
             $this->validateAmount();
-            $this->processMerchantOrder();
+            //$this->processMerchantOrder(); //ESTE PASO SE HACE EN EL CHECKOUT_PROCESS
         } catch (\Exception $exception) {
             $jsonResponse = new JsonExceptionResponse();
             $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
@@ -71,14 +73,29 @@ class notifyController
             $jsonResponse->setException($exception);
             $response = $jsonResponse->toJson();
             $this->insertLog($exception);
-        }
-        try {
-            if (!isset($response)) {
-                $this->confirmPagantisOrder();
-                $jsonResponse = new JsonSuccessResponse();
-                $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
-                $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
+            $shippingUrl = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
+
+            if ($this->origin == 'notify') {
+                $jsonResponse->printResponse();
+            } else {
+                if (get_class($exception)=='AlreadyProcessedException') {
+                    return;
+                }
+
+                header("Location: $shippingUrl");
+                exit;
             }
+        }
+    }
+
+    public function confirmInformation()
+    {
+        try {
+            $this->confirmPagantisOrder();
+            $this->updateBdInfo();
+            $jsonResponse = new JsonSuccessResponse();
+            $jsonResponse->setMerchantOrderId($this->oscommerceOrderId);
+            $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
         } catch (\Exception $exception) {
             $this->rollbackMerchantOrder();
             $jsonResponse = new JsonExceptionResponse();
@@ -128,10 +145,10 @@ class notifyController
      */
     private function getPagantisOrderId()
     {
-        $query = "select pmt_order_id from ".TABLE_PAGANTIS_ORDERS." where os_order_id='".$this->oscommerceOrderId."'";
+        $query = "select pagantis_order_id from ".TABLE_PAGANTIS_ORDERS." where os_order_reference='".$this->oscommerceOrderId."'";
         $resultsSelect = tep_db_query($query);
         while ($orderRow = tep_db_fetch_array($resultsSelect)) {
-            $this->pagantisOrderId = $orderRow['pmt_order_id'];
+            $this->pagantisOrderId = $orderRow['pagantis_order_id'];
         }
 
         if ($this->pagantisOrderId == '') {
@@ -163,12 +180,16 @@ class notifyController
         try {
             $this->checkPagantisStatus(array('AUTHORIZED'));
         } catch (\Exception $e) {
-            if ($this->pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
-                $status = $this->pagantisOrder->getStatus();
+            if ($this->findOscommerceOrderId()!=='') {
+                throw new AlreadyProcessedException();
             } else {
-                $status = '-';
+                if ($this->pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
+                    $status = $this->pagantisOrder->getStatus();
+                } else {
+                    $status = '-';
+                }
+                throw new WrongStatusException($status);
             }
-            throw new WrongStatusException($status);
         }
     }
 
@@ -177,7 +198,9 @@ class notifyController
      */
     private function checkMerchantOrderStatus()
     {
-        if ($this->oscommerceOrder->info['order_status']!=='1') {
+        global $order;
+
+        if ($order->info['order_status']!=='1') {
             throw new AlreadyProcessedException();
         }
     }
@@ -193,15 +216,6 @@ class notifyController
         if ($pagantisAmount != $ocAmount) {
             throw new AmountMismatchException($pagantisAmount, $ocAmount);
         }
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function processMerchantOrder()
-    {
-        $this->saveOrder();
-        $this->updateBdInfo();
     }
 
     /**
@@ -229,8 +243,8 @@ class notifyController
      * @throws QuoteNotFoundException
      */
     private function getQuoteId()
-    {
-        if ($this->getOscommerceOrderId() == '') {
+    { var_dump($this->oscommerceOrderId);die;
+        if ($this->oscommerceOrderId == "") {
             throw new QuoteNotFoundException();
         }
     }
@@ -315,33 +329,44 @@ class notifyController
             throw new OrderNotFoundException();
         }
     }
+
+    /**
+     * @return mixed
+     */
+    private function findOscommerceOrderId()
+    {
+        $query = "select os_order_id from ".TABLE_PAGANTIS_ORDERS." where os_order_reference='".$this->oscommerceOrderId."'";
+        $resultsSelect = tep_db_query($query);
+        $orderRow = tep_db_fetch_array($resultsSelect);
+
+        return $orderRow['os_order_id'];
+    }
+
     /** STEP 6 CMOS - Check Merchant Order Status */
     /** STEP 7 VA - Validate Amount */
     /** STEP 8 PMO - Process Merchant Order */
 
     /**
-     * Save the merchant order_id with the related identification
+     * Save the order status with the related identification
      */
     private function updateBdInfo()
     {
-        global $wpdb;
+        global $insert_id, $order;
+        $query = "update ".TABLE_PAGANTIS_ORDERS." set os_order_id='$insert_id' where os_order_reference='$this->oscommerceOrderId'";
+        tep_db_query($query);
 
-        $this->checkDbTable();
-        $tableName = $wpdb->prefix.self::ORDERS_TABLE;
-
-        $wpdb->update(
-            $tableName,
-            array('wc_order_id'=>$this->oscommerceOrderId),
-            array('id' => $this->oscommerceOrderId),
-            array('%s'),
-            array('%d')
-        );
+        $comment = "Pagantis id=$this->pagantisOrderId/Via=".$this->origin;
+        $query = "insert into ".TABLE_ORDERS_STATUS_HISTORY ."(comments, orders_id, orders_status_id, customer_notified, date_added) values
+            ('$comment', ".$insert_id.", '".$this->orderStatus."', -1, now() )";
+        tep_db_query($query);
     }
 
     /** STEP 9 CPO - Confirmation Pagantis Order */
     private function rollbackMerchantOrder()
     {
-        $this->oscommerceOrder->update_status('pending', __('Pending payment', 'oscommerce'));
+        global $insert_id;
+        $query = "update orders set order_status='1' where id='$insert_id' ";
+        tep_db_query($query);
     }
 
     /**
@@ -376,5 +401,37 @@ class notifyController
     public function setOscommerceOrderId($oscommerceOrderId)
     {
         $this->oscommerceOrderId = $oscommerceOrderId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOrigin()
+    {
+        return $this->origin;
+    }
+
+    /**
+     * @param mixed $origin
+     */
+    public function setOrigin($origin)
+    {
+        $this->origin = $origin;
+    }
+
+    /**
+     * @return String
+     */
+    public function getOrderStatus()
+    {
+        return $this->orderStatus;
+    }
+
+    /**
+     * @param String $orderStatus
+     */
+    public function setOrderStatus($orderStatus)
+    {
+        $this->orderStatus = $orderStatus;
     }
 }

@@ -4,7 +4,6 @@ use Pagantis\ModuleUtils\Exception\OrderNotFoundException;
 use Pagantis\OrdersApiClient\Model\Order\User\Address;
 use Pagantis\ModuleUtils\Exception\UnknownException;
 
-define('TABLE_PAGANTIS', 'pagantis');
 define('TABLE_PAGANTIS_LOG', 'pagantis_log');
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
 define('TABLE_PAGANTIS_ORDERS', 'pagantis_orders');
@@ -25,25 +24,28 @@ class pagantis
     /** @var String $base_url */
     public $base_url;
 
-    /** @var String $order_id */
-    public $order_id;
+    /** @var String $os_order_reference */
+    public $os_order_reference;
 
-    public $defaultConfigs = array('PMT_TITLE'=>'Instant Financing',
-                                   'PMT_SIMULATOR_DISPLAY_TYPE'=>'pmtSDK.simulator.types.SIMPLE',
-                                   'PMT_SIMULATOR_DISPLAY_SKIN'=>'pmtSDK.simulator.skins.BLUE',
-                                   'PMT_SIMULATOR_DISPLAY_POSITION'=>'hookDisplayProductButtons',
-                                   'PMT_SIMULATOR_START_INSTALLMENTS'=>3,
-                                   'PMT_SIMULATOR_MAX_INSTALLMENTS'=>12,
-                                   'PMT_SIMULATOR_CSS_POSITION_SELECTOR'=>'default',
-                                   'PMT_SIMULATOR_DISPLAY_CSS_POSITION'=>'pmtSDK.simulator.positions.INNER',
-                                   'PMT_SIMULATOR_CSS_PRICE_SELECTOR'=>'default',
-                                   'PMT_SIMULATOR_CSS_QUANTITY_SELECTOR'=>'default',
-                                   'PMT_FORM_DISPLAY_TYPE'=>0,
-                                   'PMT_DISPLAY_MIN_AMOUNT'=>1,
-                                   'PMT_URL_OK'=>'',
-                                   'PMT_URL_KO'=>'',
-                                   'PMT_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente 
-                            online y sin papeleos,¡y la respuesta es inmediata!'
+    /** @var notifyController $pgNotify */
+    public $pgNotify;
+
+    public $defaultConfigs = array('PAGANTIS_TITLE'=>'Instant Financing',
+                                   'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
+                                   'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
+                                   'PAGANTIS_SIMULATOR_DISPLAY_POSITION'=>'hookDisplayProductButtons',
+                                   'PAGANTIS_SIMULATOR_START_INSTALLMENTS'=>3,
+                                   'PAGANTIS_SIMULATOR_MAX_INSTALLMENTS'=>12,
+                                   'PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR'=>'default',
+                                   'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'=>'pgSDK.simulator.positions.INNER',
+                                   'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR'=>'default',
+                                   'PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR'=>'default',
+                                   'PAGANTIS_FORM_DISPLAY_TYPE'=>0,
+                                   'PAGANTIS_DISPLAY_MIN_AMOUNT'=>1,
+                                   'PAGANTIS_URL_OK'=>'',
+                                   'PAGANTIS_URL_KO'=>'',
+                                   'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
+                                   'PAGANTIS_ORDER_STATUS'=>'6'
     );
 
     /**
@@ -51,9 +53,9 @@ class pagantis
     */
     public function __construct()
     {
-        global $order;
         $this->version = '8.0.0';
         $this->code = 'pagantis';
+        $this->sort_order = 0;
 
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE; // Payment module title in Admin
@@ -63,20 +65,7 @@ class pagantis
 
         $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
 
-        $this->getExtraConfig();
-
-        if ((int)MODULE_PAYMENT_PAGANTIS_ORDER_STATUS_ID > 0) {
-            $this->order_status = MODULE_PAYMENT_PAGANTIS_ORDER_STATUS_ID;
-        }
-
-        if (strpos($_SERVER[REQUEST_URI], "checkout_confirmation.php")!==false && $_SESSION['order_id']) {
-            if ($pmtOrderId = $this->getPmtOrderId($_SESSION['order_id'])) {
-                $this->form_action_url = "https://form.pagamastarde.com/orders/$pmtOrderId";
-            }
-        }
-        /*if (is_object($order)) {
-            $this->update_status();
-        }*/
+        $this->extraConfig = $this->getExtraConfig();
         
         $this->base_url = dirname(
             sprintf(
@@ -87,6 +76,7 @@ class pagantis
                 $_SERVER['REQUEST_URI']
             )
         );
+
         $this->form_action_url = $this->base_url . '/ext/modules/payment/pagantis/bypass.php';
     }
 
@@ -101,33 +91,7 @@ class pagantis
     */
     public function update_status()
     {
-        global $order, $db;
 
-        if (strpos($_SERVER[REQUEST_URI], "checkout_process.php") > 0) {
-            if ($_POST) {
-                die('aqui hemos llegado por notificación');
-            } else {
-                echo "pasamos de largo pq es un GET";
-            }
-        }
-
-        if ($this->enabled && (int)MODULE_PAYMENT_PAGANTIS_ZONE > 0 && isset($order->billing['country']['id'])) {
-            $check_flag = false;
-            $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_PAGANTIS_ZONE . "' and zone_country_id = '" . (int)$order->billing['country']['id'] . "' order by zone_id");
-            while ($check = tep_db_fetch_array($check_query)) {
-                if ($check['zone_id'] < 1) {
-                    $check_flag = true;
-                    break;
-                } elseif ($check['zone_id'] == $order->billing['zone_id']) {
-                    $check_flag = true;
-                    break;
-                }
-            }
-
-            if ($check_flag == false) {
-                $this->enabled = false;
-            }
-        }
     }
 
     /*
@@ -205,17 +169,16 @@ class pagantis
             $global_vars['payment'] = serialize($payment);
             $global_vars['comments'] = serialize($comments);
             $global_vars['$customer_default_address_id'] = serialize($customer_default_address_id);
-            $global_vars['cartId'] = serialize($cartID)
-print_R($GLOBALS);die;
+            $global_vars['cartID'] = serialize($cartID);
+            $global_vars['sessiontoken'] = serialize($_SESSION['sessiontoken']);
+
             if (!isset($order)) {
                 throw new UnknownException("Order not found");
             }
 
             $id_hash = time().serialize($order->products).''.serialize($order->customer).''.serialize($order->delivery);
-            $this->order_id = md5($id_hash);
-            $_SESSION['order_id'] = $this->order_id;
-            $sql = sprintf("insert into " . TABLE_PAGANTIS . " (order_id) values ('%s')", $this->order_id);
-            tep_db_query($sql);
+            $this->os_order_reference = md5($id_hash);
+            $_SESSION['order_id'] = $this->os_order_reference;
 
             $userAddress = new Address();
             $userAddress
@@ -250,13 +213,11 @@ print_R($GLOBALS);die;
                 ->setShippingAddress($orderShippingAddress);
 
             $previousOrders = $this->getOrders();
-            foreach ((array)$previousOrders as $previousOrder) {
+            foreach ((array)$previousOrders as $k => $previousOrder) {
                 $orderHistory = new \Pagantis\OrdersApiClient\Model\Order\User\OrderHistory();
-                $orderElement = wc_get_order($previousOrder);
-                $orderCreated = $orderElement->get_date_created();
                 $orderHistory
-                    ->setAmount(intval(100 * $orderElement->get_total()))
-                    ->setDate(new \DateTime($orderCreated->date('Y-m-d H:i:s')))
+                    ->setAmount(intval(100 * $previousOrder['value']))
+                    ->setDate(new \DateTime($previousOrder['date_purchased']))
                 ;
                 $orderUser->addOrderHistory($orderHistory);
             }
@@ -276,13 +237,13 @@ print_R($GLOBALS);die;
             $orderShoppingCart = new \Pagantis\OrdersApiClient\Model\Order\ShoppingCart();
             $orderShoppingCart
                 ->setDetails($details)
-                ->setOrderReference($this->order_id)
+                ->setOrderReference($this->os_order_reference)
                 ->setPromotedAmount(0)
                 ->setTotalAmount(intval($order->info['total'] * 100));
 
             $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php';
             $checkoutProcessUrl = htmlspecialchars_decode(
-                tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->order_id", 'SSL', true, false)
+                tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->os_order_reference", 'SSL', true, false)
             );
             $cancelUrl              = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
             $orderConfigurationUrls = new \Pagantis\OrdersApiClient\Model\Order\Configuration\Urls();
@@ -325,8 +286,7 @@ print_R($GLOBALS);die;
             $pagantisOrder = $orderClient->createOrder($orderApiClient);
             if ($pagantisOrder instanceof \Pagantis\OrdersApiClient\Model\Order) {
                 $url = $pagantisOrder->getActionUrls()->getForm();
-                $this->insertRow($this->order_id, serialize($global_vars));
-                die($this->order_id);
+                $this->insertRow($this->order_id, $pagantisOrder->getId(), serialize($global_vars));
             } else {
                 throw new OrderNotFoundException();
             }
@@ -346,8 +306,6 @@ print_R($GLOBALS);die;
                 wc_get_template('iframe.php', $template_fields, '', $this->template_path); //TODO
             }*/ //
         } catch (\Exception $exception) {
-            var_dump($exception->getMessage());
-            exit;
             tep_redirect($cancelUrl);
             return;
         }
@@ -358,12 +316,12 @@ print_R($GLOBALS);die;
      */
     public function before_process()
     {
-        if (!$_POST) {
-            die('aqui hemos llegado por order');
-        } else {
-            echo "pasamos de largo pq es un POST y ya debe estar verificado";
-        }
-        exit;
+        include_once('./ext/modules/payment/pagantis/notifyController.php');
+        $this->pgNotify = new notifyController();var_dump($_GET);var_dump($_POST);die;
+        $this->pgNotify->setOscommerceOrderId($_GET['order_id']);
+        $this->pgNotify->setOrigin(isset($_GET['from']) ? ($_GET['from']) : 'order');
+        $this->pgNotify->setOrderStatus($this->extraConfig['PAGANTIS_ORDER_STATUS']);
+        $this->pgNotify->processInformation();
     }
 
     /**
@@ -373,45 +331,7 @@ print_R($GLOBALS);die;
     */
     public function after_process()
     {
-        global $insert_id, $order, $currencies;
-        $this->order_id = $_SESSION['order_id'];
-        $sql = sprintf("select json from %s where order_id='%s' order by id desc limit 1", TABLE_PAGANTIS, $this->order_id);
-        $check_query = tep_db_query($sql);
-        while ($check = tep_db_fetch_array($check_query)) {
-            $this->notification = json_decode(stripcslashes($check['json']), true);
-        }
-        if (MODULE_PAYMENT_PAGANTIS_TESTMODE == 'Test') {
-            $secret_key = MODULE_PAYMENT_PAGANTIS_TSK;
-            $public_key = MODULE_PAYMENT_PAGANTIS_TK;
-        } else {
-            $secret_key = MODULE_PAYMENT_PAGANTIS_PSK;
-            $public_key = MODULE_PAYMENT_PAGANTIS_PK;
-        }
-        $notififcation_check = true;
-        $signature_check = sha1($secret_key.
-        $this->notification['account_id'].
-        $this->notification['api_version'].
-        $this->notification['event'].
-        $this->notification['data']['id']);
-        $signature_check_sha512 = hash(
-            'sha512',
-            $secret_key.
-            $this->notification['account_id'].
-            $this->notification['api_version'].
-            $this->notification['event'].
-            $this->notification['data']['id']
-        );
-        if ($signature_check != $this->notification['signature'] && $signature_check_sha512 != $this->notification['signature']) {
-            $notififcation_check = false;
-        }
-        //$this->notify('NOTIFY_PAYMENT_AUTHNETSIM_POSTPROCESS_HOOK');
-        if ($notififcation_check && $this->notification['event'] == 'charge.created') {
-            $sql = "insert into " . TABLE_ORDERS_STATUS_HISTORY . " (comments, orders_id, orders_status_id, customer_notified, date_added) values
-            ('".'Pagantis.  Transaction ID: ' .$this->notification['data']['id']."', ".$insert_id.", '".$this->order_status."', -1, now() )";
-            tep_db_query($sql);
-        }
-        unset($_SESSION['order_id']);
-        return false;
+        $this->pgNotify->confirmInformation();
     }
 
     public function output_error()
@@ -425,7 +345,7 @@ print_R($GLOBALS);die;
             $check_query = tep_db_query("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_PAGANTIS_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
-        $this->install_pagantis_tables();
+        $this->installPagantisTables();
         return $this->_check;
     }
 
@@ -437,32 +357,22 @@ print_R($GLOBALS);die;
         global $messageStack;
 
         if (defined('MODULE_PAYMENT_PAGANTIS_STATUS')) {
-            $messageStack->add_session('Pagantis already installed.', 'error');
             tep_redirect(tep_href_link(FILENAME_MODULES, 'set=payment&module=pagantis', 'NONSSL'));
             return 'failed';
         }
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Pagantis Module', 'MODULE_PAYMENT_PAGANTIS_STATUS', 'True', '', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Pagantis module', 'MODULE_PAYMENT_PAGANTIS_STATUS', 'True', '', '6', '0', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Public Key', 'MODULE_PAYMENT_PAGANTIS_PK', '', 'MANDATORY. You can get in your pagantis profile', '6', '0', now())");
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Secret Key', 'MODULE_PAYMENT_PAGANTIS_SK', '', 'MANDATORY. You can get in your pagantis profile', '6', '0', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Include simulator', 'MODULE_PAYMENT_PAGANTIS_SIMULATOR', 'True', 'Do you want to include simulator in product page?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
-        $this->install_pagantis_tables();
+        //tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name, public_flag, downloads_flag) values (6, 1, 'Pagantis [Transactions]', 0, 0)");
+        $this->installPagantisTables();
     }
 
     /**
      * Create the neccesary tables for the module
      */
-    private function install_pagantis_tables()
+    private function installPagantisTables()
     {
-        $sql = "CREATE TABLE IF NOT EXISTS " . TABLE_PAGANTIS . " (
-            `id` int(11) NOT NULL auto_increment,
-            `insert_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `order_id` varchar(150) NOT NULL,
-            `json` TEXT,
-            PRIMARY KEY (id),
-            KEY (order_id))";
-        tep_db_query($sql);
-
         $sql = "CREATE TABLE IF NOT EXISTS " . TABLE_PAGANTIS_LOG . " ( 
                           id int NOT NULL AUTO_INCREMENT, 
                           log text NOT NULL, 
@@ -473,18 +383,20 @@ print_R($GLOBALS);die;
         $sql = "CREATE TABLE IF NOT EXISTS " . TABLE_PAGANTIS_CONFIG . " (
                             id int NOT NULL AUTO_INCREMENT, 
                             config varchar(60) NOT NULL, 
-                            value varchar(100) NOT NULL, 
+                            value varchar(200) NOT NULL, 
                             UNIQUE KEY id(id))";
         tep_db_query($sql);
-        foreach ((array)$this->extraConfig as $configKey => $configValue) {
-            $query = "INSERT INTO " . TABLE_PAGANTIS_CONFIG . " (config, value) values ($configKey, $configValue)";
+        foreach ((array)$this->defaultConfigs as $configKey => $configValue) {
+            $query = "INSERT INTO " . TABLE_PAGANTIS_CONFIG . " (config, value) values ('$configKey', '$configValue')";
             tep_db_query($query);
         }
 
         $sql = "CREATE TABLE IF NOT EXISTS " . TABLE_PAGANTIS_ORDERS . " (
                             id int NOT NULL AUTO_INCREMENT, 
-                            os_order_id varchar(50) NOT NULL, 
-                            pmt_order_id varchar(50) NOT NULL, 
+                            os_order_id varchar(50), 
+                            os_order_reference varchar(50) NOT NULL,
+                            pagantis_order_id varchar(50) NOT NULL, 
+                            globals text,
                             UNIQUE KEY id(id))";
         tep_db_query($sql);
 
@@ -500,12 +412,6 @@ print_R($GLOBALS);die;
      */
     public function remove()
     {
-        $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS."'");
-        if (tep_db_num_rows($checkTable) > 0) {
-            tep_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key in ('" . implode("', '", $this->keys()) . "')");
-            tep_db_query("drop table " . TABLE_PAGANTIS);
-        }
-
         $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS_LOG."'");
         if (tep_db_num_rows($checkTable) > 0) {
             tep_db_query("drop table " . TABLE_PAGANTIS_LOG);
@@ -525,6 +431,9 @@ print_R($GLOBALS);die;
         if (tep_db_num_rows($checkTable) > 0) {
             tep_db_query("drop table " . TABLE_PAGANTIS_CONCURRENCY);
         }
+
+        $query = "delete from ".TABLE_ORDERS_STATUS." where orders_status_id='6'";
+        tep_db_query($query);
     }
 
     /**
@@ -536,8 +445,8 @@ print_R($GLOBALS);die;
     {
         return array('MODULE_PAYMENT_PAGANTIS_STATUS',
            'MODULE_PAYMENT_PAGANTIS_PK',
-           'MODULE_PAYMENT_PAGANTIS_SK',
-           'MODULE_PAYMENT_PAGANTIS_SIMULATOR');
+           'MODULE_PAYMENT_PAGANTIS_SK'
+           );
     }
 
     /**
@@ -545,65 +454,48 @@ print_R($GLOBALS);die;
      */
     private function getOrders()
     {
-        // extra parameters for logged users
-        $sign_up = '';
-        $dob = '';
-        $order_total = 0;
-        $order_count = 0;
         $this->is_guest = 'true';
-        $result = array();
         if (trim($_SESSION['customer_id']) != '') {
             $this->is_guest = 'false';
-            /*$sql = sprintf(
-                "SELECT customers_info_date_account_created, customers_dob, customers_gender
-                FROM %s
-                JOIN %s ON customers_info.customers_info_id = customers.customers_id
-                Where  customers.customers_id = %d",
-                TABLE_CUSTOMERS,
-                TABLE_CUSTOMERS_INFO,
+            $query = sprintf(
+                "select orders_total.value, orders.date_purchased from orders 
+JOIN orders_status_history ON orders.orders_id=orders_status_history.orders_id 
+JOIN orders_total ON orders.orders_id=orders_total.orders_id 
+where orders.customers_id='%s' and orders_status_history.orders_status_id in ('2','3') and orders_total.class='ot_total'",
                 $_SESSION['customer_id']
             );
-            $check_query = tep_db_query($sql);
-            while ($check = tep_db_fetch_array($check_query)) {
-                $sign_up = substr($check['customers_info_date_account_created'], 0, 10);
-                $dob = substr($check['customers_dob'], 0, 10);
-                $gender = $check['customers_gender'] == 'm' ? 'male' : 'female';
-            }*/
-            $sql = sprintf(
-                "select orders_total.value from %s join %s on orders_status.orders_status_id = orders.orders_status
-            join %s on orders.orders_id = orders_total.orders_id and orders_total.class = 'ot_total'
-            where customers_id=%d and orders_status.orders_status_name in ('Processing','Delivered')
-            order by orders.orders_id",
-                TABLE_ORDERS_STATUS,
-                TABLE_ORDERS,
-                TABLE_ORDERS_TOTAL,
-                $_SESSION['customer_id']
-            );
-            $check_query = tep_db_query($sql);
-            $result = tep_db_fetch_array($check_query);
+
+            $response = array();
+            $resultsSelect = tep_db_query($query);
+            while ($orderRow = tep_db_fetch_array($resultsSelect)) {
+                $response[] = $orderRow;
+            }
         }
-        return $result;
+
+        return $response;
     }
 
     /**
      * @param $orderId
-     * @param $pmtOrderId
-     *
-     * @throws Exception
+     * @param $pagantisOrderId
+     * @param $globalVars
      */
-    private function insertRow($orderId, $pmtOrderId)
+    private function insertRow($orderId, $pagantisOrderId, $globalVars)
     {
         $query = "select * from ". TABLE_PAGANTIS_ORDERS ." where os_order_id='$orderId'";
         $resultsSelect = tep_db_query($query);
         $countResults = tep_db_num_rows($resultsSelect);
         if ($countResults == 0) {
-            $query = "INSERT INTO " . TABLE_PAGANTIS_ORDERS ."(os_order_id, pmt_order_id) values ('$orderId', '$pmtOrderId')";
+            $query = "INSERT INTO ". TABLE_PAGANTIS_ORDERS ."(os_order_reference, PAGANTIS_order_id, globals) values ('$this->os_order_reference', '$pagantisOrderId','$globalVars')";
         } else {
-            $query = "UPDATE " . TABLE_PAGANTIS_ORDERS . " set pmt_order_id='$pmtOrderId' where os_order_id='$orderId'";
+            $query = "UPDATE " . TABLE_PAGANTIS_ORDERS . " set PAGANTIS_order_id='$pagantisOrderId' where os_order_reference='$orderId'";
         }
         tep_db_query($query);
     }
 
+    /**
+     * @return array
+     */
     private function getExtraConfig()
     {
         $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS."'");
@@ -619,16 +511,5 @@ print_R($GLOBALS);die;
         }
 
         return $response;
-    }
-
-    private function getPmtOrderId($osOrderId)
-    {
-        $result = '';
-        $query = "select pmt_order_id from ". TABLE_PAGANTIS_ORDERS ." where os_order_id='$osOrderId'";
-        $resultsSelect = tep_db_query($query);
-        while ($orderRow = tep_db_fetch_array($resultsSelect)) {
-            $result = $orderRow['pmt_order_id'];
-        }
-        return $result;
     }
 }

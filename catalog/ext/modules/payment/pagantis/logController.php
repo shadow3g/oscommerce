@@ -37,7 +37,7 @@ if ($secretKey!='' && $privateKey!='') {
 
     $response = array();
     $resultsSelect = tep_db_query($query);
-    if (isset($results) && $privateKey == $secretKey) {
+    if (isset($resultsSelect) && $privateKey == $secretKey) {
         $i = 0;
         while ($orderRow = tep_db_fetch_array($resultsSelect)) {
             $response[$i]['timestamp'] = $orderRow['createdAt'];

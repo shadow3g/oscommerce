@@ -317,7 +317,7 @@ class pagantis
     public function before_process()
     {
         include_once('./ext/modules/payment/pagantis/notifyController.php');
-        $this->pgNotify = new notifyController();var_dump($_GET);var_dump($_POST);die;
+        $this->pgNotify = new notifyController();var_dump($_GET['from']);var_dump($_POST);die;
         $this->pgNotify->setOscommerceOrderId($_GET['order_id']);
         $this->pgNotify->setOrigin(isset($_GET['from']) ? ($_GET['from']) : 'order');
         $this->pgNotify->setOrderStatus($this->extraConfig['PAGANTIS_ORDER_STATUS']);

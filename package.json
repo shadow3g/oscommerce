@@ -1,0 +1,26 @@
+{
+  "name": "pagantis",
+  "version": "8.0.0",
+  "description": "Pagantis integration in oscommerce",
+  "main": "Gruntfile.js",
+  "dependencies": {},
+  "devDependencies": {
+    "bower": "^1.8.0",
+    "grunt": "^1.0.1",
+    "grunt-contrib-compress": "^1.4.3",
+    "grunt-shell": "^2.1.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pagantis/oscommerce.git"
+  },
+  "author": "Pagantis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pagantis/oscommerce/issues"
+  },
+  "homepage": "https://github.com/pagantis/oscommerce"
+}

@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class PagantisOscommerceTest extends TestCase
 {
-    const OSCURL = 'http://oscommerce-test.docker:8095';
+    const OSCURL = 'http://oscommerce-test.docker:8096';
 
     const BACKOFFICE_FOLDER = '/admin';
 
@@ -35,8 +35,8 @@ abstract class PagantisOscommerceTest extends TestCase
      * @var array
      */
     protected $configuration = array(
-        'username'      => 'demo@oscommerce.com',
-        'password'      => 'oscommerce_demo',
+        'username'      => 'root',
+        'password'      => 'root',
         'publicKey'     => 'tk_fd53cd467ba49022e4f8215e',
         'secretKey'     => '21e57baa97459f6a',
         'birthdate'     => '05/05/2005',

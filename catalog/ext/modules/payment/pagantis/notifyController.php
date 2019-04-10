@@ -243,7 +243,7 @@ class notifyController
      * @throws QuoteNotFoundException
      */
     private function getQuoteId()
-    { var_dump($this->oscommerceOrderId);die;
+    {
         if ($this->oscommerceOrderId == "") {
             throw new QuoteNotFoundException();
         }

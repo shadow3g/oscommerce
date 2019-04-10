@@ -35,6 +35,6 @@
   },
   "minimum-stability": "stable",
   "config": {
-      "vendor-dir" : "ext/modules/payment/pagantis/vendor"
+      "vendor-dir" : "catalog/ext/modules/payment/pagantis/vendor"
       }
 }

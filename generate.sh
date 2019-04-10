@@ -11,8 +11,8 @@ sleep 10
 
 grunt shell:composerProd
 
-docker cp ./ext/. oscommerce-test:/var/www/html/ext/
-docker cp ./includes/. oscommerce-test:/var/www/html/includes/
+docker cp ./catalog/ext/. oscommerce-test:/var/www/html/ext/
+docker cp ./catalog/includes/. oscommerce-test:/var/www/html/includes/
 
 grunt shell:composerDev
 
@@ -21,9 +21,9 @@ set -e
 if [ "$1" = "true" ]
 then
     echo oscommerce-basic
-    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-basic
+    catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-basic
     echo oscommerce-configure
-    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure
+    catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure
 #    echo oscommerce-product-page
 #    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-product-page
 #    echo oscommerce-buy-unregistered
@@ -42,5 +42,5 @@ then
 #    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-cancel-buy-controllers
 else
     echo oscommerce-configure
-    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure
+    catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure
 fi

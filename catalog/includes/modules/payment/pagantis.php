@@ -87,7 +87,7 @@ class pagantis
                 $_SERVER['REQUEST_URI']
             )
         );
-        $this->form_action_url = $this->base_url . '/ext/modules/payment/pagantis/bypass.php';
+        $this->form_action_url = $this->base_url . '/catalog/ext/modules/payment/pagantis/bypass.php';
     }
 
     /***************
@@ -191,7 +191,7 @@ class pagantis
     public function process_button()
     {
         try {
-            include_once('./ext/modules/payment/pagantis/vendor/autoload.php');
+            include_once('./catalog/ext/modules/payment/pagantis/vendor/autoload.php');
             global $order, $customer_id, $sendto, $billto, $cart, $languages_id, $currency, $currencies, $shipping, $payment, $comments, $customer_default_address_id, $cartID;
             $global_vars = array();
             $global_vars['customer_id'] = serialize($customer_id);
@@ -279,7 +279,7 @@ class pagantis
                 ->setPromotedAmount(0)
                 ->setTotalAmount(intval($order->info['total'] * 100));
 
-            $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php';
+            $callback_url = $this->base_url.'/catalog/ext/modules/payment/pagantis/notify.php';
             $checkoutProcessUrl = htmlspecialchars_decode(
                 tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->order_id", 'SSL', true, false)
             );

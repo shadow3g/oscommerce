@@ -1,4 +1,4 @@
-/ext/modules/payment/pagantis/vendor
+/catalog/ext/modules/payment/pagantis/vendor
 pagantis*.zip
 composer.phar
 node_modules

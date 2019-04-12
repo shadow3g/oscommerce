@@ -84,7 +84,7 @@ abstract class AbstractBuy extends PagantisOscommerceTest
     {
         $this->webDriver->get(self::OSCURL);
         $productGridSearch = WebDriverBy::className('contentText');
-        $productLinkSearch = $productGridSearch->linkText(strtoupper(self::PRODUCT_NAME));
+        $productLinkSearch = $productGridSearch->linkText(self::PRODUCT_NAME);
 
         $this->webDriver->wait()->until(
             WebDriverExpectedCondition::elementToBeClickable(
@@ -106,23 +106,17 @@ abstract class AbstractBuy extends PagantisOscommerceTest
      */
     public function fillPaymentMethod()
     {
-        sleep(5);
+        $button = WebDriverBy::xpath("//tr[@class='moduleRow']/td[2]/input[@value='pagantis']");
+        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($button);
+        $this->waitUntil($condition);
+        $this->findByXpath("//tr[@class='moduleRow']/td[2]/input[@value='pagantis']")->click();
 
-        $reviewStepSearch = WebDriverBy::id('p_method_pagantis');
-        $this->webDriver->wait()->until(
-            WebDriverExpectedCondition::elementToBeClickable($reviewStepSearch)
-        );
-        $this->findById('p_method_pagantis')->click();
-
-        $this->webDriver->executeScript("payment.save()");
-        $reviewStepSearch = WebDriverBy::id('review-buttons-container');
-        $this->webDriver->wait()->until(
-            WebDriverExpectedCondition::visibilityOfElementLocated($reviewStepSearch)
-        );
-
-        $this->assertTrue(
-            (bool) WebDriverExpectedCondition::visibilityOfElementLocated($reviewStepSearch)
-        );
+        $buttonSearch = WebDriverBy::id('tdb6');
+        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($buttonSearch);
+        $this->waitUntil($condition);
+        $buttonElement = $this->webDriver->findElement($buttonSearch);
+        $this->webDriver->executeScript("arguments[0].scrollIntoView(true);", array($buttonElement));
+        $buttonElement->click();
     }
 
     /**
@@ -130,18 +124,12 @@ abstract class AbstractBuy extends PagantisOscommerceTest
      */
     public function fillShippingMethod()
     {
-        sleep(5);
-
-        $this->findById('s_method_flatrate_flatrate')->click();
-        $this->webDriver->executeScript('shippingMethod.save()');
-
-        $checkoutStepPaymentMethodSearch = WebDriverBy::id('checkout-payment-method-load');
-        $this->webDriver->wait()->until(
-            WebDriverExpectedCondition::visibilityOfElementLocated($checkoutStepPaymentMethodSearch)
-        );
-        $this->assertTrue(
-            (bool) WebDriverExpectedCondition::visibilityOfElementLocated($checkoutStepPaymentMethodSearch)
-        );
+        $buttonSearch = WebDriverBy::id('tdb6');
+        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($buttonSearch);
+        $this->waitUntil($condition);
+        $buttonElement = $this->webDriver->findElement($buttonSearch);
+        $this->webDriver->executeScript("arguments[0].scrollIntoView(true);", array($buttonElement));
+        $buttonElement->click();
     }
 
 
@@ -153,9 +141,12 @@ abstract class AbstractBuy extends PagantisOscommerceTest
      */
     public function goToPagantis()
     {
-        sleep(5);
-
-        $this->webDriver->executeScript('review.save()');
+        $buttonSearch = WebDriverBy::id('tdb5');
+        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($buttonSearch);
+        $this->waitUntil($condition);
+        $buttonElement = $this->webDriver->findElement($buttonSearch);
+        $this->webDriver->executeScript("arguments[0].scrollIntoView(true);", array($buttonElement));
+        $buttonElement->click();
     }
 
     /**

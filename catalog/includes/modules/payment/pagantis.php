@@ -30,21 +30,22 @@ class pagantis
     /** @var notifyController $pgNotify */
     public $pgNotify;
 
-    public $defaultConfigs = array('PAGANTIS_TITLE'=>'Instant Financing',
-                                   'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
-                                   'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
-                                   'PAGANTIS_SIMULATOR_DISPLAY_POSITION'=>'hookDisplayProductButtons',
-                                   'PAGANTIS_SIMULATOR_START_INSTALLMENTS'=>3,
-                                   'PAGANTIS_SIMULATOR_MAX_INSTALLMENTS'=>12,
-                                   'PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR'=>'default',
-                                   'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'=>'pgSDK.simulator.positions.INNER',
-                                   'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR'=>'default',
-                                   'PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR'=>'default',
-                                   'PAGANTIS_FORM_DISPLAY_TYPE'=>0,
-                                   'PAGANTIS_DISPLAY_MIN_AMOUNT'=>1,
-                                   'PAGANTIS_URL_OK'=>'',
-                                   'PAGANTIS_URL_KO'=>'',
-                                   'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!'
+    public $defaultConfigs = array(
+        'PAGANTIS_TITLE'=>'Instant Financing',
+        'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
+        'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
+        'PAGANTIS_SIMULATOR_DISPLAY_POSITION'=>'hookDisplayProductButtons',
+        'PAGANTIS_SIMULATOR_START_INSTALLMENTS'=>3,
+        'PAGANTIS_SIMULATOR_MAX_INSTALLMENTS'=>12,
+        'PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR'=>'default',
+        'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'=>'pgSDK.simulator.positions.INNER',
+        'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR'=>'default',
+        'PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR'=>'default',
+        'PAGANTIS_FORM_DISPLAY_TYPE'=>0,
+        'PAGANTIS_DISPLAY_MIN_AMOUNT'=>1,
+        'PAGANTIS_URL_OK'=>'',
+        'PAGANTIS_URL_KO'=>'',
+        'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!'
     );
 
     /**
@@ -84,7 +85,6 @@ class pagantis
      * CLASS METHODS
      *
      **************/
-
     /**
     * Here you can implement using payment zones (refer to standard PayPal module as reference)
     */
@@ -378,9 +378,14 @@ class pagantis
                             value varchar(200) NOT NULL, 
                             UNIQUE KEY id(id))";
         tep_db_query($sql);
-        foreach ((array)$this->defaultConfigs as $configKey => $configValue) {
-            $query = "INSERT INTO " . TABLE_PAGANTIS_CONFIG . " (config, value) values ('$configKey', '$configValue')";
-            tep_db_query($query);
+
+        // check if table has records
+        $check_query = tep_db_query("select value from " . TABLE_PAGANTIS_CONFIG);
+        if(tep_db_num_rows($check_query) === 0) {
+            foreach ((array)$this->defaultConfigs as $configKey => $configValue) {
+                $query = "INSERT INTO " . TABLE_PAGANTIS_CONFIG . " (config, value) values ('$configKey', '$configValue')";
+                tep_db_query($query);
+            }
         }
 
         $sql = "CREATE TABLE IF NOT EXISTS " . TABLE_PAGANTIS_ORDERS . " (

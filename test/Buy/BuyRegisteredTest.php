@@ -30,18 +30,16 @@ class BuyRegisteredTest extends AbstractBuy
     {
         $this->prepareProductAndCheckout();
         $this->login();
-        $this->fillBillingInformation();
         $this->fillShippingMethod();
         $this->fillPaymentMethod();
 
         // get cart total price
-        $cartPrice = WebDriverBy::cssSelector('#checkout-review-table tfoot tr.last .price');
-        $this->webDriver->wait()->until(
-            WebDriverExpectedCondition::presenceOfElementLocated(
-                $cartPrice
-            )
-        );
-        $cartPrice = $this->webDriver->findElement($cartPrice)->getText();
+        $button = WebDriverBy::xpath("//td[@class='main']/strong[1]");
+        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($button);
+        $this->waitUntil($condition);
+        $cartPrice = $this->findByXpath("//td[@class='main']/strong[1]")->getText();
+
+
         // --------------------
         $this->goToPagantis();
         $this->verifyPagantis();
@@ -67,30 +65,19 @@ class BuyRegisteredTest extends AbstractBuy
     }
 
     /**
-     * Fill the billing information
-     */
-    public function fillBillingInformation()
-    {
-        $this->webDriver->executeScript('billing.save()');
-        $checkoutStepShippingMethodSearch = WebDriverBy::id('checkout-shipping-method-load');
-        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($checkoutStepShippingMethodSearch);
-        $this->webDriver->wait()->until($condition);
-        $this->assertTrue((bool) $condition);
-    }
-
-    /**
      * Login
      */
     public function login()
     {
-        $this->findById('login-email')->clear()->sendKeys($this->configuration['email']);
-        $this->findById('login-password')->clear()->sendKeys($this->configuration['password']);
-        $this->findById('login-form')->submit();
+        $this->findByName('email_address')->clear()->sendKeys($this->configuration['customeremail']);
+        $this->findByName('password')->clear()->sendKeys($this->configuration['customerpwd']);
 
-        $billingAddressSelector = WebDriverBy::id('billing-address-select');
-        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($billingAddressSelector);
-        $this->webDriver->wait()->until($condition);
-        $this->assertTrue((bool) $condition);
+        $buttonSearch = WebDriverBy::id('tdb1');
+        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($buttonSearch);
+        $this->waitUntil($condition);
+        $buttonElement = $this->webDriver->findElement($buttonSearch);
+        $this->webDriver->executeScript("arguments[0].scrollIntoView(true);", array($buttonElement));
+        $buttonElement->click();
     }
 
     /**

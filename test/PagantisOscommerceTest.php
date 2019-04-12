@@ -35,31 +35,20 @@ abstract class PagantisOscommerceTest extends TestCase
      * @var array
      */
     protected $configuration = array(
-        'username'      => 'root',
-        'password'      => 'root',
-        'publicKey'     => 'tk_fd53cd467ba49022e4f8215e',
-        'secretKey'     => '21e57baa97459f6a',
-        'birthdate'     => '05/05/2005',
-        'firstname'     => 'Jøhn',
-        'lastname'      => 'Dōè',
-        'email'         => 'john_oc@pagantis.com',
-        'longpwd'       => 'd53cd467ba49022e4f821',
-        'company'       => 'Digital Origin SL',
-        'zip'           => '08023',
-        'country'       => '195',
-        'city'          => 'Barcelona',
-        'phone'         => '600123123',
-        'dni'           => '09422447Z',
-        'extra'         => 'Free Finance',
-        'address'       => 'Av.Diagonal 579',
-        'methodName'    => 'Pagantis',
-        'checkoutTitle' => 'Instant Financing',
-        'defaultMinIns' => 3,
-        'defaultMaxIns' => 12,
-        'defaultSimulatorOpt' => 6,
-        'confirmationMsg'=>'Pedido recibido',
-        'checkoutDescription'=> 'Pay up to 12 comfortable installments with Pagantis',
-        'enter' => 'Haz clic aquí para acceder'
+        'username'            => 'root',
+        'password'            => 'root',
+        'publicKey'           => 'tk_fd53cd467ba49022e4f8215e',
+        'secretKey'           => '21e57baa97459f6a',
+        'birthdate'           => '05/05/1982',
+        'customeremail'       => 'demo@oscommerce.com',
+        'customerpwd'         => 'oscommerce_demo',
+        'country'             => '195',
+        'city'                => 'Barcelona',
+        'methodName'          => 'Pagantis',
+        'checkoutTitle'       => 'Instant Financing',
+        'confirmationMsg'     => 'Pedido recibido',
+        'checkoutDescription' => 'Pay up to 12 comfortable installments with Pagantis',
+        'enter'               => 'Haz click aquí para acceder',
     );
 
 
@@ -74,15 +63,11 @@ abstract class PagantisOscommerceTest extends TestCase
     {
         $faker = Factory::create();
         $this->configuration['dni'] = $this->getDNI();
-//        $this->configuration['birthdate'] =
-//            $faker->numberBetween(1, 28) . '/' .
-//            $faker->numberBetween(1, 12). '/1975'
-//        ;
         $this->configuration['firstname'] = $faker->firstName;
         $this->configuration['lastname'] = $faker->lastName . ' ' . $faker->lastName;
         $this->configuration['company'] = $faker->company;
         $this->configuration['zip'] = '28'.$faker->randomNumber(3, true);
-        $this->configuration['street'] = $faker->streetAddress;
+        $this->configuration['address'] = $faker->streetAddress;
         $this->configuration['phone'] = '6' . $faker->randomNumber(8);
         $this->configuration['email'] = date('ymd') . '@pagantis.com';
         parent::__construct($name, $data, $dataName);

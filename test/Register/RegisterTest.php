@@ -35,7 +35,7 @@ class RegisterTest extends AbstractRegister
         $this->findByName('firstname')->clear()->sendKeys($this->configuration['firstname']);
         $this->findByName('lastname')->clear()->sendKeys($this->configuration['lastname']);
         $this->findByName('dob')->clear()->sendKeys($this->configuration['birthdate']);
-        $this->findByName('email_address')->clear()->sendKeys($this->configuration['email']);
+        $this->findByName('email_address')->clear()->sendKeys($this->configuration['customeremail']);
 
         $this->findByName('street_address')->clear()->sendKeys($this->configuration['address']);
         $this->findByName('postcode')->clear()->sendKeys($this->configuration['zip']);
@@ -44,8 +44,8 @@ class RegisterTest extends AbstractRegister
         $select = new WebDriverSelect($this->findByName('country'));
         $select->selectByValue($this->configuration['country']);
         $this->findByName('telephone')->clear()->sendKeys($this->configuration['phone']);
-        $this->findByName('password')->clear()->sendKeys($this->configuration['longpwd']);
-        $this->findByName('confirmation')->clear()->sendKeys($this->configuration['longpwd']);
+        $this->findByName('password')->clear()->sendKeys($this->configuration['customerpwd']);
+        $this->findByName('confirmation')->clear()->sendKeys($this->configuration['customerpwd']);
 
         $myAccountSearch = WebDriverBy::id('tdb4');
         $condition = WebDriverExpectedCondition::visibilityOfElementLocated($myAccountSearch);

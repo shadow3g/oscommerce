@@ -25,21 +25,13 @@ then
     echo oscommerce-configure
     catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure
     echo oscommerce-register
-    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-register
-#    echo oscommerce-buy-unregistered
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-buy-unregistered
-#    echo oscommerce-cancel-buy-unregistered
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-cancel-buy-unregistered
-#    echo oscommerce-register
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-register
-#    echo oscommerce-fill-data
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-fill-data
-#    echo oscommerce-buy-registered
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-buy-registered
+    catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-register
+    echo oscommerce-buy-registered
+    catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-buy-registered
 #    echo oscommerce-cancel-buy-registered
 #    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-cancel-buy-registered
-#    echo oscommerce-cancel-buy-controllers
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-cancel-buy-controllers
+#    echo oscommerce-controllers
+#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-controllers
 else
     echo oscommerce-configure
     catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure

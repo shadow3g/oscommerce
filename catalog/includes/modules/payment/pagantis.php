@@ -41,7 +41,6 @@ class pagantis
         'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION' => 'pgSDK.simulator.positions.INNER',
         'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR' => 'default',
         'PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR' => 'default',
-        'PAGANTIS_FORM_DISPLAY_TYPE' => 0,
         'PAGANTIS_DISPLAY_MIN_AMOUNT' => 1,
         'PAGANTIS_URL_OK' => '',
         'PAGANTIS_URL_KO' => '',
@@ -299,7 +298,7 @@ class pagantis
 
             if ($url == "") {
                 throw new UnknownException(_("No ha sido posible obtener una respuesta de Pagantis"));
-            } else { //if ($this->extraConfig['PAGANTIS_FORM_DISPLAY_TYPE'] == '0') {
+            } else {
                 $output = "\n";
                 $output .= tep_draw_hidden_field("formUrl", $url) . "\n";
                 $output .= tep_draw_hidden_field("cancelUrl", $cancelUrl) . "\n";

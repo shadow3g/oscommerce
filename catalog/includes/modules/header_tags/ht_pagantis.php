@@ -63,90 +63,44 @@ class ht_pagantis {
     }
 
     function execute() {
-        echo "<script src='https://cdn.pagantis.com/js/pg-v2/sdk.js'></script>";
-        echo '<script>';
-        echo '        function findPriceSelector()';
-        echo '        { ';
-        echo '           var priceDOM = document.getElementById("our_price_display");';
-        echo '            if (priceDOM != null) {';
-        echo '                return \'#our_price_display\';';
-        echo '            } else { ';
-        echo '                priceDOM = document.querySelector(".current-price span[itemprop=price]");';
-        echo '              if (priceDOM != null) { ';
-        echo '                  return ".current-price span[itemprop=price]"; ';
-        echo '              }';
-        echo '            }';
-        echo '          return \'default\';';
-        echo '        }';
+        echo "<script src='https://cdn.pagantis.com/js/pg-v2/sdk.js'></script>". PHP_EOL;
+        echo '<script>'. PHP_EOL;
 
-        echo '        function findQuantitySelector()';
-        echo '        {';
-        echo '            var quantityDOM = document.getElementById("quantity_wanted");';
-        echo '            if (quantityDOM != null) {';
-        echo '                return \'#quantity_wanted\';';
-        echo '            }';
-        echo '            return \'default\';';
-        echo '        }';
+        echo '        function loadSimulator()'. PHP_EOL;
+        echo '        {'. PHP_EOL;
+        echo '           if (typeof pgSDK != \'undefined\') {'. PHP_EOL;
+        echo '               var positionSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR']. '\';'. PHP_EOL;
+        echo '               var priceSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR']. '\';'. PHP_EOL;
+        echo '               var quantitySelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR']. '\';'. PHP_EOL;
 
-        echo '        function loadSimulator()';
-        echo '        {';
-        echo '           if (typeof pgSDK != \'undefined\') {';
-        echo '               var price = null;';
-        echo '               var quantity = null;';
-        echo '               var positionSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR']. '\';';
-        echo '               var priceSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR']. '\';';
-        echo '               var quantitySelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR']. '\';';
+        echo '               if (positionSelector === \'default\') {'. PHP_EOL;
+        echo '                   positionSelector = \'.buttonSet\''. PHP_EOL;
+        echo '               }'. PHP_EOL;
 
-        echo '               if (positionSelector === \'default\') {';
-        echo '                   positionSelector = \'.pagantisSimulator\'';
-        echo '               }';
+        echo '               if (priceSelector === \'default\') {'. PHP_EOL;
+        echo '                   priceSelector = \'#bodyContent>form>div>h1\''. PHP_EOL;
+        echo '               }'. PHP_EOL;
 
-        echo '               if (priceSelector === \'default\') {';
-        echo '                   priceSelector = findPriceSelector();';
-        echo '                }';
+        echo '               pgSDK.product_simulator = {};'. PHP_EOL;
+        echo '               pgSDK.product_simulator.id = \'product-simulator\';'. PHP_EOL;
+        echo '               pgSDK.product_simulator.publicKey = \'' . $this->pk . '\';'. PHP_EOL;
+        echo '               pgSDK.product_simulator.selector = positionSelector;'. PHP_EOL;
+        echo '               pgSDK.product_simulator.numInstalments = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_START_INSTALLMENTS'] . '\';'. PHP_EOL;
+        echo '               pgSDK.product_simulator.type = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] . ';'. PHP_EOL;
+        echo '               pgSDK.product_simulator.skin = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] . ';'. PHP_EOL;
+        echo '               pgSDK.product_simulator.position = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] . ';'. PHP_EOL;
+        echo '               pgSDK.product_simulator.itemAmountSelector = priceSelector;'. PHP_EOL;
 
-        echo '               if (quantitySelector === \'default\') {';
-        echo '               quantitySelector = findQuantitySelector();';
-        echo '                   if (quantitySelector === \'default\') {';
-        echo '                       quantity = \'1\';';
-        echo '                    }';
-        echo '                }';
-
-        echo '               pgSDK.product_simulator = {};';
-        echo '               pgSDK.product_simulator.id = \'product-simulator\';';
-        echo '               pgSDK.product_simulator.publicKey = \'' . $this->pk . '\';';
-        echo '               pgSDK.product_simulator.selector = positionSelector;';
-        echo '               pgSDK.product_simulator.numInstalments = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_START_INSTALLMENTS'] . '\';';
-        echo '               pgSDK.product_simulator.type = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] . ';';
-        echo '               pgSDK.product_simulator.skin = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] . ';';
-        echo '               pgSDK.product_simulator.position = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] . ';';
-
-        echo '               if (priceSelector !== \'default\') {';
-        echo '                   pgSDK.product_simulator.itemAmountSelector = priceSelector;';
-        echo '                }';
-        echo '               if (quantitySelector !== \'default\' && quantitySelector !== \'none\') {';
-        echo '                   pgSDK.product_simulator.itemQuantitySelector = quantitySelector;';
-        echo '               }';
-        echo '               if (price != null) {';
-        echo '                   pgSDK.product_simulator.itemAmount = price;';
-        echo '               }';
-        echo '               if (quantity != null) {';
-        echo '                   pgSDK.product_simulator.itemQuantity = quantity;';
-        echo '               }';
-
-        echo '               pgSDK.simulator.init(pgSDK.product_simulator);';
-        echo '               clearInterval(window.PSSimulatorId);';
-        echo '               return true;';
-        echo '           }';
-        echo '           return false;';
-        echo '       }';
-        echo '       if (!loadSimulator()) {';
-        echo '           window.PSSimulatorId = setInterval(function () {';
-        echo '               loadSimulator();';
-        echo '           }, 2000);';
-        echo '       }';
-        echo '</script>';
-        echo '<div class="pagantisSimulator"></div>';
+        echo '               pgSDK.simulator.init(pgSDK.product_simulator);'. PHP_EOL;
+        echo '               clearInterval(window.PSSimulatorId);'. PHP_EOL;
+        echo '               return true;'. PHP_EOL;
+        echo '           }'. PHP_EOL;
+        echo '           return false;'. PHP_EOL;
+        echo '       }'. PHP_EOL;
+        echo '       window.PSSimulatorId = setInterval(function () {'. PHP_EOL;
+        echo '          loadSimulator();'. PHP_EOL;
+        echo '       }, 2000);'. PHP_EOL;
+        echo '</script>'. PHP_EOL;
     }
 
     function isEnabled() {

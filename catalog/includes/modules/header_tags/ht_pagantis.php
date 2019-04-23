@@ -17,20 +17,19 @@ class ht_pagantis {
     var $group = 'header_tags';
     var $title;
     var $description;
-    var $sort_order;
     var $enabled = false;
 
-    /** @var Array $extraConfig */
-    public $extraConfig;
 
     function ht_pagantis() {
         $this->title = MODULE_HEADER_TAGS_PAGANTIS_TITLE;
         $this->description = MODULE_HEADER_TAGS_PAGANTIS_DESCRIPTION;
+        $this->sort_order = 0;
 
         if ( defined('MODULE_HEADER_TAGS_PAGANTIS_STATUS') ) {
-            $this->sort_order = MODULE_HEADER_TAGS_PAGANTIS_SORT_ORDER;
             $this->enabled = (MODULE_HEADER_TAGS_PAGANTIS_STATUS == 'True');
         }
+        $this->extraConfig = $this->getExtraConfig();
+        $this->pk = $this->getConfig('MODULE_PAYMENT_PAGANTIS_PK');
     }
 
     /**
@@ -43,29 +42,60 @@ class ht_pagantis {
         if (tep_db_num_rows($checkTable) > 0) {
             $query       = "select * from ".TABLE_PAGANTIS_CONFIG;
             $result      = tep_db_query($query);
-            $resultArray = tep_db_fetch_array($result);
-            var_dump($resultArray);
             $response    = array();
-            foreach ((array)$resultArray as $key => $value) {
-                var_dump($value);
-                $response[$key] = $value;
+            while ($resultArray = tep_db_fetch_array($result)) {
+                $response[$resultArray['config']] = $resultArray['value'];
             }
         }
         return $response;
     }
 
+    /**
+     * @param string $config
+     * @return array
+     */
+    private function getConfig($config = '')
+    {
+            $query       = "select configuration_value from ".TABLE_CONFIGURATION . " where configuration_key = '" . $config . "'";
+            $result      = tep_db_query($query);
+            $resultArray = tep_db_fetch_array($result);
+            return $resultArray['configuration_value'];
+    }
+
     function execute() {
-        $this->extraConfig = $this->getExtraConfig();
         echo "<script src='https://cdn.pagantis.com/js/pg-v2/sdk.js'></script>";
         echo '<script>';
+        echo '        function findPriceSelector()';
+        echo '        { ';
+        echo '           var priceDOM = document.getElementById("our_price_display");';
+        echo '            if (priceDOM != null) {';
+        echo '                return \'#our_price_display\';';
+        echo '            } else { ';
+        echo '                priceDOM = document.querySelector(".current-price span[itemprop=price]");';
+        echo '              if (priceDOM != null) { ';
+        echo '                  return ".current-price span[itemprop=price]"; ';
+        echo '              }';
+        echo '            }';
+        echo '          return \'default\';';
+        echo '        }';
+
+        echo '        function findQuantitySelector()';
+        echo '        {';
+        echo '            var quantityDOM = document.getElementById("quantity_wanted");';
+        echo '            if (quantityDOM != null) {';
+        echo '                return \'#quantity_wanted\';';
+        echo '            }';
+        echo '            return \'default\';';
+        echo '        }';
+
         echo '        function loadSimulator()';
         echo '        {';
         echo '           if (typeof pgSDK != \'undefined\') {';
         echo '               var price = null;';
         echo '               var quantity = null;';
-        echo '               var positionSelector = ' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR'];
-        echo '               var priceSelector = ' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR'];
-        echo '               var quantitySelector = ' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR'];
+        echo '               var positionSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR']. '\';';
+        echo '               var priceSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR']. '\';';
+        echo '               var quantitySelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR']. '\';';
 
         echo '               if (positionSelector === \'default\') {';
         echo '                   positionSelector = \'.pagantisSimulator\'';
@@ -78,15 +108,15 @@ class ht_pagantis {
         echo '               if (quantitySelector === \'default\') {';
         echo '               quantitySelector = findQuantitySelector();';
         echo '                   if (quantitySelector === \'default\') {';
-        echo '                       quantity = \'1\'';
+        echo '                       quantity = \'1\';';
         echo '                    }';
         echo '                }';
 
         echo '               pgSDK.product_simulator = {};';
         echo '               pgSDK.product_simulator.id = \'product-simulator\';';
-        echo '               pgSDK.product_simulator.publicKey = MODULE_PAYMENT_PAGANTIS_PK;';
+        echo '               pgSDK.product_simulator.publicKey = \'' . $this->pk . '\';';
         echo '               pgSDK.product_simulator.selector = positionSelector;';
-        echo '               pgSDK.product_simulator.numInstalments = ' . $this->extraConfig['PAGANTIS_SIMULATOR_START_INSTALLMENTS'] . ';';
+        echo '               pgSDK.product_simulator.numInstalments = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_START_INSTALLMENTS'] . '\';';
         echo '               pgSDK.product_simulator.type = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] . ';';
         echo '               pgSDK.product_simulator.skin = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] . ';';
         echo '               pgSDK.product_simulator.position = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] . ';';
@@ -128,8 +158,8 @@ class ht_pagantis {
     }
 
     function install() {
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Pagantis Module', 'MODULE_HEADER_TAGS_PAGANTIS_STATUS', 'True', 'Do you want to allow product titles to be added to the page title?', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort Order', 'MODULE_HEADER_TAGS_PAGANTIS_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Pagantis Module', 'MODULE_HEADER_TAGS_PAGANTIS_STATUS', 'True', '', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+
     }
 
     function remove() {
@@ -137,7 +167,7 @@ class ht_pagantis {
     }
 
     function keys() {
-        return array('MODULE_HEADER_TAGS_PAGANTIS_STATUS', 'MODULE_HEADER_TAGS_PAGANTIS_SORT_ORDER');
+        return array('MODULE_HEADER_TAGS_PAGANTIS_STATUS');
     }
 }
 ?>

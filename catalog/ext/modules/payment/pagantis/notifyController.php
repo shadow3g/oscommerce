@@ -77,7 +77,9 @@ class notifyController
                 $jsonResponse->printResponse();
             } else {
                 if ($exception->getMessage() == AlreadyProcessedException::ERROR_MESSAGE) {
-                    return;
+                    $confirmationUrl = trim(tep_catalog_href_link(FILENAME_ACCOUNT_HISTORY_INFO, "order_id=$this->merchantOrderId", 'SSL', false));
+                    header("Location: $confirmationUrl");
+                    exit;
                 }
 
                 header("Location: $shippingUrl");

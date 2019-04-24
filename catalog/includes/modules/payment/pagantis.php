@@ -388,7 +388,7 @@ class pagantis
             date_added) 
         values 
         (
-            'MODULE_PAYMENT_PAGANTIS_PANEL_TITLE',
+            'Enable Pagantis module',
             'MODULE_PAYMENT_PAGANTIS_STATUS',
             'True',
             '',

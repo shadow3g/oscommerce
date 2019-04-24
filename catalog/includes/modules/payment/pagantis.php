@@ -57,6 +57,7 @@ class pagantis
         $this->code = 'pagantis';
         $this->sort_order = 0;
         $this->description = $this->getDescription();
+        $this->extraConfig = $this->getExtraConfig();
 
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE; // Payment module title in Admin
@@ -65,8 +66,6 @@ class pagantis
         }
 
         $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
-
-        $this->extraConfig = $this->getExtraConfig();
 
         $this->base_url = dirname(
             sprintf(

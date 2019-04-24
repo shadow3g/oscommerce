@@ -540,8 +540,7 @@ class pagantis
     {
         return array('MODULE_PAYMENT_PAGANTIS_STATUS',
             'MODULE_PAYMENT_PAGANTIS_PK',
-            'MODULE_PAYMENT_PAGANTIS_SK',
-            'MODULE_PAYMENT_PAGANTIS_PANEL_TITLE'
+            'MODULE_PAYMENT_PAGANTIS_SK'
         );
     }
 

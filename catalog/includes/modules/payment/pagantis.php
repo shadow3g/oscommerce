@@ -9,6 +9,7 @@ define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
 define('TABLE_PAGANTIS_ORDERS', 'pagantis_order');
 define('TABLE_PAGANTIS_CONCURRENCY', 'pagantis_concurrency');
 define('__ROOT__', dirname(dirname(__FILE__)));
+define('PAGANTIS_PPP', 'Pagantis Promoted');
 
 class pagantis
 {
@@ -44,7 +45,8 @@ class pagantis
                                    'PAGANTIS_DISPLAY_MIN_AMOUNT'=>1,
                                    'PAGANTIS_URL_OK'=>'',
                                    'PAGANTIS_URL_KO'=>'',
-                                   'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!'
+                                   'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
+                                   'PAGANTIS_PROMOTION' => ''
     );
 
     /**
@@ -55,6 +57,7 @@ class pagantis
         $this->version = '8.0.0';
         $this->code = 'pagantis';
         $this->sort_order = 0;
+        $this->description = $this->getDescription();
 
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE; // Payment module title in Admin
@@ -224,12 +227,18 @@ class pagantis
             $details      = new \Pagantis\OrdersApiClient\Model\Order\ShoppingCart\Details();
             $shippingCost = number_format($order->info['shipping_cost'], 2, '.', '');
             $details->setShippingCost(intval(strval(100 * $shippingCost)));
+
+            $promotedAmount = 0;
             foreach ($order->products as $item) {
+                $promotedProduct = $this->isPromoted($item);
                 $product = new \Pagantis\OrdersApiClient\Model\Order\ShoppingCart\Details\Product();
                 $product
                     ->setAmount(intval(100 * number_format(($item['final_price'] * $item['qty']), 2)))
                     ->setQuantity(intval($item['qty']))
                     ->setDescription($item['name']);
+                if ($promotedProduct) {
+                    $promotedAmount+=$product->getAmount();
+                }
                 $details->addProduct($product);
             }
 
@@ -238,11 +247,12 @@ class pagantis
                 ->setDetails($details)
                 ->setOrderReference($this->os_order_reference)
                 ->setPromotedAmount(0)
-                ->setTotalAmount(intval($order->info['total'] * 100));
+                ->setTotalAmount(intval($order->info['total'] * 100))
+                ->setPromotedAmount($promotedAmount);
 
             $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php';
             $checkoutProcessUrl = htmlspecialchars_decode(
-                tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->os_order_reference&from=order", 'SSL', true, false)
+                tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->os_order_reference&from=order", 'SSL', true)
             );
             $cancelUrl              = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
             $orderConfigurationUrls = new \Pagantis\OrdersApiClient\Model\Order\Configuration\Urls();
@@ -306,7 +316,7 @@ class pagantis
     }
 
     /**
-     *
+     * @throws Exception
      */
     public function before_process()
     {
@@ -327,22 +337,29 @@ class pagantis
         $this->pgNotify->confirmInformation();
     }
 
+    /**
+     * @return bool
+     */
     public function output_error()
     {
         return false;
     }
 
+    /**
+     * @return mixed
+     */
     public function check()
     {
         if (!isset($this->_check)) {
-            $check_query = tep_db_query("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_PAGANTIS_STATUS'");
+            $query = "select * from ".TABLE_CONFIGURATION." where configuration_key = 'MODULE_PAYMENT_PAGANTIS_STATUS'";
+            $check_query = tep_db_query($query);
             $this->_check = tep_db_num_rows($check_query);
         }
         $this->installPagantisTables();
         return $this->_check;
     }
 
-    /*
+    /**
      * This is where you define module's configurations (displayed in admin).
      */
     public function install()
@@ -399,7 +416,7 @@ class pagantis
         tep_db_query($sql);
     }
 
-    /*
+    /**
      * Standard functionality to uninstall the module.
      */
     public function remove()
@@ -424,8 +441,7 @@ class pagantis
             tep_db_query("drop table " . TABLE_PAGANTIS_CONCURRENCY);
         }
 
-        $query = "delete from ".TABLE_ORDERS_STATUS." where orders_status_id='6'";
-        tep_db_query($query);
+        tep_db_query("DELETE FROM ". TABLE_CONFIGURATION ." where configuration_key in ('MODULE_PAYMENT_PAGANTIS_STATUS','MODULE_PAYMENT_PAGANTIS_PK','MODULE_PAYMENT_PAGANTIS_SK')");
     }
 
     /**
@@ -490,18 +506,53 @@ where orders.customers_id='%s' and orders_status_history.orders_status_id in ('2
      */
     private function getExtraConfig()
     {
-        $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS."'");
+        $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS_CONFIG."'");
         $response = array();
         if (tep_db_num_rows($checkTable) > 0) {
             $query       = "select * from ".TABLE_PAGANTIS_CONFIG;
             $result      = tep_db_query($query);
-            $resultArray = tep_db_fetch_array($result);
             $response    = array();
-            foreach ((array)$resultArray as $key => $value) {
+            while ($resultArray = tep_db_fetch_array($result)) {
+                $key = $resultArray['config'];
+                $value = $resultArray['value'];
                 $response[$key] = $value;
             }
         }
 
         return $response;
+    }
+
+    /**
+     * @param $item
+     *
+     * @return bool
+     */
+    private function isPromoted($item)
+    {
+        $productId = explode('{', $item['id'], 1);
+        $productId = $productId['0'];
+
+        if ($this->extraConfig['PAGANTIS_PROMOTION'] == '') {
+            $promotedProducts = array();
+        } else {
+            $promotedProducts = array_values((array)unserialize($this->extraConfig['PAGANTIS_PROMOTION']));
+        }
+
+        return (in_array($productId, $promotedProducts));
+    }
+
+    /**
+     * @return string
+     */
+    private function getDescription()
+    {
+        $descriptionCode = '';
+        if (MODULE_PAYMENT_PAGANTIS_STATUS == 'True') {
+            $pagantisPromotionUrl = $this->base_url.'/ext/modules/payment/pagantis/promotion.php';
+            $linkDescription = "Si desea gestionar los productos promocionados pulse aquí";
+            $descriptionCode = "<a href='$pagantisPromotionUrl'>$linkDescription</a>";
+        }
+
+        return $descriptionCode;
     }
 }

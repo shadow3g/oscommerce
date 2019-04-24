@@ -46,6 +46,17 @@ class notifyController
     /** @var mixed $pagantisOrderId */
     protected $pagantisOrderId = '';
 
+    /** @var array $extraConfig */
+    protected $extraConfig;
+
+    /**
+     * notifyController constructor.
+     */
+    public function __construct()
+    {
+        $this->extraConfig = $this->getExtraConfig();
+    }
+
     /**
      * Validation vs PagantisClient
      *
@@ -71,18 +82,30 @@ class notifyController
             $jsonResponse->setPagantisOrderId($this->pagantisOrderId);
             $jsonResponse->setException($exception);
             $this->insertLog($exception);
-            $shippingUrl = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
+
+            if ($this->extraConfig['PAGANTIS_URL_KO'] =! '') {
+                $koUrl = $this->extraConfig['PAGANTIS_URL_KO'];
+            } else {
+                $koUrl = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
+            }
 
             if ($this->origin == 'notify') {
                 $jsonResponse->printResponse();
             } else {
                 if ($exception->getMessage() == AlreadyProcessedException::ERROR_MESSAGE) {
-                    $confirmationUrl = trim(tep_catalog_href_link(FILENAME_ACCOUNT_HISTORY_INFO, "order_id=$this->merchantOrderId", 'SSL', false));
+                    if ($this->extraConfig['PAGANTIS_URL_OK']!='') {
+                        $confirmationUrl = $this->extraConfig['PAGANTIS_URL_OK'];
+                        $confirmationUrl.="?order_id=$this->merchantOrderId";
+                    } else {
+                        $confirmationUrl = trim(tep_catalog_href_link(FILENAME_ACCOUNT_HISTORY_INFO, '', 'SSL', false));
+                        $confirmationUrl.="?order_id=$this->merchantOrderId";
+                    }
+
                     header("Location: $confirmationUrl");
                     exit;
                 }
 
-                header("Location: $shippingUrl");
+                header("Location: $koUrl");
                 exit;
             }
         }
@@ -453,4 +476,22 @@ class notifyController
     {
         $this->orderStatus = $orderStatus;
     }
-}
+
+    /**
+     * @return array
+     */
+    private function getExtraConfig()
+    {
+        $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS_CONFIG."'");
+        $response = array();
+        if (tep_db_num_rows($checkTable) > 0) {
+            $query       = "select * from ".TABLE_PAGANTIS_CONFIG;
+            $result      = tep_db_query($query);
+            $response    = array();
+            while ($resultArray = tep_db_fetch_array($result)) {
+                $response[$resultArray['config']] = $resultArray['value'];
+            }
+        }
+
+        return $response;
+    }}

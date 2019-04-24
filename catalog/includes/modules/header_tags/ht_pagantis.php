@@ -103,6 +103,29 @@ class ht_pagantis {
             echo '       }, 2000);'. PHP_EOL;
             echo '</script>'. PHP_EOL;
 
+            if ($this->isPromoted($GLOBALS["HTTP_GET_VARS"]["products_id"])) {
+                echo "<div id='promotedText' style='display:none'><br/>PRODUCTO PROMOCIONADO, AQUI PUEDE IR CUALQUIER HTML</div>";
+                echo '<script>'. PHP_EOL;
+                echo '        function loadPromoted()'. PHP_EOL;
+                echo '        {'. PHP_EOL;
+                echo 'var positionSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR']. '\';'. PHP_EOL;
+                echo 'if (positionSelector === \'default\') {'. PHP_EOL;
+                echo 'positionSelector = \'.buttonSet\''. PHP_EOL;
+                echo '}'. PHP_EOL;
+                echo 'var docFather = document.querySelector(positionSelector);'.PHP_EOL;
+                echo 'if (typeof docFather != \'undefined\') {'. PHP_EOL;
+                echo 'var promotedNode = document.getElementById("promotedText");'.PHP_EOL;
+                echo 'docFather.appendChild(promotedNode);'.PHP_EOL;
+                echo 'promotedNode.style.display=""' . PHP_EOL;
+                echo '               return true;'. PHP_EOL;
+                echo '       }'. PHP_EOL;
+                echo '               return false;'. PHP_EOL;
+                echo '       }'. PHP_EOL;
+                echo '       window.PSPromotedId = setInterval(function () {'. PHP_EOL;
+                echo '          loadPromoted();'. PHP_EOL;
+                echo '       }, 2000);'. PHP_EOL;
+                echo '</script>'. PHP_EOL;
+            }
         }
     }
 
@@ -125,6 +148,17 @@ class ht_pagantis {
 
     function keys() {
         return array('MODULE_HEADER_TAGS_PAGANTIS_STATUS');
+    }
+
+    private function isPromoted($productId)
+    {
+        if ($this->extraConfig['PAGANTIS_PROMOTION'] == '') {
+            $promotedProducts = array();
+        } else {
+            $promotedProducts = array_values((array)unserialize($this->extraConfig['PAGANTIS_PROMOTION']));
+        }
+
+        return (in_array($productId, $promotedProducts));
     }
 }
 ?>

@@ -9,7 +9,6 @@ define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
 define('TABLE_PAGANTIS_ORDERS', 'pagantis_order');
 define('TABLE_PAGANTIS_CONCURRENCY', 'pagantis_concurrency');
 define('__ROOT__', dirname(dirname(__FILE__)));
-define('PAGANTIS_PPP', 'Pagantis Promoted');
 
 class pagantis
 {
@@ -62,7 +61,7 @@ class pagantis
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE; // Payment module title in Admin
         } else {
-            $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_CATALOG_TITLE; // Payment module title in Catalog
+            $this->title = $this->extraConfig['PAGANTIS_TITLE']; // Payment module title in Catalog
         }
 
         $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
@@ -255,10 +254,16 @@ class pagantis
             );
 
             $cancelUrl = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
+            if ($this->extraConfig['PAGANTIS_URL_KO']!='') {
+                $koUrl = $this->extraConfig['PAGANTIS_URL_KO'];
+            } else {
+                $koUrl = $cancelUrl;
+            }
+
             $orderConfigurationUrls = new \Pagantis\OrdersApiClient\Model\Order\Configuration\Urls();
             $orderConfigurationUrls
                 ->setCancel($cancelUrl)
-                ->setKo($cancelUrl)
+                ->setKo($koUrl)
                 ->setAuthorizedNotificationCallback($callback_url)
                 ->setRejectedNotificationCallback($callback_url)
                 ->setOk($checkoutProcessUrl);
@@ -383,7 +388,7 @@ class pagantis
             date_added) 
         values 
         (
-            'Enable Pagantis module',
+            'MODULE_PAYMENT_PAGANTIS_PANEL_TITLE',
             'MODULE_PAYMENT_PAGANTIS_STATUS',
             'True',
             '',
@@ -524,7 +529,6 @@ class pagantis
         tep_db_query($query);
 
         $this->uninstallSimulator();
-
     }
 
     /**
@@ -536,7 +540,8 @@ class pagantis
     {
         return array('MODULE_PAYMENT_PAGANTIS_STATUS',
             'MODULE_PAYMENT_PAGANTIS_PK',
-            'MODULE_PAYMENT_PAGANTIS_SK'
+            'MODULE_PAYMENT_PAGANTIS_SK',
+            'MODULE_PAYMENT_PAGANTIS_PANEL_TITLE'
         );
     }
 
@@ -581,7 +586,7 @@ and orders_total.class='ot_total'",
             $query = "INSERT INTO " . TABLE_PAGANTIS_ORDERS . " 
                 (os_order_reference, pagantis_order_id, globals) values ('$orderId', '$pagantisOrderId','$globalVars')";
         } else {
-            $query = "UPDATE " . TABLE_PAGANTIS_ORDERS . " set pagantis_order_id='$pagantisOrderId' 
+            $query = "UPDATE ".TABLE_PAGANTIS_ORDERS." set pagantis_order_id='$pagantisOrderId' 
                         where os_order_reference='$orderId'";
         }
         tep_db_query($query);
@@ -599,15 +604,12 @@ and orders_total.class='ot_total'",
             $result      = tep_db_query($query);
             $response    = array();
             while ($resultArray = tep_db_fetch_array($result)) {
-                $key = $resultArray['config'];
-                $value = $resultArray['value'];
-                $response[$key] = $value;
+                $response[$resultArray['config']] = $resultArray['value'];
             }
         }
 
         return $response;
     }
-
 
     /**
      * @param $item

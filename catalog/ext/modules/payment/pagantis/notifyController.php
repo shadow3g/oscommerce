@@ -97,7 +97,7 @@ class notifyController
                         $confirmationUrl = $this->extraConfig['PAGANTIS_URL_OK'];
                         $confirmationUrl.="?order_id=$this->merchantOrderId";
                     } else {
-                        $confirmationUrl = trim(tep_catalog_href_link(FILENAME_ACCOUNT_HISTORY_INFO, '', 'SSL', false));
+                        $confirmationUrl = trim(tep_href_link(FILENAME_ACCOUNT_HISTORY_INFO, '', 'SSL', false));
                         $confirmationUrl.="?order_id=$this->merchantOrderId";
                     }
 
@@ -425,6 +425,25 @@ class notifyController
         }
     }
 
+    /**
+     * @return array
+     */
+    private function getExtraConfig()
+    {
+        $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS_CONFIG."'");
+        $response = array();
+        if (tep_db_num_rows($checkTable) > 0) {
+            $query       = "select * from ".TABLE_PAGANTIS_CONFIG;
+            $result      = tep_db_query($query);
+            $response    = array();
+            while ($resultArray = tep_db_fetch_array($result)) {
+                $response[$resultArray['config']] = $resultArray['value'];
+            }
+        }
+
+        return $response;
+    }
+
     /***
      * SETTERS Y GETTERS
      */
@@ -476,22 +495,4 @@ class notifyController
     {
         $this->orderStatus = $orderStatus;
     }
-
-    /**
-     * @return array
-     */
-    private function getExtraConfig()
-    {
-        $checkTable = tep_db_query("SHOW TABLES LIKE '".TABLE_PAGANTIS_CONFIG."'");
-        $response = array();
-        if (tep_db_num_rows($checkTable) > 0) {
-            $query       = "select * from ".TABLE_PAGANTIS_CONFIG;
-            $result      = tep_db_query($query);
-            $response    = array();
-            while ($resultArray = tep_db_fetch_array($result)) {
-                $response[$resultArray['config']] = $resultArray['value'];
-            }
-        }
-
-        return $response;
-    }}
+}

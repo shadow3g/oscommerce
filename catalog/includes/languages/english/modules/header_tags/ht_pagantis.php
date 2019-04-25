@@ -16,3 +16,4 @@ define('MODULE_HEADER_TAGS_PAGANTIS_TITLE', 'Pagantis Simulator');
 define('MODULE_HEADER_TAGS_PAGANTIS_DESCRIPTION', 'Pagantis simulator for OsCommerce');
 define('MODULE_HEADER_TAGS_PAGANTIS_SORT_ORDER', '100');
 define('MODULE_HEADER_TAGS_PAGANTIS_STATUS', 'true');
+define('MODULE_HEADER_TAGS_PAGANTIS_SDK', 'https://cdn.pagantis.com/js/pg-v2/sdk.js');

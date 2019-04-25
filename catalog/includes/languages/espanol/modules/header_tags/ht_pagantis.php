@@ -16,3 +16,4 @@ define('MODULE_HEADER_TAGS_PAGANTIS_TITLE', 'Simulador de cutotas de Pagantis');
 define('MODULE_HEADER_TAGS_PAGANTIS_DESCRIPTION', 'Simulador de cutotas de Pagantis para OsCommerce');
 define('MODULE_HEADER_TAGS_PAGANTIS_SORT_ORDER', '100');
 define('MODULE_HEADER_TAGS_PAGANTIS_STATUS', 'true');
+define('MODULE_HEADER_TAGS_PAGANTIS_SDK', 'https://cdn.pagamastarde.com/js/pmt-v2/sdk.js');

@@ -45,7 +45,8 @@ class pagantis
                                    'PAGANTIS_URL_OK'=>'',
                                    'PAGANTIS_URL_KO'=>'',
                                    'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
-                                   'PAGANTIS_PROMOTION' => ''
+                                   'PAGANTIS_PROMOTION' => '',
+                                   'PAGANTIS_PROMOTED_PRODUCT_CODE' => '<p>PRODUCTO PROMOCIONADO CON PAGANTIS</p><img src="/ext/modules/payment/pagantis/img/sin_intereses.png"/>'
     );
 
     /**
@@ -616,7 +617,6 @@ and orders_total.class='ot_total'",
      */
     private function isPromoted($item)
     {
-
         //HOOK WHILE PROMOTED AMOUNT IS NOT WORKING
         return false;
 
@@ -648,7 +648,6 @@ and orders_total.class='ot_total'",
 
         return $descriptionCode;
     }
-
 
     /**
      * @return bool

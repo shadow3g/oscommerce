@@ -14,4 +14,4 @@
 
   define('MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE', 'Pagantis');
 
-  define('MODULE_PAYMENT_PAGANTIS_PANEL_TITLE', 'Activar módulo Pagantis');
+  define('MODULE_PAYMENT_PAGANTIS_PANEL_TITLE', 'Activar módulo');

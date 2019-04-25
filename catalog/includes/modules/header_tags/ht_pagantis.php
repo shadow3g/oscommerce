@@ -31,6 +31,7 @@ class ht_pagantis {
         if ( defined('MODULE_HEADER_TAGS_PAGANTIS_STATUS') ) {
             $this->enabled = (MODULE_HEADER_TAGS_PAGANTIS_STATUS == 'True');
         }
+
         $this->extraConfig = $this->getExtraConfig();
         $this->pk = $this->getConfig('MODULE_PAYMENT_PAGANTIS_PK');
         $this->sdkFile = MODULE_HEADER_TAGS_PAGANTIS_SDK;

@@ -8,6 +8,7 @@ define('TABLE_PAGANTIS_LOG', 'pagantis_log');
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
 define('TABLE_PAGANTIS_ORDERS', 'pagantis_order');
 define('TABLE_PAGANTIS_CONCURRENCY', 'pagantis_concurrency');
+define('MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE', 'Pagantis');
 define('__ROOT__', dirname(dirname(__FILE__)));
 
 class pagantis
@@ -40,6 +41,7 @@ class pagantis
                                    'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'=>'pgSDK.simulator.positions.INNER',
                                    'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR'=>'default',
                                    'PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR'=>'default',
+                                   'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR_CHECKOUT'=>'default',
                                    'PAGANTIS_FORM_DISPLAY_TYPE'=>0,
                                    'PAGANTIS_DISPLAY_MIN_AMOUNT'=>1,
                                    'PAGANTIS_URL_OK'=>'',
@@ -63,7 +65,7 @@ class pagantis
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE; // Payment module title in Admin
         } else {
-            $this->title = $this->extraConfig['PAGANTIS_TITLE']; // Payment module title in Catalog
+            $this->title = $this->extraConfig['PAGANTIS_TITLE'] .'<br/><br/><div class="buttonSet" style="display:none"></div><br/>'; // Payment module title in Catalog
         }
 
         $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
@@ -439,6 +441,28 @@ class pagantis
             '0',
             now()
         )");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . "
+        (
+            configuration_title,
+            configuration_key,
+            configuration_value,
+            configuration_description,
+            configuration_group_id,
+            sort_order,
+            set_function,
+            date_added
+        ) 
+        values 
+        (
+            'Include simulator',
+            'MODULE_PAYMENT_PAGANTIS_SIMULATOR',
+            'True',
+            'Do you want to include the Paga+Tarde widget in the checkout page?',
+            '6',
+            '3',
+            'tep_cfg_select_option(array(\'True\',\'False\'), ',
+            now())"
+        );
 
         $this->installPagantisTables();
 
@@ -540,7 +564,8 @@ class pagantis
     {
         return array('MODULE_PAYMENT_PAGANTIS_STATUS',
             'MODULE_PAYMENT_PAGANTIS_PK',
-            'MODULE_PAYMENT_PAGANTIS_SK'
+            'MODULE_PAYMENT_PAGANTIS_SK',
+            'MODULE_PAYMENT_PAGANTIS_SIMULATOR'
         );
     }
 

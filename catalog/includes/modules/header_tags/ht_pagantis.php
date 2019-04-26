@@ -28,8 +28,9 @@ class ht_pagantis {
         $this->description = MODULE_HEADER_TAGS_PAGANTIS_DESCRIPTION;
         $this->sort_order = 0;
 
-        if ( defined('MODULE_HEADER_TAGS_PAGANTIS_STATUS') ) {
-            $this->enabled = (MODULE_HEADER_TAGS_PAGANTIS_STATUS == 'True');
+        if (defined('MODULE_HEADER_TAGS_PAGANTIS_STATUS') && defined('MODULE_PAYMENT_PAGANTIS_STATUS')) {
+            $this->enabled = ((MODULE_HEADER_TAGS_PAGANTIS_STATUS == 'True') &&
+                             (MODULE_PAYMENT_PAGANTIS_STATUS == 'True')) ;
         }
 
         $this->extraConfig = $this->getExtraConfig();
@@ -61,7 +62,7 @@ class ht_pagantis {
      */
     private function getConfig($config = '')
     {
-            $query       = "select configuration_value from ".TABLE_CONFIGURATION . " where configuration_key = '" . $config . "'";
+            $query       = "select * from ".TABLE_CONFIGURATION . " where configuration_key ='" . $config . "'";
             $result      = tep_db_query($query);
             $resultArray = tep_db_fetch_array($result);
             return $resultArray['configuration_value'];
@@ -70,9 +71,12 @@ class ht_pagantis {
     /**
      * Execute function
      */
-    function execute() {
+    function execute()
+    {
         global $languages_id;
-        if (isset($GLOBALS["HTTP_GET_VARS"]["products_id"])) {
+        $productId = $GLOBALS["HTTP_GET_VARS"]["products_id"];
+        $checkoutPage = strpos($_SERVER[REQUEST_URI], "checkout_payment.php") > 0;
+        if (isset($productId) || $checkoutPage) {
             $simulatorCode = 'pgSDK';
             if ($languages_id == '2' || $languages_id == null) {
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] = 'pmtSDK.simulator.positions.INNER';
@@ -87,7 +91,9 @@ class ht_pagantis {
             echo '           if (typeof '.$simulatorCode.' != \'undefined\') {'. PHP_EOL;
             echo '               var positionSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR']. '\';'. PHP_EOL;
             echo '               var priceSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR']. '\';'. PHP_EOL;
+            echo '               var checkoutPriceSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR']. '\';'. PHP_EOL;
             echo '               var quantitySelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR']. '\';'. PHP_EOL;
+            echo '               var checkoutPage =     \'' . $checkoutPage.'\';'. PHP_EOL;
 
             echo '               if (positionSelector === \'default\') {'. PHP_EOL;
             echo '                   positionSelector = \'.buttonSet\''. PHP_EOL;
@@ -97,6 +103,9 @@ class ht_pagantis {
             echo '                   priceSelector = \'#bodyContent>form>div>h1\''. PHP_EOL;
             echo '               }'. PHP_EOL;
 
+            echo '               if (checkoutPriceSelector == \'default\' && checkoutPage == \'1\')  {'. PHP_EOL;
+            echo '                   priceSelector = \'#columnRight > .infoBoxContainer > .infoBoxContents > tbody > tr:last-child > td\';'. PHP_EOL;
+            echo '               }'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator = {};'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.id = \'product-simulator\';'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.publicKey = \'' . $this->pk . '\';'. PHP_EOL;
@@ -108,17 +117,17 @@ class ht_pagantis {
             echo '               '.$simulatorCode.'.product_simulator.itemAmountSelector = priceSelector;'. PHP_EOL;
 
             echo '               '.$simulatorCode.'.simulator.init('.$simulatorCode.'.product_simulator);'. PHP_EOL;
-            echo '               clearInterval(window.PSSimulatorId);'. PHP_EOL;
+            echo '               clearInterval(window.OSSimulatorId);'. PHP_EOL;
             echo '               return true;'. PHP_EOL;
             echo '           }'. PHP_EOL;
             echo '           return false;'. PHP_EOL;
             echo '       }'. PHP_EOL;
-            echo '       window.PSSimulatorId = setInterval(function () {'. PHP_EOL;
+            echo '       window.OSSimulatorId = setInterval(function () {'. PHP_EOL;
             echo '          loadSimulator();'. PHP_EOL;
             echo '       }, 2000);'. PHP_EOL;
             echo '</script>'. PHP_EOL;
 
-            if ($this->isPromoted($GLOBALS["HTTP_GET_VARS"]["products_id"])) {
+            if ($this->isPromoted($productId)) {
                 echo "<div id='promotedText' style='display:none'><br/>".$this->extraConfig['PAGANTIS_PROMOTED_PRODUCT_CODE']."</div>";
                 echo '<script>'. PHP_EOL;
                 echo '        function loadPromoted()'. PHP_EOL;
@@ -132,13 +141,43 @@ class ht_pagantis {
                 echo 'var promotedNode = document.getElementById("promotedText");'.PHP_EOL;
                 echo 'docFather.appendChild(promotedNode);'.PHP_EOL;
                 echo 'promotedNode.style.display=""' . PHP_EOL;
+                echo '               clearInterval(window.OSPromotedId);'. PHP_EOL;
                 echo '               return true;'. PHP_EOL;
                 echo '       }'. PHP_EOL;
                 echo '               return false;'. PHP_EOL;
                 echo '       }'. PHP_EOL;
-                echo '       window.PSPromotedId = setInterval(function () {'. PHP_EOL;
+                echo '       window.OSPromotedId = setInterval(function () {'. PHP_EOL;
                 echo '          loadPromoted();'. PHP_EOL;
                 echo '       }, 2000);'. PHP_EOL;
+                echo '</script>'. PHP_EOL;
+            }
+
+            if ($checkoutPage) {
+                echo '<script>' . PHP_EOL;
+                echo 'function checkSelected(value)'. PHP_EOL;
+                echo '{'. PHP_EOL;
+                echo 'var simulator = document.getElementsByClassName("buttonSet");'  . PHP_EOL;
+                echo ' if(simulator == "undefined") { return false;  } '. PHP_EOL;
+                echo 'if(value==\'pagantis\') { var status="" } else { var status="none";} simulator[0].style.display=status; ' . PHP_EOL;
+                echo '}'. PHP_EOL;
+
+                echo 'function showSimulator()'. PHP_EOL;
+                echo '{'. PHP_EOL;
+                echo 'var elements = document.querySelectorAll("input[name=\'payment\']");' . PHP_EOL;
+                echo 'if(elements == null) { return false };' . PHP_EOL;
+
+                echo 'for(var i = 0, max = elements.length; i < max; i++) { elements[i].onclick = function() {
+                        checkSelected(this.value);
+                    } }' . PHP_EOL;
+                echo 'clearInterval(window.OSdisplayId);';
+                echo 'return true;'. PHP_EOL;
+                echo '};'. PHP_EOL;
+
+                echo '       window.OSdisplayId = setInterval(function () {'. PHP_EOL;
+                echo '          showSimulator();'. PHP_EOL;
+                echo '       }, 2000);'. PHP_EOL;
+
+
                 echo '</script>'. PHP_EOL;
             }
         }

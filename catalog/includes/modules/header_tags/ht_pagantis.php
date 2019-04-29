@@ -135,7 +135,7 @@ class ht_pagantis {
             echo '</script>'. PHP_EOL;
 
             //Show promoted html
-            if (isset($productId) && $this->isPromoted($productId)) {
+            if ($this->isPromoted($productId)) {
                 echo "<div id='promotedText' style='display:none'><br/>".$this->extraConfig['PAGANTIS_PROMOTED_PRODUCT_CODE']."</div>";
                 echo '<script>'. PHP_EOL;
                 echo '        function loadPromoted()'. PHP_EOL;
@@ -160,22 +160,25 @@ class ht_pagantis {
                 echo '</script>'. PHP_EOL;
             }
 
+            //Checkout simulator
             if ($checkoutPage) {
                 echo '<script>' . PHP_EOL;
                 echo 'function checkSelected(value)'. PHP_EOL;
-                echo '{'. PHP_EOL;
+                echo '{ '. PHP_EOL;
                 echo 'var simulator = document.getElementsByClassName("buttonSet");'  . PHP_EOL;
                 echo ' if(simulator == "undefined") { return false;  } '. PHP_EOL;
-                echo 'if(value==\'pagantis\') { var status="" } else { var status="none";} simulator[0].style.display=status; ' . PHP_EOL;
+                echo 'var pagantisCheckbox = document.querySelector("input[value=\'pagantis\']"); ' . PHP_EOL;
+                echo 'var grandparentNode = pagantisCheckbox.parentNode.parentNode;' . PHP_EOL;
+                echo 'if(grandparentNode == value) { var status="" } else { var status="none";} simulator[0].style.display=status; ' . PHP_EOL;
                 echo '}'. PHP_EOL;
 
                 echo 'function showSimulator()'. PHP_EOL;
                 echo '{'. PHP_EOL;
-                echo 'var elements = document.querySelectorAll("input[name=\'payment\']");' . PHP_EOL;
+                echo 'var elements = document.querySelectorAll("tr[class^=\'moduleRow\']");' . PHP_EOL;
                 echo 'if(elements == null) { return false };' . PHP_EOL;
 
                 echo 'for(var i = 0, max = elements.length; i < max; i++) { elements[i].onclick = function() {
-                        checkSelected(this.value);
+                        checkSelected(this);
                     } }' . PHP_EOL;
                 echo 'clearInterval(window.OSdisplayId);';
                 echo 'return true;'. PHP_EOL;

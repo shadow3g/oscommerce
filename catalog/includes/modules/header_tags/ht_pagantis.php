@@ -35,6 +35,8 @@ class ht_pagantis {
         $this->extraConfig = $this->getExtraConfig();
         $this->pk = $this->getConfig('MODULE_PAYMENT_PAGANTIS_PK');
         $this->sdkFile = MODULE_HEADER_TAGS_PAGANTIS_SDK;
+        $this->noduleEnabled = $this->getConfig('MODULE_PAYMENT_PAGANTIS_ENABLED');
+        $this->simulatorEnabled = $this->getConfig('MODULE_HEADER_TAGS_PAGANTIS_STATUS');
     }
 
     /**

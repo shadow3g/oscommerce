@@ -439,7 +439,29 @@ class pagantis
             '0',
             now()
         )");
-
+        tep_db_query("insert into " . TABLE_CONFIGURATION . "
+        (
+            configuration_title,
+            configuration_key,
+            configuration_value,
+            configuration_description,
+            configuration_group_id,
+            sort_order,
+            set_function,
+            date_added) 
+        values 
+        (
+            'Enable Pagantis Simulator',
+            'MODULE_PAYMENT_PAGANTIS_SIMULATOR',
+            'True',
+            '',
+            '6',
+            '0',
+            'tep_cfg_select_option(array(\'True\',
+            \'False\'),
+            ',
+            now()
+        )");
         $this->installPagantisTables();
 
         $this->installSimulator();
@@ -540,7 +562,9 @@ class pagantis
     {
         return array('MODULE_PAYMENT_PAGANTIS_STATUS',
             'MODULE_PAYMENT_PAGANTIS_PK',
-            'MODULE_PAYMENT_PAGANTIS_SK'
+            'MODULE_PAYMENT_PAGANTIS_SK',
+            'MODULE_PAYMENT_PAGANTIS_PANEL_TITLE',
+            'MODULE_PAYMENT_PAGANTIS_SIMULATOR'
         );
     }
 

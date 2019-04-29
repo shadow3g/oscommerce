@@ -28,9 +28,13 @@ class ht_pagantis {
         $this->description = MODULE_HEADER_TAGS_PAGANTIS_DESCRIPTION;
         $this->sort_order = 0;
 
-        if (defined('MODULE_HEADER_TAGS_PAGANTIS_STATUS') && defined('MODULE_PAYMENT_PAGANTIS_STATUS')) {
+        if (defined('MODULE_HEADER_TAGS_PAGANTIS_STATUS')
+            && defined('MODULE_PAYMENT_PAGANTIS_STATUS')
+            && defined('MODULE_PAYMENT_PAGANTIS_SIMULATOR')
+        ) {
             $this->enabled = ((MODULE_HEADER_TAGS_PAGANTIS_STATUS == 'True') &&
-                             (MODULE_PAYMENT_PAGANTIS_STATUS == 'True')) ;
+                              (MODULE_PAYMENT_PAGANTIS_STATUS == 'True') &&
+                              (MODULE_PAYMENT_PAGANTIS_SIMULATOR == 'True')) ;
         }
 
         $this->extraConfig = $this->getExtraConfig();
@@ -117,7 +121,10 @@ class ht_pagantis {
             echo '               '.$simulatorCode.'.product_simulator.skin = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] . ';'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.position = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] . ';'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.itemAmountSelector = priceSelector;'. PHP_EOL;
-
+            echo '               var promotedProduct =     \'' . $this->isPromoted($productId) .'\';'. PHP_EOL;
+            echo '               if(promotedProduct == true) { ' . PHP_EOL;
+            echo '               '.$simulatorCode.'.product_simulator.itemPromotedAmountSelector = priceSelector;'. PHP_EOL;
+            echo '               }' . PHP_EOL;
             echo '               '.$simulatorCode.'.simulator.init('.$simulatorCode.'.product_simulator);'. PHP_EOL;
             echo '               clearInterval(window.OSSimulatorId);'. PHP_EOL;
             echo '               return true;'. PHP_EOL;
@@ -129,7 +136,8 @@ class ht_pagantis {
             echo '       }, 2000);'. PHP_EOL;
             echo '</script>'. PHP_EOL;
 
-            if ($this->isPromoted($productId)) {
+            //Show promoted html
+            if (isset($productId) && $this->isPromoted($productId)) {
                 echo "<div id='promotedText' style='display:none'><br/>".$this->extraConfig['PAGANTIS_PROMOTED_PRODUCT_CODE']."</div>";
                 echo '<script>'. PHP_EOL;
                 echo '        function loadPromoted()'. PHP_EOL;
@@ -229,7 +237,11 @@ class ht_pagantis {
     private function isPromoted($productId)
     {
         //HOOK WHILE PROMOTED AMOUNT IS NOT WORKING
-        return false;
+        //return false;
+
+        if (!isset($productId)) {
+            return false;
+        }
 
         if ($this->extraConfig['PAGANTIS_PROMOTION'] == '') {
             $promotedProducts = array();

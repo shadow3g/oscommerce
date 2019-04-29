@@ -228,6 +228,16 @@ class pagantis
             $shippingCost = number_format($order->info['shipping_cost'], 2, '.', '');
             $details->setShippingCost(intval(strval(100 * $shippingCost)));
 
+            $metadataOrder = new \Pagantis\OrdersApiClient\Model\Order\Metadata();
+            $metadata = array(
+                'oscommerce' => PROJECT_VERSION,
+                'pagantis' => $this->version,
+                'php' => phpversion()
+            );
+            foreach ($metadata as $key => $metadatum) {
+                $metadataOrder->addMetadata($key, $metadatum);
+            }
+
             $promotedAmount = 0;
             foreach ($order->products as $item) {
                 $promotedProduct = $this->isPromoted($item);
@@ -238,6 +248,8 @@ class pagantis
                     ->setDescription($item['name']);
                 if ($promotedProduct) {
                     $promotedAmount+=$product->getAmount();
+                    $promotedMessage = $product->getDescription()."-".$product->getAmount()."-".$product->getQuantity();
+                    $metadataOrder->addMetadata('promotedProduct', $promotedMessage);
                 }
                 $details->addProduct($product);
             }
@@ -246,7 +258,6 @@ class pagantis
             $orderShoppingCart
                 ->setDetails($details)
                 ->setOrderReference($this->os_order_reference)
-                ->setPromotedAmount(0)
                 ->setTotalAmount(intval($order->info['total'] * 100))
                 ->setPromotedAmount($promotedAmount);
 
@@ -280,15 +291,6 @@ class pagantis
                 ->setChannel($orderChannel)
                 ->setUrls($orderConfigurationUrls);
 
-            $metadataOrder = new \Pagantis\OrdersApiClient\Model\Order\Metadata();
-            $metadata = array(
-                'oscommerce' => PROJECT_VERSION,
-                'pagantis' => $this->version,
-                'php' => phpversion()
-            );
-            foreach ($metadata as $key => $metadatum) {
-                $metadataOrder->addMetadata($key, $metadatum);
-            }
             $orderApiClient = new \Pagantis\OrdersApiClient\Model\Order();
             $orderApiClient
                 ->setConfiguration($orderConfiguration)

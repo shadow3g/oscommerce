@@ -459,7 +459,7 @@ class pagantis
             'Include simulator',
             'MODULE_PAYMENT_PAGANTIS_SIMULATOR',
             'True',
-            'Do you want to include the Paga+Tarde widget in the checkout page?',
+            'Do you want to include Pagantis simulator',
             '6',
             '3',
             'tep_cfg_select_option(array(\'True\',\'False\'), ',

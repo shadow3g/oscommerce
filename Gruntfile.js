@@ -36,8 +36,8 @@ module.exports = function(grunt) {
                     archive: 'pagantis.zip'
                 },
                 files: [
-                    {src: ['ext/**'], dest: 'pagantis/', filter: 'isFile'},
-                    {src: ['includes/**'], dest: 'pagantis/', filter: 'isFile'}
+                    {expand:true, src: ['catalog/ext/**'], dest: 'pagantis/ext', filter: 'isFile'},
+                    {expand:true, src: ['catalog/includes/**'], dest: 'pagantis/includes', filter: 'isFile'}
                 ]
             }
         }

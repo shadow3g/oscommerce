@@ -228,6 +228,16 @@ class pagantis
             $shippingCost = number_format($order->info['shipping_cost'], 2, '.', '');
             $details->setShippingCost(intval(strval(100 * $shippingCost)));
 
+            $metadataOrder = new \Pagantis\OrdersApiClient\Model\Order\Metadata();
+            $metadata = array(
+                'oscommerce' => PROJECT_VERSION,
+                'pagantis' => $this->version,
+                'php' => phpversion()
+            );
+            foreach ($metadata as $key => $metadatum) {
+                $metadataOrder->addMetadata($key, $metadatum);
+            }
+
             $promotedAmount = 0;
             foreach ($order->products as $item) {
                 $promotedProduct = $this->isPromoted($item);
@@ -238,6 +248,8 @@ class pagantis
                     ->setDescription($item['name']);
                 if ($promotedProduct) {
                     $promotedAmount+=$product->getAmount();
+                    $promotedMessage = $product->getDescription()."-Price:".$item['final_price']."-Qty:".$product->getQuantity();
+                    $metadataOrder->addMetadata('promotedProduct', $promotedMessage);
                 }
                 $details->addProduct($product);
             }
@@ -246,9 +258,8 @@ class pagantis
             $orderShoppingCart
                 ->setDetails($details)
                 ->setOrderReference($this->os_order_reference)
-                ->setPromotedAmount(0)
-                ->setTotalAmount(intval($order->info['total'] * 100))
-                ->setPromotedAmount($promotedAmount);
+                ->setTotalAmount(intval($order->info['total'] * 100));
+                //->setPromotedAmount($promotedAmount);
 
             $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php';
             $checkoutProcessUrl = htmlspecialchars_decode(
@@ -280,15 +291,6 @@ class pagantis
                 ->setChannel($orderChannel)
                 ->setUrls($orderConfigurationUrls);
 
-            $metadataOrder = new \Pagantis\OrdersApiClient\Model\Order\Metadata();
-            $metadata = array(
-                'oscommerce' => PROJECT_VERSION,
-                'pagantis' => $this->version,
-                'php' => phpversion()
-            );
-            foreach ($metadata as $key => $metadatum) {
-                $metadataOrder->addMetadata($key, $metadatum);
-            }
             $orderApiClient = new \Pagantis\OrdersApiClient\Model\Order();
             $orderApiClient
                 ->setConfiguration($orderConfiguration)
@@ -643,7 +645,7 @@ and orders_total.class='ot_total'",
     private function isPromoted($item)
     {
         //HOOK WHILE PROMOTED AMOUNT IS NOT WORKING
-        //return false;
+        return false;
 
         $productId = explode('{', $item['id'], 1);
         $productId = $productId['0'];
@@ -665,7 +667,8 @@ and orders_total.class='ot_total'",
         $descriptionCode = "<img src=\"images/icon_info.gif\" border=\"0\" alt=\"Info\" title=\"Info\">&nbsp;<strong>Module version:</strong> $this->version<br/><br/>";
         $descriptionCode.= "<img src=\"images/icon_info.gif\" border=\"0\">&nbsp;<a href='https://developer.pagantis.com/' target=\"_blank\" style=\"text-decoration: underline; font-weight: bold;\">View Online Documentation</a><br/><br/>";
         $descriptionCode.= "<img src='images/icon_popup.gif'  border='0'>        <a href='http://pagantis.com' target='_blank' style='text-decoration: underline; font-weight: bold;'>Visit Pagantis Website</a><br/><br/><br/>";
-        if (MODULE_PAYMENT_PAGANTIS_STATUS == 'True') {
+
+        if (MODULE_PAYMENT_PAGANTIS_STATUS == 'True' && $this->isPromoted(null)) {
             $pagantisPromotionUrl = $this->base_url.'/admin/promotion.php';
             $linkDescription = "Si desea gestionar los productos promocionados pulse aquí";
             $descriptionCode.= "<a href='$pagantisPromotionUrl'>$linkDescription</a>";

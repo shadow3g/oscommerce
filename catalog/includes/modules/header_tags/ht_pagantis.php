@@ -265,7 +265,7 @@ class ht_pagantis {
     private function isPromoted($productId)
     {
         //HOOK WHILE PROMOTED AMOUNT IS NOT WORKING
-        //return false;
+        return false;
 
         if (!isset($productId)) {
             return false;

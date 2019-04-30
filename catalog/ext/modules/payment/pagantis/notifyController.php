@@ -393,14 +393,15 @@ class notifyController
         tep_db_query($query);
 
         $metadataOrder = $this->pagantisOrder->getMetadata();
+
         $metadataInfo = '';
         foreach ($metadataOrder as $metadataKey => $metadataValue) {
             if ($metadataKey == 'promotedProduct') {
-                $metadataInfo.= "<br/>Producto promocionado = $metadataValue";
+                $metadataInfo.= "/Producto promocionado = $metadataValue";
             }
         }
 
-        $comment = "Pagantis id=$this->pagantisOrderId/Via=".ucfirst($this->origin);
+        $comment = "Pagantis id=$this->pagantisOrderId/Via=".ucfirst($this->origin)."/".$metadataInfo;
         $query = "insert into ".TABLE_ORDERS_STATUS_HISTORY ."(comments, orders_id, orders_status_id, customer_notified, date_added) values
             ('$comment', ".$insert_id.", '2', -1, now() )";
         tep_db_query($query);

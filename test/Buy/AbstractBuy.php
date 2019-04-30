@@ -20,7 +20,7 @@ abstract class AbstractBuy extends PagantisOscommerceTest
     /**
      * Correct purchase message
      */
-    const CORRECT_PURCHASE_MESSAGE = 'YOUR ORDER HAS BEEN RECEIVED.';
+    const CORRECT_PURCHASE_MESSAGE = 'Your Order Has Been Processed!';
 
     /**
      * Canceled purchase message
@@ -189,32 +189,6 @@ abstract class AbstractBuy extends PagantisOscommerceTest
     }
 
     /**
-     * Check if the purchase was in the myAccount panel and with Processing status
-     *
-     * @param string $statusText
-     *
-     * @throws \Facebook\WebDriver\Exception\NoSuchElementException
-     * @throws \Facebook\WebDriver\Exception\TimeOutException
-     */
-    public function checkLastPurchaseStatus($statusText = 'Processing')
-    {
-        $accountMenu = WebDriverBy::cssSelector('.account-cart-wrapper a.skip-link.skip-account');
-        $this->clickElement($accountMenu);
-
-        $myAccountMenu = WebDriverBy::cssSelector('#header-account .first a');
-        $this->clickElement($myAccountMenu);
-
-        $this->webDriver->wait()->until(
-            WebDriverExpectedCondition::visibilityOfElementLocated(
-                WebDriverBy::cssSelector('.box-account.box-recent')
-            )
-        );
-
-        $status = $this->findByCss('.box-account.box-recent .data-table.orders .first .status em')->getText();
-        $this->assertTrue(($status == $statusText));
-    }
-
-    /**
      * Check purchase return message
      *
      * @param string $message
@@ -227,10 +201,10 @@ abstract class AbstractBuy extends PagantisOscommerceTest
         // Check if all goes good
         $this->webDriver->wait()->until(
             WebDriverExpectedCondition::visibilityOfElementLocated(
-                WebDriverBy::cssSelector('.page-title h1')
+                WebDriverBy::cssSelector('#bodyContent>h1')
             )
         );
-        $successMessage = $this->findByCss('.page-title h1');
+        $successMessage = $this->findByCss('#bodyContent>h1');
         $this->assertContains(
             $message,
             $successMessage->getText()

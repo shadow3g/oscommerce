@@ -11,7 +11,7 @@
 */
 
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
-define('MODULE_HEADER_TAGS_PAGANTIS_SDK', 'https://cdn.pagantis.com/js/pg-v2/sdk.js');
+define('MODULE_HEADER_TAGS_PAGANTIS_SDK', 'https://cdn.pagamastarde.com/js/pmt-v2/sdk.js');
 
 class ht_pagantis {
     var $code = 'ht_pagantis';
@@ -110,12 +110,12 @@ class ht_pagantis {
 
         if (isset($productId) || $checkoutPage) {
             $simulatorCode = 'pgSDK';
-            if ($languages_id == '2' || $languages_id == null) {
+            //if ($languages_id == '2' || $languages_id == null) {
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] = 'pmtSDK.simulator.positions.INNER';
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] = 'pmtSDK.simulator.types.SIMPLE';
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] = 'pmtSDK.simulator.skins.BLUE';
                 $simulatorCode = 'pmtSDK';
-            }
+            //}
             echo "<script src='".$this->sdkFile."'></script>". PHP_EOL;
             echo '<script>'. PHP_EOL;
             echo '        function loadSimulator()'. PHP_EOL;

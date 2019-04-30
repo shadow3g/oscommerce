@@ -9,10 +9,10 @@ use Facebook\WebDriver\WebDriverExpectedCondition;
  * Class ConfigureTest
  * @package Test\Configure
  *
- * @group oscommerce-configure
+ * @group oscommerce-configure-ppp
 
  */
-class ConfigureTest extends AbstractConfigure
+class ConfigurePPPTest extends AbstractConfigure
 {
     /**
      * testConfigurePagantisInOscommerce15
@@ -21,32 +21,26 @@ class ConfigureTest extends AbstractConfigure
     {
         $this->loginToBackOffice();
         $this->goToPagantis();
-        $this->installPagantisModule();
-        $this->configureModule();
+        $this->configurePPP();
         $this->quit();
     }
 
     /**
      * Configure paylater module
      */
-    public function configureModule()
+    public function configurePPP()
     {
-        // Click on edit
-        $button = WebDriverBy::id('tdb2');
+        // click on Pagantis
+        $button = WebDriverBy::xpath("//td[contains(text(), 'Pagantis')]");
         $condition = WebDriverExpectedCondition::visibilityOfElementLocated($button);
         $this->waitUntil($condition);
-        $this->findById('tdb2')->click();
+        $this->findByXpath("//td[contains(text(), 'Pagantis')]")->click();
 
-        $this->findByName('configuration[MODULE_PAYMENT_PAGANTIS_PK]')
-            ->clear()
-            ->sendKeys($this->configuration['publicKey'])
-        ;
+        // click on manage PPP
+        $this->findByLinkText($this->configuration['pppText'])->click();
 
-        $this->findByName('configuration[MODULE_PAYMENT_PAGANTIS_SK]')
-            ->clear()
-            ->sendKeys($this->configuration['secretKey'])
-        ;
-
+        // click on Matrox G200 MMS
+        $this->findByName('checkboxProducts[1]')->click();
         // click on Save
         $button = WebDriverBy::id('tdb2');
         $condition = WebDriverExpectedCondition::visibilityOfElementLocated($button);

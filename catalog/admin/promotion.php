@@ -102,7 +102,7 @@ require('includes/template_top.php');
                                                 </tbody></table></td>
                                     </tr>
                                     </tbody></table></td>
-                            <td width="75%" valign="top"></td>
+                            <td width="50%" valign="top"></td>
                         </tr>
                         </tbody>
                     </table>

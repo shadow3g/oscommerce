@@ -13,6 +13,7 @@ grunt shell:composerProd
 
 docker cp ./catalog/ext/. oscommerce-test:/var/www/html/ext/
 docker cp ./catalog/includes/. oscommerce-test:/var/www/html/includes/
+docker cp ./catalog/admin/promotion.php oscommerce-test:/var/www/html/admin/promotion.php
 
 grunt shell:composerDev
 
@@ -28,10 +29,10 @@ then
     catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-register
     echo oscommerce-buy-registered
     catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-buy-registered
-#    echo oscommerce-cancel-buy-registered
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-cancel-buy-registered
-#    echo oscommerce-controllers
-#    ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-controllers
+    echo oscommerce-configure-ppp
+    catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure-ppp
+    echo oscommerce-buy-promoted
+    catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-buy-promoted
 else
     echo oscommerce-configure
     catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-configure

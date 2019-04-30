@@ -190,6 +190,7 @@ class notifyController
             $publicKey     = trim(MODULE_PAYMENT_PAGANTIS_PK);
             $secretKey     = trim(MODULE_PAYMENT_PAGANTIS_SK);
             $this->orderClient   = new \Pagantis\OrdersApiClient\Client($publicKey, $secretKey);
+            /** @var Pagantis\OrdersApiClient\Model\Order pagantisOrder */
             $this->pagantisOrder = $this->orderClient->getOrder($this->pagantisOrderId);
         } catch (\Exception $e) {
             throw new OrderNotFoundException();
@@ -390,6 +391,14 @@ class notifyController
         $this->merchantOrderId = $insert_id;
         $query = "update ".TABLE_PAGANTIS_ORDERS." set os_order_id='$insert_id' where os_order_reference='$this->oscommerceOrderId'";
         tep_db_query($query);
+
+        $metadataOrder = $this->pagantisOrder->getMetadata();
+        $metadataInfo = '';
+        foreach ($metadataOrder as $metadataKey => $metadataValue) {
+            if ($metadataKey == 'promotedProduct') {
+                $metadataInfo.= "<br/>Producto promocionado = $metadataValue";
+            }
+        }
 
         $comment = "Pagantis id=$this->pagantisOrderId/Via=".ucfirst($this->origin);
         $query = "insert into ".TABLE_ORDERS_STATUS_HISTORY ."(comments, orders_id, orders_status_id, customer_notified, date_added) values

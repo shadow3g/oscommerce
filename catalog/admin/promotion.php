@@ -1,5 +1,4 @@
 <?php
-chdir('../../../../admin');
 require('includes/application_top.php');
 
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
@@ -49,7 +48,7 @@ if (tep_db_num_rows($checkTable) > 0) {
     }
 }
 
-$pagantisPromotionUrl = '/ext/modules/payment/pagantis/promotion.php';
+$pagantisPromotionUrl = '/admin/promotion.php';
 
 require('includes/template_top.php');
 ?>

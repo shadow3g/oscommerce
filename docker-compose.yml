@@ -16,6 +16,7 @@ services:
       - ./catalog/includes/modules/header_tags/ht_pagantis.php:/var/www/html/includes/modules/header_tags/ht_pagantis.php
       - ./catalog/includes/languages/english/modules/header_tags/ht_pagantis.php:/var/www/html/includes/languages/english/modules/header_tags/ht_pagantis.php
       - ./catalog/includes/languages/espanol/modules/header_tags/ht_pagantis.php:/var/www/html/includes/languages/espanol/modules/header_tags/ht_pagantis.php
+      - ./catalog/admin/promotion.php:/var/www/html/admin/promotion.php
     environment:
       - OSCOMMERCE_DB_HOST=db-dev
       - OSCOMMERCE_DB_USER=root

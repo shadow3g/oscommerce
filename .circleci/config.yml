@@ -39,6 +39,7 @@ jobs:
           command: |
             docker cp ./catalog/ext/. oscommerce-test:/var/www/html/ext/
             docker cp ./catalog/includes/. oscommerce-test:/var/www/html/includes/
+            docker cp ./catalog/admin/promotion.php oscommerce-test:/var/www/html/admin/promotion.php
       - run:
           name: Composer install
           command: |

@@ -48,7 +48,7 @@ class pagantis
                                    'PAGANTIS_URL_KO'=>'',
                                    'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
                                    'PAGANTIS_PROMOTION' => '',
-                                   'PAGANTIS_PROMOTED_PRODUCT_CODE' => '<p>PRODUCTO PROMOCIONADO CON PAGANTIS</p><img src="/ext/modules/payment/pagantis/img/sin_intereses.png"/>'
+                                   'PAGANTIS_PROMOTED_PRODUCT_CODE' => '<p>PRODUCTO PROMOCIONADO CON<img style="height: 40px; vertical-align: middle;" src="/ext/modules/payment/pagantis/img/logo_pagantis.png"/>AL 0%'
     );
 
     /**
@@ -465,7 +465,6 @@ class pagantis
             'tep_cfg_select_option(array(\'True\',\'False\'), ',
             now())"
         );
-
         $this->installPagantisTables();
 
         $this->installSimulator();
@@ -564,7 +563,8 @@ class pagantis
      */
     public function keys()
     {
-        return array('MODULE_PAYMENT_PAGANTIS_STATUS',
+        return array(
+            'MODULE_PAYMENT_PAGANTIS_STATUS',
             'MODULE_PAYMENT_PAGANTIS_PK',
             'MODULE_PAYMENT_PAGANTIS_SK',
             'MODULE_PAYMENT_PAGANTIS_SIMULATOR'
@@ -667,8 +667,9 @@ and orders_total.class='ot_total'",
         $descriptionCode = "<img src=\"images/icon_info.gif\" border=\"0\" alt=\"Info\" title=\"Info\">&nbsp;<strong>Module version:</strong> $this->version<br/><br/>";
         $descriptionCode.= "<img src=\"images/icon_info.gif\" border=\"0\">&nbsp;<a href='https://developer.pagantis.com/' target=\"_blank\" style=\"text-decoration: underline; font-weight: bold;\">View Online Documentation</a><br/><br/>";
         $descriptionCode.= "<img src='images/icon_popup.gif'  border='0'>        <a href='http://pagantis.com' target='_blank' style='text-decoration: underline; font-weight: bold;'>Visit Pagantis Website</a><br/><br/><br/>";
+
         if (MODULE_PAYMENT_PAGANTIS_STATUS == 'True' && $this->isPromoted(null)) {
-            $pagantisPromotionUrl = $this->base_url.'/ext/modules/payment/pagantis/promotion.php';
+            $pagantisPromotionUrl = $this->base_url.'/admin/promotion.php';
             $linkDescription = "Si desea gestionar los productos promocionados pulse aquí";
             $descriptionCode.= "<a href='$pagantisPromotionUrl'>$linkDescription</a>";
         }

@@ -81,6 +81,33 @@ class ht_pagantis {
 
         $productId = $GLOBALS["HTTP_GET_VARS"]["products_id"];
         $checkoutPage = strpos($_SERVER[REQUEST_URI], "checkout_payment.php") > 0;
+
+        //Show promoted html
+        if ($this->isPromoted($productId) && $checkoutPage!='1') {
+            echo "<div id='promotedText' style='display:none'><br/>".$this->extraConfig['PAGANTIS_PROMOTED_PRODUCT_CODE']."</div>";
+            echo '<script>'. PHP_EOL;
+            echo '        function loadPromoted()'. PHP_EOL;
+            echo '        {'. PHP_EOL;
+            echo 'var positionSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR']. '\';'. PHP_EOL;
+            echo 'if (positionSelector === \'default\') {'. PHP_EOL;
+            echo 'positionSelector = \'.buttonSet\''. PHP_EOL;
+            echo '}'. PHP_EOL;
+            echo 'var docFather = document.querySelector(positionSelector);'.PHP_EOL;
+            echo 'if (typeof docFather != \'undefined\') {'. PHP_EOL;
+            echo 'var promotedNode = document.getElementById("promotedText");'.PHP_EOL;
+            echo 'docFather.appendChild(promotedNode);'.PHP_EOL;
+            echo 'promotedNode.style.display=""' . PHP_EOL;
+            echo '               clearInterval(window.OSPromotedId);'. PHP_EOL;
+            echo '               return true;'. PHP_EOL;
+            echo '       }'. PHP_EOL;
+            echo '               return false;'. PHP_EOL;
+            echo '       }'. PHP_EOL;
+            echo '       window.OSPromotedId = setInterval(function () {'. PHP_EOL;
+            echo '          loadPromoted();'. PHP_EOL;
+            echo '       }, 2000);'. PHP_EOL;
+            echo '</script>'. PHP_EOL;
+        }
+
         if (isset($productId) || $checkoutPage) {
             $simulatorCode = 'pgSDK';
             if ($languages_id == '2' || $languages_id == null) {
@@ -158,32 +185,6 @@ class ht_pagantis {
             echo '          loadSimulator();'. PHP_EOL;
             echo '       }, 2000);'. PHP_EOL;
             echo '</script>'. PHP_EOL;
-
-            //Show promoted html
-            if ($this->isPromoted($productId) && $checkoutPage!='1') {
-                echo "<div id='promotedText' style='display:none'><br/>".$this->extraConfig['PAGANTIS_PROMOTED_PRODUCT_CODE']."</div>";
-                echo '<script>'. PHP_EOL;
-                echo '        function loadPromoted()'. PHP_EOL;
-                echo '        {'. PHP_EOL;
-                echo 'var positionSelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR']. '\';'. PHP_EOL;
-                echo 'if (positionSelector === \'default\') {'. PHP_EOL;
-                echo 'positionSelector = \'.buttonSet\''. PHP_EOL;
-                echo '}'. PHP_EOL;
-                echo 'var docFather = document.querySelector(positionSelector);'.PHP_EOL;
-                echo 'if (typeof docFather != \'undefined\') {'. PHP_EOL;
-                echo 'var promotedNode = document.getElementById("promotedText");'.PHP_EOL;
-                echo 'docFather.appendChild(promotedNode);'.PHP_EOL;
-                echo 'promotedNode.style.display=""' . PHP_EOL;
-                echo '               clearInterval(window.OSPromotedId);'. PHP_EOL;
-                echo '               return true;'. PHP_EOL;
-                echo '       }'. PHP_EOL;
-                echo '               return false;'. PHP_EOL;
-                echo '       }'. PHP_EOL;
-                echo '       window.OSPromotedId = setInterval(function () {'. PHP_EOL;
-                echo '          loadPromoted();'. PHP_EOL;
-                echo '       }, 2000);'. PHP_EOL;
-                echo '</script>'. PHP_EOL;
-            }
 
             //Checkout simulator
             if ($checkoutPage) {
@@ -265,7 +266,7 @@ class ht_pagantis {
     private function isPromoted($productId)
     {
         //HOOK WHILE PROMOTED AMOUNT IS NOT WORKING
-        return false;
+        //return false;
 
         if (!isset($productId)) {
             return false;

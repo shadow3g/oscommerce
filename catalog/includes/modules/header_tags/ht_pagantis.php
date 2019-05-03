@@ -170,11 +170,12 @@ class ht_pagantis {
             echo '               }';
 
             //Amount in checkout page
-            echo '               if(promotedAmount != \'0\' && checkoutPage == \'1\' ) { ' . PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.totalPromotedAmount = promotedAmount;'. PHP_EOL;
+            echo '               if(checkoutPage == \'1\' ) { ' . PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.totalAmountSelector = priceSelector;'. PHP_EOL;
+            echo '                  if(promotedAmount != \'0\' && checkoutPage == \'1\' ) { ' . PHP_EOL;
+            echo '                  '   .$simulatorCode.'.product_simulator.totalPromotedAmount = promotedAmount;'. PHP_EOL;
+            echo '                  }' . PHP_EOL;
             echo '               }' . PHP_EOL;
-
             echo '               '.$simulatorCode.'.simulator.init('.$simulatorCode.'.product_simulator);'. PHP_EOL;
             echo '               clearInterval(window.OSSimulatorId);'. PHP_EOL;
             echo '               return true;'. PHP_EOL;

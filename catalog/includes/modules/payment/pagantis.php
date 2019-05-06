@@ -651,9 +651,6 @@ and orders_total.class='ot_total'",
      */
     private function isPromoted($item)
     {
-        //HOOK WHILE PROMOTED AMOUNT IS NOT WORKING
-        return false;
-
         $productId = explode('{', $item['id'], 1);
         $productId = $productId['0'];
 

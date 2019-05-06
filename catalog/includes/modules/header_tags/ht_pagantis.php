@@ -19,6 +19,7 @@ class ht_pagantis {
     var $title;
     var $description;
     var $enabled = false;
+    var $langCode = null;
 
     /**
      * ht_pagantis constructor.
@@ -40,6 +41,10 @@ class ht_pagantis {
         $this->extraConfig = $this->getExtraConfig();
         $this->pk = $this->getConfig('MODULE_PAYMENT_PAGANTIS_PK');
         $this->sdkFile = MODULE_HEADER_TAGS_PAGANTIS_SDK;
+
+        if (defined('MODULE_HEADER_TAGS_PAGANTIS_LANG_CODE')) {
+            $this->langCode = MODULE_HEADER_TAGS_PAGANTIS_LANG_CODE;
+        }
     }
 
     /**
@@ -110,7 +115,7 @@ class ht_pagantis {
 
         if (isset($productId) || $checkoutPage) {
             $simulatorCode = 'pgSDK';
-            if ($languages_id == '2' || $languages_id == null) {
+            if ($this->langCode == 'es' || $this->langCode == null) {
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] = 'pmtSDK.simulator.positions.INNER';
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] = 'pmtSDK.simulator.types.SIMPLE';
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] = 'pmtSDK.simulator.skins.BLUE';

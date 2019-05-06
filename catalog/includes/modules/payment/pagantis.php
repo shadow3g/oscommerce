@@ -31,6 +31,9 @@ class pagantis
     /** @var notifyController $pgNotify */
     public $pgNotify;
 
+    /** @var string $langCode */
+    public $langCode = null;
+
     public $defaultConfigs = array('PAGANTIS_TITLE'=>'Instant Financing',
                                    'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
                                    'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
@@ -81,6 +84,10 @@ class pagantis
         );
 
         $this->form_action_url = $this->base_url . '/ext/modules/payment/pagantis/bypass.php';
+
+        if (defined('MODULE_PAYMENT_PAGANTIS_LANG_CODE')) {
+            $this->langCode = MODULE_PAYMENT_PAGANTIS_LANG_CODE;
+        }
     }
 
     /***************

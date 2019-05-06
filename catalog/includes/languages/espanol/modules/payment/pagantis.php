@@ -15,3 +15,5 @@
   define('MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE', 'Paga+Tarde');
 
   define('MODULE_PAYMENT_PAGANTIS_PANEL_TITLE', 'Activar módulo');
+
+  define('MODULE_PAYMENT_PAGANTIS_LANG_CODE', 'es');

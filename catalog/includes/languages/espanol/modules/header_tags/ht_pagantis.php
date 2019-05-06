@@ -17,3 +17,4 @@ define('MODULE_HEADER_TAGS_PAGANTIS_DESCRIPTION', 'Simulador de cuotas de Pagant
 define('MODULE_HEADER_TAGS_PAGANTIS_SORT_ORDER', '100');
 define('MODULE_HEADER_TAGS_PAGANTIS_STATUS', 'true');
 define('MODULE_HEADER_TAGS_PAGANTIS_SDK', 'https://cdn.pagamastarde.com/js/pmt-v2/sdk.js');
+define('MODULE_HEADER_TAGS_PAGANTIS_LANG_CODE', 'es');

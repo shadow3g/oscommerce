@@ -31,6 +31,9 @@ class pagantis
     /** @var notifyController $pgNotify */
     public $pgNotify;
 
+    /** @var string $langCode */
+    public $langCode = null;
+
     public $defaultConfigs = array('PAGANTIS_TITLE'=>'Instant Financing',
                                    'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
                                    'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
@@ -48,7 +51,7 @@ class pagantis
                                    'PAGANTIS_URL_KO'=>'',
                                    'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
                                    'PAGANTIS_PROMOTION' => '',
-                                   'PAGANTIS_PROMOTED_PRODUCT_CODE' => '<p>PRODUCTO PROMOCIONADO AL 0%</p>'
+                                   'PAGANTIS_PROMOTED_PRODUCT_CODE' => '<p>PRODUCTO PROMOCIONADO CON<img style="height: 40px; vertical-align: middle;" src="/ext/modules/payment/pagantis/img/logo_pagantis.png"/>AL 0%'
     );
 
     /**
@@ -81,6 +84,10 @@ class pagantis
         );
 
         $this->form_action_url = $this->base_url . '/ext/modules/payment/pagantis/bypass.php';
+
+        if (defined('MODULE_PAYMENT_PAGANTIS_LANG_CODE')) {
+            $this->langCode = MODULE_PAYMENT_PAGANTIS_LANG_CODE;
+        }
     }
 
     /***************
@@ -459,7 +466,7 @@ class pagantis
             'Include simulator',
             'MODULE_PAYMENT_PAGANTIS_SIMULATOR',
             'True',
-            'Do you want to include the Paga+Tarde widget in the checkout page?',
+            'Do you want to include Pagantis simulator',
             '6',
             '3',
             'tep_cfg_select_option(array(\'True\',\'False\'), ',

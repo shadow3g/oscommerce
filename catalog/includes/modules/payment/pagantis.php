@@ -676,8 +676,8 @@ and orders_total.class='ot_total'",
 
         if (MODULE_PAYMENT_PAGANTIS_STATUS == 'True') {
             $pagantisPromotionUrl = $this->base_url.'/admin/promotion.php';
-            $linkDescription = "Si deseas ofrecer financiación sin intereses para alguno de tus productos haz click aquí";
-            $descriptionCode.= "<a href='$pagantisPromotionUrl'>$linkDescription</a>";
+            $linkDescription = "Si deseas ofrecer financiación sin intereses para alguno de tus productos ";
+            $descriptionCode.= "<img src='images/icon_info.gif' border='0'/> $linkDescription<a href='$pagantisPromotionUrl' style='text-decoration: underline; font-weight: bold;'>haz click aquí</a>";
         }
 
         return $descriptionCode;

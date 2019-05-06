@@ -37,8 +37,8 @@ abstract class PagantisOscommerceTest extends TestCase
     protected $configuration = array(
         'username'            => 'root',
         'password'            => 'root',
-        'publicKey'           => 'tk_fd53cd467ba49022e4f8215e',
-        'secretKey'           => '21e57baa97459f6a',
+        'publicKey'           => 'pk_9b56a8558d6744d6a88e3886',
+        'secretKey'           => 'd51f5433c4ac4bd8',
         'birthdate'           => '05/05/1982',
         'customeremail'       => 'demo@oscommerce.com',
         'customerpwd'         => 'oscommerce_demo',

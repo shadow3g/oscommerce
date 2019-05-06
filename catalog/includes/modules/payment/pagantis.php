@@ -3,6 +3,7 @@
 use Pagantis\ModuleUtils\Exception\OrderNotFoundException;
 use Pagantis\OrdersApiClient\Model\Order\User\Address;
 use Pagantis\ModuleUtils\Exception\UnknownException;
+use Pagantis\ModuleUtils\Model\Log\LogEntry;
 
 define('TABLE_PAGANTIS_LOG', 'pagantis_log');
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
@@ -186,7 +187,7 @@ class pagantis
                 throw new UnknownException("Order not found");
             }
 
-            $id_hash = time() . serialize($order->products) . '' . serialize($order->customer) . '' . serialize($order->delivery);
+            $id_hash = time().serialize($order->products).''.serialize($order->customer).''.serialize($order->delivery);
             $this->os_order_reference = md5($id_hash);
             $_SESSION['order_id'] = $this->os_order_reference;
 
@@ -268,7 +269,7 @@ class pagantis
                 ->setTotalAmount(intval($order->info['total'] * 100))
                 ->setPromotedAmount($promotedAmount);
 
-            $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php';
+            $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php?order_id='.$this->os_order_reference;
             $checkoutProcessUrl = htmlspecialchars_decode(
                 tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->os_order_reference&from=order", 'SSL', true)
             );
@@ -326,8 +327,9 @@ class pagantis
 
             } //TODO IFRAME
         } catch (\Exception $exception) {
-            tep_redirect($cancelUrl);
-            return;
+            $this->insertLog($exception);
+            header('Location: '.$cancelUrl);
+            exit;
         }
     }
 
@@ -672,7 +674,7 @@ and orders_total.class='ot_total'",
         $descriptionCode.= "<img src=\"images/icon_info.gif\" border=\"0\">&nbsp;<a href='https://developer.pagantis.com/' target=\"_blank\" style=\"text-decoration: underline; font-weight: bold;\">View Online Documentation</a><br/><br/>";
         $descriptionCode.= "<img src='images/icon_popup.gif'  border='0'>        <a href='http://pagantis.com' target='_blank' style='text-decoration: underline; font-weight: bold;'>Visit Pagantis Website</a><br/><br/><br/>";
 
-        if (MODULE_PAYMENT_PAGANTIS_STATUS == 'True' && $this->isPromoted(null)) {
+        if (MODULE_PAYMENT_PAGANTIS_STATUS == 'True') {
             $pagantisPromotionUrl = $this->base_url.'/admin/promotion.php';
             $linkDescription = "Si deseas ofrecer financiación sin intereses para alguno de tus productos haz click aquí";
             $descriptionCode.= "<a href='$pagantisPromotionUrl'>$linkDescription</a>";
@@ -700,6 +702,9 @@ and orders_total.class='ot_total'",
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Pagantis Module', 'MODULE_HEADER_TAGS_PAGANTIS_STATUS', 'True', '', '6', '1', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
     }
 
+    /**
+     * @return bool
+     */
     private function uninstallSimulator()
     {
         $checkSimulator = tep_db_query("select configuration_key, configuration_value from " .TABLE_CONFIGURATION ." 
@@ -715,5 +720,19 @@ and orders_total.class='ot_total'",
 
         $query = "delete from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_HEADER_TAGS_PAGANTIS_STATUS'";
         tep_db_query($query);
+    }
+
+    /**
+     * @param $exception
+     */
+    private function insertLog($exception)
+    {
+        if ($exception instanceof \Exception) {
+            $logEntry= new LogEntry();
+            $logEntryJson = $logEntry->error($exception)->toJson();
+
+            $query = "insert into ".TABLE_PAGANTIS_LOG."(log) values ($logEntryJson)";
+            tep_db_query($query);
+        }
     }
 }

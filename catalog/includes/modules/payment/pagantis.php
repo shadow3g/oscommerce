@@ -265,8 +265,8 @@ class pagantis
             $orderShoppingCart
                 ->setDetails($details)
                 ->setOrderReference($this->os_order_reference)
-                ->setTotalAmount(intval($order->info['total'] * 100));
-                //->setPromotedAmount($promotedAmount);
+                ->setTotalAmount(intval($order->info['total'] * 100))
+                ->setPromotedAmount($promotedAmount);
 
             $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php';
             $checkoutProcessUrl = htmlspecialchars_decode(
@@ -674,7 +674,7 @@ and orders_total.class='ot_total'",
 
         if (MODULE_PAYMENT_PAGANTIS_STATUS == 'True' && $this->isPromoted(null)) {
             $pagantisPromotionUrl = $this->base_url.'/admin/promotion.php';
-            $linkDescription = "Si desea gestionar los productos promocionados pulse aquí";
+            $linkDescription = "Si deseas ofrecer financiación sin intereses para alguno de tus productos haz click aquí";
             $descriptionCode.= "<a href='$pagantisPromotionUrl'>$linkDescription</a>";
         }
 

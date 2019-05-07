@@ -66,7 +66,7 @@ jobs:
           name: oscommerce-buy-registered
           command: |
             export DOCKERHOST=$(ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $2 }' | cut -f2 -d: | head -n1)
-            catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --oscommerce-buy-registered
+            catalog/ext/modules/payment/pagantis/vendor/bin/phpunit --group oscommerce-buy-registered
   pushRelease:
     docker:
       - image: circleci/php:7.1-node-browsers

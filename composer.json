@@ -28,6 +28,7 @@
     "pagantis/module-utils": "^2.0"
   },
   "require-dev": {
+    "doctrine/instantiator": "1.0.5",
     "pagantis/selenium-form-utils": "^2.0"
   },
   "autoload-dev": {

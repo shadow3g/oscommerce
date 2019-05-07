@@ -44,9 +44,9 @@ jobs:
             docker cp ./catalog/includes/. oscommerce-test:/var/www/html/includes/
             docker cp ./catalog/admin/promotion.php oscommerce-test:/var/www/html/admin/promotion.php
       - run:
-          name: Composer install
+          name: Composer install --ignore-platform-reqs
           command: |
-            composer install
+            composer install --ignore-platform-reqs
       - run:
           name: oscommerce-basic
           command: |

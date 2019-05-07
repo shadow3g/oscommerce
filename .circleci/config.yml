@@ -34,9 +34,9 @@ jobs:
             docker-compose up -d selenium
             sleep 15
       - run:
-          name: Composer install --no-dev
+          name: Composer install --no-dev --ignore-platform-reqs
           command: |
-            composer install --no-dev
+            composer install --no-dev --ignore-platform-reqs
       - run:
           name: Docker CP the module folders
           command: |

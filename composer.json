@@ -31,7 +31,11 @@
     "pagantis/selenium-form-utils": "^2.0"
   },
   "autoload-dev": {
-    "psr-4": { "Test\\Buy\\": "test/buy/", "Test\\": "test/" }
+    "psr-4": {
+      "Test\\": "test/",
+      "Test\\Buy\\": "test/buy/",
+      "Test\\Configure\\": "test/configure/"
+    }
   },
   "minimum-stability": "stable",
   "config": {

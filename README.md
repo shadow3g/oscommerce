@@ -1,10 +1,10 @@
-# Module installation <img src="https://pagamastarde.com/img/icons/logo.svg" width="100" align="right">
+# Module installation <img src="https://pagantis.com/img/icons/logo.svg" width="100" align="right">
 
-CircleCI: [![CircleCI](https://circleci.com/gh/PagaMasTarde/OsCommerce/tree/master.svg?style=svg)](https://circleci.com/gh/PagaMasTarde/OsCommerce/tree/master)
+CircleCI: [![CircleCI](https://circleci.com/gh/pagantis/OsCommerce/tree/master.svg?style=svg)](https://circleci.com/gh/pagantis/OsCommerce/tree/master)
 
-[![Latest Stable Version](https://poser.pugx.org/pagamastarde/OsCommerce/v/stable)](https://packagist.org/packages/pagamastarde/OsCommerce)
-[![composer.lock](https://poser.pugx.org/pagamastarde/OsCommerce/composerlock)](https://packagist.org/packages/pagamastarde/OsCommerce)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/PagaMasTarde/OsCommerce/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/PagaMasTarde/OsCommerce/?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/pagantis/OsCommerce/v/stable)](https://packagist.org/packages/pagantis/OsCommerce)
+[![composer.lock](https://poser.pugx.org/pagantis/OsCommerce/composerlock)](https://packagist.org/packages/pagantis/OsCommerce)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/pagantis/OsCommerce/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/pagantis/OsCommerce/?branch=master)
 
 ## :hand: Requirements
 OsCommerce installation

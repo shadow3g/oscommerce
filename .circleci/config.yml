@@ -94,7 +94,7 @@ jobs:
           name: Push ZIP to GitHub
           command: |
             github-release upload \
-                --user pagamastarde \
+                --user pagantis \
                 --repo oscommerce \
                 --tag $CIRCLE_TAG \
                 --name pagantis-$CIRCLE_TAG.zip \

@@ -141,16 +141,16 @@
         },
         {
             "name": "pagantis/orders-api-client",
-            "version": "v2.0.1",
+            "version": "v2.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pagantis/orders-api-client.git",
-                "reference": "096417dcbc53d2d2d80905758ce58b889c99b632"
+                "reference": "082916c356c901d9c4aa88392c43790272930d0e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pagantis/orders-api-client/zipball/096417dcbc53d2d2d80905758ce58b889c99b632",
-                "reference": "096417dcbc53d2d2d80905758ce58b889c99b632",
+                "url": "https://api.github.com/repos/pagantis/orders-api-client/zipball/082916c356c901d9c4aa88392c43790272930d0e",
+                "reference": "082916c356c901d9c4aa88392c43790272930d0e",
                 "shasum": ""
             },
             "require": {
@@ -159,7 +159,7 @@
                 "php": ">=5.3"
             },
             "require-dev": {
-                "fzaninotto/faker": "^1.7",
+                "fzaninotto/faker": "^1.8",
                 "phpunit/phpunit": "^4.8"
             },
             "type": "library",
@@ -179,7 +179,7 @@
                 }
             ],
             "description": "Pagantis Orders Api Client in PHP. Use the api with simple methods and using OOP.",
-            "time": "2019-03-14T10:56:53+00:00"
+            "time": "2019-05-09T13:55:03+00:00"
         }
     ],
     "packages-dev": [

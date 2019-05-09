@@ -199,7 +199,9 @@ class pagantis
                 ->setCity($order->billing['city'])
                 ->setAddress($order->billing['street_address'])
                 ->setFixPhone($order->customer['telephone'])
-                ->setMobilePhone($order->customer['telephone']);
+                ->setMobilePhone($order->customer['telephone'])
+                ->setNationalId($order->customer['national_id'])
+                ->setTaxId($order->customer['tax_id']);
 
             $orderBillingAddress = $userAddress;
 
@@ -221,7 +223,9 @@ class pagantis
                 ->setEmail($order->customer['email_address'])
                 ->setFixPhone($order->customer['telephone'])
                 ->setMobilePhone($order->customer['telephone'])
-                ->setShippingAddress($orderShippingAddress);
+                ->setShippingAddress($orderShippingAddress)
+                ->setNationalId($order->customer['national_id'])
+                ->setTaxId($order->customer['tax_id']);
 
             $previousOrders = $this->getOrders();
             foreach ((array)$previousOrders as $k => $previousOrder) {

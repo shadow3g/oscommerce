@@ -49,7 +49,7 @@ abstract class PagantisOscommerceTest extends TestCase
         'confirmationMsg'     => 'Pedido recibido',
         'checkoutDescription' => 'Pay up to 12 comfortable installments with Pagantis',
         'enter'               => 'Haz click aquí para acceder',
-        'pppText'             => 'Si deseas ofrecer financiación sin intereses para alguno de tus productos haz click aquí'
+        'pppText'             => 'haz click aquí'
     );
 
 

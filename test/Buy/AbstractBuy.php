@@ -107,7 +107,7 @@ abstract class AbstractBuy extends PagantisOscommerceTest
     public function goToProductPage()
     {
         $this->webDriver->get(self::OSCURL);
-        $productGridSearch = WebDriverBy::className('contentText');
+        $productGridSearch = WebDriverBy::className('contentContainer');
         $productLinkSearch = $productGridSearch->linkText(self::PRODUCT_NAME);
 
         $this->webDriver->wait()->until(

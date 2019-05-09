@@ -11,24 +11,6 @@ module.exports = function(grunt) {
             composerDev: {
                 command: 'composer install --ignore-plaftorm-reqs'
             },
-            runTestOscommerce: {
-                command:
-                    'docker-compose down\n' +
-                    'docker-compose up -d selenium\n' +
-                    'docker-compose up -d prestashop17-test\n' +
-                    'echo "Creating the prestashop17-test"\n' +
-                    'sleep 100\n' +
-                    'date\n' +
-                    'docker-compose logs prestashop17-test\n' +
-                    'set -e\n' +
-                    'vendor/bin/phpunit --group prestashop17basic\n' +
-                    'vendor/bin/phpunit --group prestashop17install\n' +
-                    'vendor/bin/phpunit --group prestashop17register\n' +
-                    'vendor/bin/phpunit --group prestashop17buy\n' +
-                    'vendor/bin/phpunit --group prestashop17advanced\n' +
-                    'vendor/bin/phpunit --group prestashop17validate\n' +
-                    'vendor/bin/phpunit --group prestashop17controller\n'
-            }
         },
         compress: {
             main: {

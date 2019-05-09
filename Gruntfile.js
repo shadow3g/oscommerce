@@ -6,10 +6,10 @@ module.exports = function(grunt) {
                     'cp pagantis.zip pagantis-$(git rev-parse --abbrev-ref HEAD).zip \n'
             },
             composerProd: {
-                command: 'composer install --no-dev  --ignore-plaftorm-reqs'
+                command: 'composer install --no-dev --ignore-platform-reqs'
             },
             composerDev: {
-                command: 'composer install --ignore-plaftorm-reqs'
+                command: 'composer install --ignore-platform-reqs'
             },
         },
         compress: {

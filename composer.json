@@ -1,0 +1,45 @@
+{
+  "name": "pagantis/oscommerce",
+  "description": "Oscommerce module to add Pagantis",
+  "license": "proprietary",
+  "type": "module",
+  "keywords": [
+    "api",
+    "rest",
+    "oscommerce",
+    "module",
+    "ecommerce",
+    "payment",
+    "checkout",
+    "credit",
+    "pagantis",
+    "financiar",
+    "financiera",
+    "financiación"
+  ],
+  "authors": [
+    {
+      "name": "Pagantis",
+      "email": "integrations@pagantis.com"
+    }
+  ],
+  "require": {
+    "pagantis/orders-api-client": "^2.0",
+    "pagantis/module-utils": "^2.0"
+  },
+  "require-dev": {
+    "doctrine/instantiator": "1.0.5",
+    "pagantis/selenium-form-utils": "^2.0"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\": "test/",
+      "Test\\Buy\\": "test/buy/",
+      "Test\\Configure\\": "test/configure/"
+    }
+  },
+  "minimum-stability": "stable",
+  "config": {
+      "vendor-dir" : "catalog/ext/modules/payment/pagantis/vendor"
+      }
+}

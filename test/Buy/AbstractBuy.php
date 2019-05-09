@@ -4,7 +4,12 @@ namespace Test\Buy;
 
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
+use Pagantis\ModuleUtils\Exception\NoIdentificationException;
+use Pagantis\ModuleUtils\Exception\AlreadyProcessedException;
+use Pagantis\ModuleUtils\Exception\QuoteNotFoundException;
+use Pagantis\SeleniumFormUtils\SeleniumHelper;
 use Test\PagantisOscommerceTest;
+use Httpful\Request;
 
 /**
  * Class AbstractBuy
@@ -48,11 +53,14 @@ abstract class AbstractBuy extends PagantisOscommerceTest
     const NOTIFICATION_FOLDER = '/pagantis/notify';
 
     /**
-     * Buy unregistered
+     * @param bool $promoted
      */
-    public function prepareProductAndCheckout()
+    public function prepareProductAndCheckout($promoted = false)
     {
         $this->goToProductPage();
+        if ($promoted) {
+            $this->checkPromoted();
+        }
         $this->addToCart();
     }
 
@@ -75,6 +83,22 @@ abstract class AbstractBuy extends PagantisOscommerceTest
         $buyButtonElement = $this->webDriver->findElement($buyButtonSearch);
         $this->webDriver->executeScript("arguments[0].scrollIntoView(true);", array($buyButtonElement));
         $buyButtonElement->click();
+    }
+
+    /**
+     * Login
+     */
+    public function login()
+    {
+        $this->findByName('email_address')->clear()->sendKeys($this->configuration['customeremail']);
+        $this->findByName('password')->clear()->sendKeys($this->configuration['customerpwd']);
+
+        $buttonSearch = WebDriverBy::id('tdb1');
+        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($buttonSearch);
+        $this->waitUntil($condition);
+        $buttonElement = $this->webDriver->findElement($buttonSearch);
+        $this->webDriver->executeScript("arguments[0].scrollIntoView(true);", array($buttonElement));
+        $buttonElement->click();
     }
 
     /**
@@ -130,6 +154,33 @@ abstract class AbstractBuy extends PagantisOscommerceTest
         $buttonElement = $this->webDriver->findElement($buttonSearch);
         $this->webDriver->executeScript("arguments[0].scrollIntoView(true);", array($buttonElement));
         $buttonElement->click();
+    }
+
+    /**
+     * Verify Pagantis
+     *
+     * @throws \Exception
+     */
+    public function verifyPagantis()
+    {
+        $condition = WebDriverExpectedCondition::titleContains(self::PAGANTIS_TITLE);
+        $this->webDriver->wait(300)->until($condition, $this->webDriver->getCurrentURL());
+        $this->assertTrue((bool)$condition, $this->webDriver->getCurrentURL());
+    }
+
+    /**
+     * Commit Purchase
+     * @throws \Exception
+     */
+    public function commitPurchase()
+    {
+
+        $condition = WebDriverExpectedCondition::titleContains(self::PAGANTIS_TITLE);
+        $this->webDriver->wait(300)->until($condition, $this->webDriver->getCurrentURL());
+        $this->assertTrue((bool)$condition, "PR32");
+
+        // complete the purchase with redirect
+        SeleniumHelper::finishForm($this->webDriver);
     }
 
 
@@ -210,4 +261,77 @@ abstract class AbstractBuy extends PagantisOscommerceTest
             $successMessage->getText()
         );
     }
+
+    public function makeValidation()
+    {
+        $this->checkConcurrency();
+        $this->checkPagantisOrderId();
+        $this->checkAlreadyProcessed();
+    }
+
+
+    /**
+     * Check if with a empty parameter called order-received we can get a QuoteNotFoundException
+     */
+    protected function checkConcurrency()
+    {
+        $notifyUrl = self::OSCURL.self::NOTIFICATION_FOLDER.'?order=';
+        $this->assertNotEmpty($notifyUrl, $notifyUrl);
+        $response = Request::post($notifyUrl)->expects('json')->send();
+        $this->assertNotEmpty($response->body->result, $response);
+        $this->assertNotEmpty($response->body->status_code, $response);
+        $this->assertNotEmpty($response->body->timestamp, $response);
+        $this->assertContains(
+            QuoteNotFoundException::ERROR_MESSAGE,
+            $response->body->result,
+            "PR=>".$response->body->result
+        );
+    }
+
+    /**
+     * Check if with a parameter called order-received set to a invalid identification,
+     * we can get a NoIdentificationException
+     */
+    protected function checkPagantisOrderId()
+    {
+        $orderId=0;
+        $notifyUrl = self::OSCURL.self::NOTIFICATION_FOLDER.'?order='.$orderId;
+        $this->assertNotEmpty($notifyUrl, $notifyUrl);
+        $response = Request::post($notifyUrl)->expects('json')->send();
+        $this->assertNotEmpty($response->body->result, $response);
+        $this->assertNotEmpty($response->body->status_code, $response);
+        $this->assertNotEmpty($response->body->timestamp, $response);
+        $this->assertEquals(
+            $response->body->merchant_order_id,
+            $orderId,
+            $response->body->merchant_order_id.'!='. $orderId
+        );
+        $this->assertContains(
+            NoIdentificationException::ERROR_MESSAGE,
+            $response->body->result,
+            "PR=>".$response->body->result
+        );
+    }
+
+    /**
+     * Check if re-launching the notification we can get a AlreadyProcessedException
+     *
+     * @throws \Httpful\Exception\ConnectionErrorException
+     */
+    protected function checkAlreadyProcessed()
+    {
+        $notifyUrl = self::OSCURL.self::NOTIFICATION_FOLDER.'?order=145000008';
+        $response = Request::post($notifyUrl)->expects('json')->send();
+        $this->assertNotEmpty($response->body->result, $response);
+        $this->assertNotEmpty($response->body->status_code, $response);
+        $this->assertNotEmpty($response->body->timestamp, $response);
+        $this->assertNotEmpty($response->body->merchant_order_id, $response);
+        $this->assertNotEmpty($response->body->pagantis_order_id, $response);
+        $this->assertContains(
+            AlreadyProcessedException::ERROR_MESSAGE,
+            $response->body->result,
+            "PR51=>".$response->body->result
+        );
+    }
+
 }

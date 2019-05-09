@@ -6,12 +6,12 @@ use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
 
 /**
- * Class BuyRegisteredTest
+ * Class BuyPromotedTest
  * @package Test\Buy
  *
- * @group oscommerce-buy-registered
+ * @group oscommerce-buy-promoted
  */
-class BuyRegisteredTest extends AbstractBuy
+class BuyPromotedTest extends AbstractBuy
 {
     /**
      * @var String $orderUrl
@@ -19,11 +19,13 @@ class BuyRegisteredTest extends AbstractBuy
     public $orderUrl;
 
     /**
-     * Test Buy Registered
+     * Test Buy Promoted
      */
-    public function testBuyRegistered()
+    public function testBuyPromoted()
     {
-        $this->prepareProductAndCheckout(false);
+        $this->prepareProductAndCheckout(true);
+        $this->quit();
+        die;
         $this->login();
         $this->fillShippingMethod();
         $this->fillPaymentMethod();
@@ -40,7 +42,17 @@ class BuyRegisteredTest extends AbstractBuy
         $this->verifyPagantis();
         $this->commitPurchase();
         $this->checkPurchaseReturn(self::CORRECT_PURCHASE_MESSAGE);
-        // $this->makeValidation();
         $this->quit();
+    }
+
+    /**
+     *
+     */
+    protected function checkPromoted()
+    {
+        $elememt = WebDriverBy::id("promotedText");
+        $condition = WebDriverExpectedCondition::visibilityOfElementLocated($elememt);
+        $this->waitUntil($condition);
+
     }
 }

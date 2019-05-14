@@ -191,6 +191,9 @@ class pagantis
             $this->os_order_reference = md5($id_hash);
             $_SESSION['order_id'] = $this->os_order_reference;
 
+            $national_id = $this->getNationalId();
+            $tax_id = $this->getTaxId();
+
             $userAddress = new Address();
             $userAddress
                 ->setZipCode($order->billing['postcode'])
@@ -200,8 +203,8 @@ class pagantis
                 ->setAddress($order->billing['street_address'])
                 ->setFixPhone($order->customer['telephone'])
                 ->setMobilePhone($order->customer['telephone'])
-                ->setNationalId($order->customer['national_id'])
-                ->setTaxId($order->customer['tax_id']);
+                ->setNationalId($national_id)
+                ->setTaxId($tax_id);
 
             $orderBillingAddress = $userAddress;
 
@@ -224,8 +227,8 @@ class pagantis
                 ->setFixPhone($order->customer['telephone'])
                 ->setMobilePhone($order->customer['telephone'])
                 ->setShippingAddress($orderShippingAddress)
-                ->setNationalId($order->customer['national_id'])
-                ->setTaxId($order->customer['tax_id']);
+                ->setNationalId($national_id)
+                ->setTaxId($tax_id);
 
             $previousOrders = $this->getOrders();
             foreach ((array)$previousOrders as $k => $previousOrder) {
@@ -737,6 +740,36 @@ and orders_total.class='ot_total'",
 
             $query = "insert into ".TABLE_PAGANTIS_LOG."(log) values ($logEntryJson)";
             tep_db_query($query);
+        }
+    }
+
+    /**
+     * @return null
+     */
+    private function getNationalId()
+    {
+        global $order;
+        if (isset($order->customer['national_id'])) {
+            return $order->customer['national_id'];
+        } elseif (isset($order->billing['piva'])) {
+            return $order->billing['piva'];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @return null
+     */
+    private function getTaxId()
+    {
+        global $order;
+        if (isset($order->customer['tax_id'])) {
+            return $order->customer['tax_id'];
+        } elseif (isset($order->billing['cf'])) {
+            return $order->billing['cf'];
+        } else {
+            return null;
         }
     }
 }

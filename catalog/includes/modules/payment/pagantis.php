@@ -60,7 +60,7 @@ class pagantis
      */
     public function __construct()
     {
-        $this->version = '8.0.0';
+        $this->version = '8.0.1';
         $this->code = 'pagantis';
         $this->sort_order = 0;
         $this->description = $this->getDescription();

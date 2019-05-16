@@ -45,6 +45,7 @@ class ht_pagantis {
         if (defined('MODULE_HEADER_TAGS_PAGANTIS_LANG_CODE')) {
             $this->langCode = MODULE_HEADER_TAGS_PAGANTIS_LANG_CODE;
         }
+
     }
 
     /**
@@ -144,6 +145,7 @@ class ht_pagantis {
             echo '               var quantitySelector = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR']. '\';'. PHP_EOL;
             echo '               var checkoutPage =     \'' . $checkoutPage.'\';'. PHP_EOL;
             echo '               var promotedAmount =     \'' . $promotedAmount.'\';'. PHP_EOL;
+            echo '               var langCode =     \'' . $this->langCode.'\';'. PHP_EOL;
 
             echo '               if (positionSelector === \'default\') {'. PHP_EOL;
             echo '                   positionSelector = \'.buttonSet\''. PHP_EOL;

@@ -45,7 +45,6 @@ class ht_pagantis {
         if (defined('MODULE_HEADER_TAGS_PAGANTIS_LANG_CODE')) {
             $this->langCode = MODULE_HEADER_TAGS_PAGANTIS_LANG_CODE;
         }
-
     }
 
     /**
@@ -83,7 +82,7 @@ class ht_pagantis {
      */
     function execute()
     {
-        global $languages_id, $order;
+        global $order;
 
         $productId = $GLOBALS["HTTP_GET_VARS"]["products_id"];
         $checkoutPage = strpos($_SERVER[REQUEST_URI], "checkout_payment.php") > 0;
@@ -123,7 +122,7 @@ class ht_pagantis {
                 $simulatorCode = 'pmtSDK';
             }
 
-            //Promoted amount on checkout Pae
+            //Promoted amount on checkout page
             $promotedAmount = 0;
             foreach ((array)$order->products as $item) {
                 $productId = explode('{', $item['id'], 1);
@@ -189,6 +188,8 @@ class ht_pagantis {
             echo '           }'. PHP_EOL;
             echo '           return false;'. PHP_EOL;
             echo '       }'. PHP_EOL;
+
+            //Invoke to main method
             echo '       window.OSSimulatorId = setInterval(function () {'. PHP_EOL;
             echo '          loadSimulator();'. PHP_EOL;
             echo '       }, 2000);'. PHP_EOL;
@@ -197,6 +198,7 @@ class ht_pagantis {
             //Checkout simulator
             if ($checkoutPage) {
                 echo '<script>' . PHP_EOL;
+
                 echo 'function checkSelected(value)'. PHP_EOL;
                 echo '{ '. PHP_EOL;
                 echo 'var simulator = document.getElementsByClassName("buttonSet");'  . PHP_EOL;
@@ -212,7 +214,6 @@ class ht_pagantis {
                 echo '{'. PHP_EOL;
                 echo 'var elements = document.querySelectorAll("tr[class^=\'moduleRow\']");' . PHP_EOL;
                 echo 'if(elements == null) { return false };' . PHP_EOL;
-
                 echo 'for(var i = 0, max = elements.length; i < max; i++) { elements[i].onclick = function() {
                         checkSelected(this);
                     } }' . PHP_EOL;
@@ -223,8 +224,6 @@ class ht_pagantis {
                 echo '       window.OSdisplayId = setInterval(function () {'. PHP_EOL;
                 echo '          showSimulator();'. PHP_EOL;
                 echo '       }, 2000);'. PHP_EOL;
-
-
                 echo '</script>'. PHP_EOL;
             }
         }

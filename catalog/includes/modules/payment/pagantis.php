@@ -69,7 +69,7 @@ class pagantis
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE; // Payment module title in Admin
         } else {
-            $this->title = $this->extraConfig['PAGANTIS_TITLE'] .'<br/><br/><div class="buttonSet" style="display:none"></div><br/>'; // Payment module title in Catalog
+            $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_CHECKOUT .'<br/><br/><div class="buttonSet" style="display:none"></div><br/>'; // Payment module title in Catalog
         }
 
         $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);

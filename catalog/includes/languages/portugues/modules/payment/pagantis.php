@@ -15,3 +15,4 @@
   define('MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE', 'Pagantis');
   define('MODULE_PAYMENT_PAGANTIS_PANEL_TITLE', 'Enable Module');
   define('MODULE_PAYMENT_PAGANTIS_LANG_CODE', 'pt');
+  define('MODULE_PAYMENT_PAGANTIS_TEXT_CHECKOUT', 'Financiamento Instantâneo');

@@ -87,7 +87,7 @@ class pagantis
         $this->form_action_url = $this->base_url . '/ext/modules/payment/pagantis/bypass.php';
 
         if (defined('MODULE_PAYMENT_PAGANTIS_LANG_CODE')) {
-            $this->langCode = MODULE_PAYMENT_PAGANTIS_LANG_CODE;
+            $this->langCode = strtoupper(MODULE_PAYMENT_PAGANTIS_LANG_CODE);
         }
     }
 
@@ -304,7 +304,9 @@ class pagantis
             $orderConfiguration = new \Pagantis\OrdersApiClient\Model\Order\Configuration();
             $orderConfiguration
                 ->setChannel($orderChannel)
-                ->setUrls($orderConfigurationUrls);
+                ->setUrls($orderConfigurationUrls)
+                ->setPurchaseCountry($this->langCode)
+            ;
 
             $orderApiClient = new \Pagantis\OrdersApiClient\Model\Order();
             $orderApiClient

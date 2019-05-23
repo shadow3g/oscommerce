@@ -1,5 +1,5 @@
 #!/bin/bash
-
+npm install
 # Prepare environment and build package
 docker-compose down
 docker-compose up -d --build oscommerce-test

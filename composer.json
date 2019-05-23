@@ -24,7 +24,7 @@
     }
   ],
   "require": {
-    "pagantis/orders-api-client": "^2.0",
+    "pagantis/orders-api-client": "^2.1",
     "pagantis/module-utils": "^2.0"
   },
   "require-dev": {

@@ -60,7 +60,7 @@ class pagantis
      */
     public function __construct()
     {
-        $this->version = '8.0.0';
+        $this->version = '8.0.2';
         $this->code = 'pagantis';
         $this->sort_order = 0;
         $this->description = $this->getDescription();
@@ -69,7 +69,7 @@ class pagantis
         if (strpos($_SERVER[REQUEST_URI], "checkout_payment.php") <= 0) {
             $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_ADMIN_TITLE; // Payment module title in Admin
         } else {
-            $this->title = $this->extraConfig['PAGANTIS_TITLE'] .'<br/><br/><div class="buttonSet" style="display:none"></div><br/>'; // Payment module title in Catalog
+            $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_CHECKOUT .'<br/><br/><div class="buttonSet" style="display:none"></div><br/>'; // Payment module title in Catalog
         }
 
         $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
@@ -87,7 +87,7 @@ class pagantis
         $this->form_action_url = $this->base_url . '/ext/modules/payment/pagantis/bypass.php';
 
         if (defined('MODULE_PAYMENT_PAGANTIS_LANG_CODE')) {
-            $this->langCode = MODULE_PAYMENT_PAGANTIS_LANG_CODE;
+            $this->langCode = strtoupper(MODULE_PAYMENT_PAGANTIS_LANG_CODE);
         }
     }
 
@@ -191,6 +191,9 @@ class pagantis
             $this->os_order_reference = md5($id_hash);
             $_SESSION['order_id'] = $this->os_order_reference;
 
+            $national_id = $this->getNationalId();
+            $tax_id = $this->getTaxId();
+
             $userAddress = new Address();
             $userAddress
                 ->setZipCode($order->billing['postcode'])
@@ -199,7 +202,9 @@ class pagantis
                 ->setCity($order->billing['city'])
                 ->setAddress($order->billing['street_address'])
                 ->setFixPhone($order->customer['telephone'])
-                ->setMobilePhone($order->customer['telephone']);
+                ->setMobilePhone($order->customer['telephone'])
+                ->setNationalId($national_id)
+                ->setTaxId($tax_id);
 
             $orderBillingAddress = $userAddress;
 
@@ -221,7 +226,9 @@ class pagantis
                 ->setEmail($order->customer['email_address'])
                 ->setFixPhone($order->customer['telephone'])
                 ->setMobilePhone($order->customer['telephone'])
-                ->setShippingAddress($orderShippingAddress);
+                ->setShippingAddress($orderShippingAddress)
+                ->setNationalId($national_id)
+                ->setTaxId($tax_id);
 
             $previousOrders = $this->getOrders();
             foreach ((array)$previousOrders as $k => $previousOrder) {
@@ -297,7 +304,9 @@ class pagantis
             $orderConfiguration = new \Pagantis\OrdersApiClient\Model\Order\Configuration();
             $orderConfiguration
                 ->setChannel($orderChannel)
-                ->setUrls($orderConfigurationUrls);
+                ->setUrls($orderConfigurationUrls)
+                ->setPurchaseCountry($this->langCode)
+            ;
 
             $orderApiClient = new \Pagantis\OrdersApiClient\Model\Order();
             $orderApiClient
@@ -733,6 +742,36 @@ and orders_total.class='ot_total'",
 
             $query = "insert into ".TABLE_PAGANTIS_LOG."(log) values ($logEntryJson)";
             tep_db_query($query);
+        }
+    }
+
+    /**
+     * @return null
+     */
+    private function getNationalId()
+    {
+        global $order;
+        if (isset($order->customer['national_id'])) {
+            return $order->customer['national_id'];
+        } elseif (isset($order->billing['piva'])) {
+            return $order->billing['piva'];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @return null
+     */
+    private function getTaxId()
+    {
+        global $order;
+        if (isset($order->customer['tax_id'])) {
+            return $order->customer['tax_id'];
+        } elseif (isset($order->billing['cf'])) {
+            return $order->billing['cf'];
+        } else {
+            return null;
         }
     }
 }

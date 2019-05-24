@@ -35,6 +35,12 @@ class pagantis
     /** @var string $langCode */
     public $langCode = null;
 
+    /** @var string $errorMessage */
+    public $errorMessage;
+
+    /** @var string $errorLinkMessage */
+    public $errorLinkMessage;
+
     public $defaultConfigs = array('PAGANTIS_TITLE'=>'Instant Financing',
                                    'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
                                    'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
@@ -88,6 +94,14 @@ class pagantis
 
         if (defined('MODULE_PAYMENT_PAGANTIS_LANG_CODE')) {
             $this->langCode = strtoupper(MODULE_PAYMENT_PAGANTIS_LANG_CODE);
+        }
+
+        if (defined('MODULE_PAYMENT_PAGANTIS_ERROR_MESSAGE')) {
+            $this->errorMessage = strtoupper(MODULE_PAYMENT_PAGANTIS_ERROR_MESSAGE);
+        }
+
+        if (defined('MODULE_PAYMENT_PAGANTIS_ERROR_MESSAGE')) {
+            $this->errorLinkMessage = strtoupper(MODULE_PAYMENT_PAGANTIS_ERROR_LINK_MESSAGE);
         }
     }
 
@@ -337,8 +351,12 @@ class pagantis
             } //TODO IFRAME
         } catch (\Exception $exception) {
             $this->insertLog($exception);
-            header('Location: '.$cancelUrl);
-            exit;
+            $output = "\n";
+            $output .= tep_draw_hidden_field("cancelUrl", $cancelUrl) . "\n";
+            $output .= "<p>".$this->errorMessage.", <a href='$cancelUrl' style='text-decoration:underline'><b>";
+            $output .= $this->errorLinkMessage." </b></a></p>";
+
+            return $output;
         }
     }
 
@@ -739,8 +757,9 @@ and orders_total.class='ot_total'",
         if ($exception instanceof \Exception) {
             $logEntry= new LogEntry();
             $logEntryJson = $logEntry->error($exception)->toJson();
+            $logEntryJson = addslashes($logEntryJson);
 
-            $query = "insert into ".TABLE_PAGANTIS_LOG."(log) values ($logEntryJson)";
+            $query = "insert into ".TABLE_PAGANTIS_LOG."(log) values ('$logEntryJson')";
             tep_db_query($query);
         }
     }

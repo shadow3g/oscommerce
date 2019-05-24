@@ -16,3 +16,5 @@
   define('MODULE_PAYMENT_PAGANTIS_PANEL_TITLE', 'Activar módulo');
   define('MODULE_PAYMENT_PAGANTIS_LANG_CODE', 'es');
   define('MODULE_PAYMENT_PAGANTIS_TEXT_CHECKOUT', 'Financiación Instantanea');
+  define('MODULE_PAYMENT_PAGANTIS_ERROR_MESSAGE', 'Error al procesar el pago');
+  define('MODULE_PAYMENT_PAGANTIS_ERROR_LINK_MESSAGE', 'Por favor, clica aquí para intentarlo de nuevo');

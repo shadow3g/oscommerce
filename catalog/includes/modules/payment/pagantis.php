@@ -353,6 +353,8 @@ class pagantis
             $this->insertLog($exception);
             $output = "\n";
             $output .= tep_draw_hidden_field("cancelUrl", $cancelUrl) . "\n";
+            $output .= tep_draw_hidden_field("errorMessage", $exception->getMessage()) . "\n";
+            $output .= tep_draw_hidden_field("errorCode", $exception->getCode()) . "\n";
             $output .= "<p>".$this->errorMessage.", <a href='$cancelUrl' style='text-decoration:underline'><b>";
             $output .= $this->errorLinkMessage." </b></a></p>";
 

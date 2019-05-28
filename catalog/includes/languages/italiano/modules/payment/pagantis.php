@@ -16,5 +16,5 @@
   define('MODULE_PAYMENT_PAGANTIS_PANEL_TITLE', 'Enable Module');
   define('MODULE_PAYMENT_PAGANTIS_LANG_CODE', 'it');
   define('MODULE_PAYMENT_PAGANTIS_TEXT_CHECKOUT', 'Finanziamento Istantaneo');
-  define('MODULE_PAYMENT_PAGANTIS_ERROR_MESSAGE', '');
-  define('MODULE_PAYMENT_PAGANTIS_ERROR_LINK_MESSAGE', '');
+  define('MODULE_PAYMENT_PAGANTIS_ERROR_MESSAGE', 'Errore durante l\'elaborazione del pagamento');
+  define('MODULE_PAYMENT_PAGANTIS_ERROR_LINK_MESSAGE', 'Per favore clicca qui per riprovare');

@@ -120,6 +120,8 @@ class ht_pagantis {
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] = 'pmtSDK.simulator.types.SIMPLE';
                 $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] = 'pmtSDK.simulator.skins.BLUE';
                 $simulatorCode = 'pmtSDK';
+            } else {
+                return true;
             }
 
             //Promoted amount on checkout page

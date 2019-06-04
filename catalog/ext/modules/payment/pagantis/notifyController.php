@@ -382,7 +382,11 @@ class notifyController
      */
     private function findOscommerceOrderId()
     {
-        $query = "select os_order_id from ".TABLE_PAGANTIS_ORDERS." where os_order_reference='".$this->oscommerceOrderId."'";
+        $query = sprintf(
+            "select os_order_id from %s where os_order_reference='%s'",
+            TABLE_PAGANTIS_ORDERS,
+            $this->oscommerceOrderId
+        );
         $resultsSelect = tep_db_query($query);
         $orderRow = tep_db_fetch_array($resultsSelect);
         $this->merchantOrderId = $orderRow['os_order_id'];
@@ -401,7 +405,12 @@ class notifyController
     {
         global $insert_id;
         $this->merchantOrderId = $insert_id;
-        $query = "update ".TABLE_PAGANTIS_ORDERS." set os_order_id='$insert_id' where os_order_reference='$this->oscommerceOrderId'";
+        $query = sprintf(
+            "update %s set os_order_id='%s' where os_order_reference='%s'",
+            TABLE_PAGANTIS_ORDERS,
+            $insert_id,
+            $this->oscommerceOrderId
+        );
         tep_db_query($query);
 
         $metadataOrder = $this->pagantisOrder->getMetadata();
@@ -414,8 +423,8 @@ class notifyController
         }
 
         $comment = "Pagantis id=$this->pagantisOrderId/Via=".ucfirst($this->origin)."/".$metadataInfo;
-        $query = "insert into ".TABLE_ORDERS_STATUS_HISTORY ."(comments, orders_id, orders_status_id, customer_notified, date_added) values
-            ('$comment', ".$insert_id.", '2', -1, now() )";
+        $query = "insert into ".TABLE_ORDERS_STATUS_HISTORY ."(comments, orders_id, orders_status_id, customer_notified,
+        date_added) values ('$comment', ".$insert_id.", '2', -1, now() )";
         tep_db_query($query);
 
         $query = "update ".TABLE_ORDERS." set orders_status='2' where orders_id='$insert_id'";

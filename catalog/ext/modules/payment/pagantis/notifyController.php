@@ -13,7 +13,7 @@ use Pagantis\ModuleUtils\Model\Response\JsonSuccessResponse;
 use Pagantis\ModuleUtils\Model\Response\JsonExceptionResponse;
 use Pagantis\ModuleUtils\Exception\ConcurrencyException;
 use Pagantis\ModuleUtils\Model\Log\LogEntry;
-
+use Pagantis\OrdersApiClient\Model\Order;
 
 define('TABLE_PAGANTIS_LOG', 'pagantis_log');
 define('TABLE_PAGANTIS_CONFIG', 'pagantis_config');
@@ -170,7 +170,11 @@ class notifyController
      */
     private function getPagantisOrderId()
     {
-        $query = "select pagantis_order_id from ".TABLE_PAGANTIS_ORDERS." where os_order_reference='".$this->oscommerceOrderId."'";
+        $query = sprintf(
+            "select pagantis_order_id from %s where os_order_reference='%s'",
+            TABLE_PAGANTIS_ORDERS,
+            $this->oscommerceOrderId
+        );
         $resultsSelect = tep_db_query($query);
         while ($orderRow = tep_db_fetch_array($resultsSelect)) {
             $this->pagantisOrderId = $orderRow['pagantis_order_id'];
@@ -253,7 +257,15 @@ class notifyController
         try {
             $this->pagantisOrder = $this->orderClient->confirmOrder($this->pagantisOrderId);
         } catch (\Exception $e) {
-            throw new UnknownException($e->getMessage());
+            /** @var Pagantis\OrdersApiClient\Model\Order pagantisOrder */
+            $this->pagantisOrder = $this->orderClient->getOrder($this->pagantisOrderId);
+            if ($this->pagantisOrder->getStatus() !== Order::STATUS_CONFIRMED) {
+                throw new UnknownException($e->getMessage());
+            } else {
+                $logMessage = 'Concurrency issue: Order_id '.$this->pagantisOrderId.' was confirmed by other process';
+                $this->insertLog(null, $logMessage);
+            }
+
         }
 
         $jsonResponse = new JsonSuccessResponse();
@@ -417,22 +429,29 @@ class notifyController
         $query = "update orders set orders_status='1' where orders_id='$insert_id' ";
         tep_db_query($query);
 
-        $query = "update ".TABLE_PAGANTIS_ORDERS." set os_order_id='' where os_order_reference='$this->oscommerceOrderId'";
+        $query = sprintf(
+            "update %s set os_order_id='' where os_order_reference='%s'",
+            TABLE_PAGANTIS_ORDERS,
+            $this->oscommerceOrderId
+        );
+
         tep_db_query($query);
     }
 
     /**
-     * @param $exception
+     * @param null $exception
+     * @param null $message
      */
-    private function insertLog($exception)
+    private function insertLog($exception = null, $message = null)
     {
+        $logEntry= new LogEntry();
         if ($exception instanceof \Exception) {
-            $logEntry= new LogEntry();
             $logEntryJson = $logEntry->error($exception)->toJson();
-
+        } else {
+            $logEntryJson = $logEntry->info($message)->toJson();
+        }
             $query = "insert into ".TABLE_PAGANTIS_LOG."(log) values ('$logEntryJson')";
             tep_db_query($query);
-        }
     }
 
     /**

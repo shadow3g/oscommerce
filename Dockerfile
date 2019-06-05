@@ -4,7 +4,7 @@ ADD ./config/ /
 
 ENV OSCOMMERCE_VERSION=2.3.4.1
 
-RUN apt-get update && apt-get install -y --no-install-recommends mysql-client && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends mysql-client zip unzip && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install -j$(nproc) pdo_mysql mysqli pdo mbstring
 
@@ -19,6 +19,17 @@ RUN chmod +x /*.sh
 COPY ./config/configure.php /var/www/html/includes
 COPY ./config/configure_admin.php /var/www/html/admin/includes/configure.php
 COPY ./config/admin_user.sql /var/www/html/admin/includes
+COPY ./config/languages.sql /var/www/html/admin/includes
+
+
+COPY ./i18n/oscommerce-spanish.zip /var/www/html/oscommerce-spanish.zip
+RUN cd /var/www/html/ && unzip oscommerce-spanish.zip
+COPY ./i18n/oscommerce-french.zip /var/www/html/oscommerce-french.zip
+RUN cd /var/www/html/ && unzip oscommerce-french.zip
+COPY ./i18n/oscommerce-italian.zip /var/www/html/oscommerce-italian.zip
+RUN cd /var/www/html/ && unzip oscommerce-italian.zip
+COPY ./i18n/oscommerce-portuguese.zip /var/www/html/oscommerce-portuguese.zip
+RUN cd /var/www/html/ && unzip oscommerce-portuguese.zip
 
 ENTRYPOINT ["/install.sh"]
 

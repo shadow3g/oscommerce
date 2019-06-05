@@ -23,6 +23,7 @@ services:
       - ./catalog/includes/languages/french/modules/header_tags/ht_pagantis.php:/var/www/html/includes/languages/french/modules/header_tags/ht_pagantis.php
       - ./catalog/includes/languages/portugues/modules/header_tags/ht_pagantis.php:/var/www/html/includes/languages/portugues/modules/header_tags/ht_pagantis.php
       - ./catalog/admin/promotion.php:/var/www/html/admin/promotion.php
+      - ./catalog/admin/allowedCountries.php:/var/www/html/admin/allowedCountries.php
     environment:
       - OSCOMMERCE_DB_HOST=db-dev
       - OSCOMMERCE_DB_USER=root

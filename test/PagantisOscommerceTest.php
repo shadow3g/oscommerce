@@ -20,7 +20,7 @@ abstract class PagantisOscommerceTest extends TestCase
 {
     const OSCURL = 'http://oscommerce-test.docker:8096';
 
-    const BACKOFFICE_FOLDER = '/admin';
+    const BACKOFFICE_FOLDER = '/admin?language=es';
 
     /**
      * Const title

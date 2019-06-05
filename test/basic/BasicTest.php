@@ -20,7 +20,7 @@ class BasicTestTest extends PagantisOscommerceTest
     /**
      * Const admin_title
      */
-    const ADMIN_TITLE = 'osCommerce Online Merchant Administration Tool';
+    const ADMIN_TITLE = 'Herramienta de Administración de osCommerce Online Merchant';
 
     /**
      * testTitleOscommerce

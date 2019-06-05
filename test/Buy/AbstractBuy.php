@@ -20,12 +20,12 @@ abstract class AbstractBuy extends PagantisOscommerceTest
     /**
      * Product name
      */
-    const PRODUCT_NAME = 'Matrox G200 MMS';
+    const PRODUCT_NAME = 'Speed';
 
     /**
      * Correct purchase message
      */
-    const CORRECT_PURCHASE_MESSAGE = 'Your Order Has Been Processed!';
+    const CORRECT_PURCHASE_MESSAGE = 'Su Pedido ha sido Procesado!';
 
     /**
      * Canceled purchase message

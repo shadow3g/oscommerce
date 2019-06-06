@@ -20,7 +20,7 @@ class BasicTestTest extends PagantisOscommerceTest
     /**
      * Const admin_title
      */
-    const ADMIN_TITLE = 'osCommerce Online Merchant Administration Tool';
+    const ADMIN_TITLE = 'Herramienta de Administración de osCommerce Online Merchant';
 
     /**
      * testTitleOscommerce
@@ -39,7 +39,7 @@ class BasicTestTest extends PagantisOscommerceTest
      */
     public function testBackOfficeTitleOscommerce()
     {
-        $this->webDriver->get(self::OSCURL.self::BACKOFFICE_FOLDER);
+        $this->webDriver->get(self::OSCURL_BACKOFFICE);
         $condition = WebDriverExpectedCondition::titleContains(self::ADMIN_TITLE);
         $this->webDriver->wait()->until($condition);
         $this->assertTrue((bool) $condition);

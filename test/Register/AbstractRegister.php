@@ -15,7 +15,7 @@ abstract class AbstractRegister extends PagantisOscommerceTest
     /**
      * Success message
      */
-    const SUCCESS_MESSAGE = 'Your Account Has Been Created!';
+    const SUCCESS_MESSAGE = '¡Su cuenta ha sido creada!';
 
     /**
      * OpenOsCommerce page

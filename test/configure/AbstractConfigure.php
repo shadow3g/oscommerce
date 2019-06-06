@@ -17,7 +17,7 @@ abstract class AbstractConfigure extends PagantisOscommerceTest
      */
     public function loginToBackOffice()
     {
-        $this->webDriver->get(self::OSCURL . self::BACKOFFICE_FOLDER);
+        $this->webDriver->get(self::OSCURL_BACKOFFICE);
         sleep(2);
 
         $usernameElementSearch = WebDriverBy::name('username');
@@ -54,10 +54,10 @@ abstract class AbstractConfigure extends PagantisOscommerceTest
         $this->findById('tdb1')->click();
 
         // click on Pagantis
-        $button = WebDriverBy::xpath("//td[contains(text(), 'Pagantis')]");
+        $button = WebDriverBy::xpath("//td[contains(text(), 'Paga+Tarde')]");
         $condition = WebDriverExpectedCondition::visibilityOfElementLocated($button);
         $this->waitUntil($condition);
-        $this->findByXpath("//td[contains(text(), 'Pagantis')]")->click();
+        $this->findByXpath("//td[contains(text(), 'Paga+Tarde')]")->click();
 
         // Click on install module
         $button = WebDriverBy::id('tdb2');
@@ -72,8 +72,8 @@ abstract class AbstractConfigure extends PagantisOscommerceTest
      */
     public function goToPagantis()
     {
-        $this->findByLinkText('Modules')->click();
+        $this->findByLinkText('Módulos')->click();
         sleep(1);
-        $this->findByLinkText('Payment')->click();
+        $this->findByLinkText('Pago')->click();
     }
 }

@@ -41,24 +41,25 @@ class pagantis
     /** @var string $errorLinkMessage */
     public $errorLinkMessage;
 
-    public $defaultConfigs = array('PAGANTIS_TITLE'=>'Instant Financing',
-                                   'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
-                                   'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
-                                   'PAGANTIS_SIMULATOR_DISPLAY_POSITION'=>'hookDisplayProductButtons',
-                                   'PAGANTIS_SIMULATOR_START_INSTALLMENTS'=>3,
-                                   'PAGANTIS_SIMULATOR_MAX_INSTALLMENTS'=>12,
-                                   'PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR'=>'default',
-                                   'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'=>'pgSDK.simulator.positions.INNER',
-                                   'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR'=>'default',
-                                   'PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR'=>'default',
-                                   'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR_CHECKOUT'=>'default',
-                                   'PAGANTIS_FORM_DISPLAY_TYPE'=>0,
-                                   'PAGANTIS_DISPLAY_MIN_AMOUNT'=>1,
-                                   'PAGANTIS_URL_OK'=>'',
-                                   'PAGANTIS_URL_KO'=>'',
-                                   'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
-                                   'PAGANTIS_PROMOTION' => '',
-                                   'PAGANTIS_PROMOTED_PRODUCT_CODE' => '<p>¡Financia este producto sin intereses! - 0% TAE</p>'
+    public $defaultConfigs = array(
+        'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
+        'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
+        'PAGANTIS_SIMULATOR_DISPLAY_POSITION'=>'hookDisplayProductButtons',
+        'PAGANTIS_SIMULATOR_START_INSTALLMENTS'=>3,
+        'PAGANTIS_SIMULATOR_MAX_INSTALLMENTS'=>12,
+        'PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR'=>'default',
+        'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'=>'pgSDK.simulator.positions.INNER',
+        'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR'=>'default',
+        'PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR'=>'default',
+        'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR_CHECKOUT'=>'default',
+        'PAGANTIS_FORM_DISPLAY_TYPE'=>0,
+        'PAGANTIS_DISPLAY_MIN_AMOUNT'=>1,
+        'PAGANTIS_URL_OK'=>'',
+        'PAGANTIS_URL_KO'=>'',
+        'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
+        'PAGANTIS_PROMOTION' => '',
+        'PAGANTIS_PROMOTED_PRODUCT_CODE' => '<p>¡Financia este producto sin intereses! - 0% TAE</p>',
+        'PAGANTIS_ALLOWED_COUNTRIES' => 'a:2:{i:0;s:2:"es";i:1;s:2:"en";}',
     );
 
     /**
@@ -78,7 +79,13 @@ class pagantis
             $this->title = MODULE_PAYMENT_PAGANTIS_TEXT_CHECKOUT .'<br/><br/><div class="buttonSet" style="display:none"></div><br/>'; // Payment module title in Catalog
         }
 
-        $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True') ? true : false);
+        if (defined('MODULE_PAYMENT_PAGANTIS_LANG_CODE')) {
+            $this->langCode = strtoupper(MODULE_PAYMENT_PAGANTIS_LANG_CODE);
+        }
+
+        $allowedCountries = unserialize($this->extraConfig['PAGANTIS_ALLOWED_COUNTRIES']);
+
+        $this->enabled = ((MODULE_PAYMENT_PAGANTIS_STATUS == 'True' && in_array(strtolower($this->langCode), $allowedCountries)) ? true : false);
 
         $this->base_url = dirname(
             sprintf(
@@ -91,10 +98,6 @@ class pagantis
         );
 
         $this->form_action_url = $this->base_url . '/ext/modules/payment/pagantis/bypass.php';
-
-        if (defined('MODULE_PAYMENT_PAGANTIS_LANG_CODE')) {
-            $this->langCode = strtoupper(MODULE_PAYMENT_PAGANTIS_LANG_CODE);
-        }
 
         if (defined('MODULE_PAYMENT_PAGANTIS_ERROR_MESSAGE')) {
             $this->errorMessage = strtoupper(MODULE_PAYMENT_PAGANTIS_ERROR_MESSAGE);
@@ -208,10 +211,17 @@ class pagantis
             $national_id = $this->getNationalId();
             $tax_id = $this->getTaxId();
 
+            $fullName = $order->billing['firstname'] . ' ' . $order->billing['lastname'];
+            if ($fullName == ' ') {
+                $fullName = $order->customer['firstname'] . ' ' . $order->customer['lastname'];
+            }
+            if ($fullName == ' ') {
+                $fullName = $order->delivery['firstname'] . ' ' . $order->delivery['lastname'];
+            }
             $userAddress = new Address();
             $userAddress
                 ->setZipCode($order->billing['postcode'])
-                ->setFullName($order->billing['firstname'] . ' ' . $order->billing['lastname'])
+                ->setFullName($fullName)
                 ->setCountryCode('ES')
                 ->setCity($order->billing['city'])
                 ->setAddress($order->billing['street_address'])
@@ -225,7 +235,7 @@ class pagantis
             $orderShippingAddress = new Address();
             $orderShippingAddress
                 ->setZipCode($order->delivery['postcode'])
-                ->setFullName($order->billing['firstname'] . ' ' . $order->billing['lastname'])
+                ->setFullName($fullName)
                 ->setCountryCode('ES')
                 ->setCity($order->delivery['city'])
                 ->setAddress($order->delivery['street_address'])
@@ -235,7 +245,7 @@ class pagantis
             $orderUser = new \Pagantis\OrdersApiClient\Model\Order\User();
             $orderUser
                 ->setAddress($userAddress)
-                ->setFullName($order->billing['firstname'] . ' ' . $order->billing['lastname'])
+                ->setFullName($fullName)
                 ->setBillingAddress($orderBillingAddress)
                 ->setEmail($order->customer['email_address'])
                 ->setFixPhone($order->customer['telephone'])
@@ -707,6 +717,10 @@ and orders_total.class='ot_total'",
             $pagantisPromotionUrl = $this->base_url.'/admin/promotion.php';
             $linkDescription = "Si deseas ofrecer financiación sin intereses para alguno de tus productos ";
             $descriptionCode.= "<img src='images/icon_info.gif' border='0'/> $linkDescription<a href='$pagantisPromotionUrl' style='text-decoration: underline; font-weight: bold;'>haz click aquí</a>";
+
+            $pagantisAllowedCountriesUrl = $this->base_url.'/admin/allowedCountries.php';
+            $linkDescription = "Para gestionar paises en los que operar con Pagantis ";
+            $descriptionCode.= "<br/><br/><img src='images/icon_info.gif' border='0'/> $linkDescription<a href='$pagantisAllowedCountriesUrl' style='text-decoration: underline; font-weight: bold;'>haz click aquí</a>";
         }
 
         return $descriptionCode;

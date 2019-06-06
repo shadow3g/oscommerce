@@ -15,9 +15,9 @@ use Facebook\WebDriver\WebDriverExpectedCondition;
 class ConfigureTest extends AbstractConfigure
 {
     /**
-     * testConfigurePagantisInOscommerce15
+     * testConfigurePagantisInOscommerce
      */
-    public function testConfigureAndConfigurePagantisInOscommerce()
+    public function testConfigurePagantisInOscommerce()
     {
         $this->loginToBackOffice();
         $this->goToPagantis();

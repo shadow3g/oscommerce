@@ -17,7 +17,7 @@ class ConfigurePPPTest extends AbstractConfigure
     /**
      * testConfigurePagantisInOscommerce15
      */
-    public function testConfigureAndConfigurePagantisInOscommerce()
+    public function testConfigurePagantisInOscommerce()
     {
         $this->loginToBackOffice();
         $this->goToPagantis();
@@ -31,16 +31,16 @@ class ConfigurePPPTest extends AbstractConfigure
     public function configurePPP()
     {
         // click on Pagantis
-        $button = WebDriverBy::xpath("//td[contains(text(), 'Pagantis')]");
+        $button = WebDriverBy::xpath("//td[contains(text(), 'Paga+Tarde')]");
         $condition = WebDriverExpectedCondition::visibilityOfElementLocated($button);
         $this->waitUntil($condition);
-        $this->findByXpath("//td[contains(text(), 'Pagantis')]")->click();
+        $this->findByXpath("//td[contains(text(), 'Paga+Tarde')]")->click();
 
         // click on manage PPP
         $this->findByLinkText($this->configuration['pppText'])->click();
 
         // click on Matrox G200 MMS
-        $this->findByName('checkboxProducts[1]')->click();
+        $this->findByName('checkboxProducts[17]')->click();
         // click on Save
         $button = WebDriverBy::id('tdb2');
         $condition = WebDriverExpectedCondition::visibilityOfElementLocated($button);

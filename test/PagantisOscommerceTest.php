@@ -18,9 +18,9 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class PagantisOscommerceTest extends TestCase
 {
-    const OSCURL = 'http://oscommerce-test.docker:8096';
+    const OSCURL = 'http://oscommerce-test.docker:8096?language=es';
 
-    const BACKOFFICE_FOLDER = '/admin?language=es';
+    const OSCURL_BACKOFFICE = 'http://oscommerce-test.docker:8096/admin?language=es';
 
     /**
      * Const title

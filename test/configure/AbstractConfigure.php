@@ -17,7 +17,7 @@ abstract class AbstractConfigure extends PagantisOscommerceTest
      */
     public function loginToBackOffice()
     {
-        $this->webDriver->get(self::OSCURL . self::BACKOFFICE_FOLDER);
+        $this->webDriver->get(self::OSCURL_BACKOFFICE);
         sleep(2);
 
         $usernameElementSearch = WebDriverBy::name('username');

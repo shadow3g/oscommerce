@@ -67,7 +67,7 @@ class pagantis
      */
     public function __construct()
     {
-        $this->version = '8.0.3';
+        $this->version = '8.1.1';
         $this->code = 'pagantis';
         $this->sort_order = 0;
         $this->description = $this->getDescription();
@@ -218,6 +218,7 @@ class pagantis
             if ($fullName == ' ') {
                 $fullName = $order->delivery['firstname'] . ' ' . $order->delivery['lastname'];
             }
+            $fullName = utf8_encode($fullName);
             $userAddress = new Address();
             $userAddress
                 ->setZipCode($order->billing['postcode'])

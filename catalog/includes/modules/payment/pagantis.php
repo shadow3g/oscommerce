@@ -218,6 +218,7 @@ class pagantis
             if ($fullName == ' ') {
                 $fullName = $order->delivery['firstname'] . ' ' . $order->delivery['lastname'];
             }
+            $fullName = utf8_encode($fullName);
             $userAddress = new Address();
             $userAddress
                 ->setZipCode($order->billing['postcode'])

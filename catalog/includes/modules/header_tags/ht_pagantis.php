@@ -158,7 +158,7 @@ class ht_pagantis {
             echo '                   priceSelector = \'#columnRight > .infoBoxContainer > .infoBoxContents > tbody > tr:last-child > td\';'. PHP_EOL;
             echo '               }'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator = {};'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.locale = ' . strtolower($this->langCode) . ';'. PHP_EOL;
+            echo '               '.$simulatorCode.'.product_simulator.locale = \'' . strtolower($this->langCode) . '\';'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.id = \'product-simulator\';'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.publicKey = \'' . $this->pk . '\';'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.selector = positionSelector;'. PHP_EOL;

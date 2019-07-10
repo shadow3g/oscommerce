@@ -59,7 +59,7 @@ class pagantis
         'PAGANTIS_TITLE_EXTRA' => 'Paga hasta en 12 cómodas cuotas con Paga+Tarde. Solicitud totalmente online y sin papeleos,¡y la respuesta es inmediata!',
         'PAGANTIS_PROMOTION' => '',
         'PAGANTIS_PROMOTED_PRODUCT_CODE' => '<p>¡Financia este producto sin intereses! - 0% TAE</p>',
-        'PAGANTIS_ALLOWED_COUNTRIES' => 'a:2:{i:0;s:2:"es";i:1;s:2:"en";}',
+        'PAGANTIS_ALLOWED_COUNTRIES' => 'a:2:{i:0;s:2:"es";i:1;s:2:"it";}',
     );
 
     /**

@@ -50,7 +50,7 @@ Here you have a complete list of configurations you can change and it's explanat
 | PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR_CHECKOUT | CSS selector with DOM element having totalAmount value on checkout page.
 | PAGANTIS_ALLOWED_COUNTRIES               | Array of country codes where the method can be used 
 | PAGANTIS_PROMOTION                       | Array of promoted products identified by product_id. If there are not some product to be promoted, it will be a empty array. 
-| PAGANTIS_PROMOTED_PRODUCT_CODE           | Message to show if a product is promoted. By default: "<p>¡Financia este producto sin intereses! - 0% TAE</p>"; 
+| PAGANTIS_PROMOTED_PRODUCT_CODE           | Message to show if a product is promoted. By default: "¡Financia este producto sin intereses! - 0% TAE"; 
 
 #### Edit using database
 1 - Open your database management (Frequently Cpanel->phpmyadmin) 
@@ -119,4 +119,4 @@ To config the promotions per product, we need to open the oscommerce admin panel
 After select some products to promote, you can see the promotion message
 ![Step 4](./oscommerce_configuration_4b.png?raw=true "Step 4")
 
-If you want to edit this message, you can do it modifying the field:PAGANTIS_PROMOTED_PRODUCT_CODE in our [advanced configuration](./configuration.md#advanced-configuration)
+If you want to edit this message, you can do it modifying the field:PAGANTIS_PROMOTED_PRODUCT_CODE in our [advanced configuration](./configuration.md#heavy_plus_sign-advanced-configuration)

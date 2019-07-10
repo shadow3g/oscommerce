@@ -7,7 +7,7 @@ To access to Paga+Tarde admin panel, we need to open the oscommerce admin panel 
 1 – Modules => Payment
 ![Step 1](./oscommerce_configuration_1.png?raw=true "Step 1")
 
-2 – Pagantis => Edit
+2 – Pagantis / Paga+Tarde => Edit
 ![Step 2](./oscommerce_configuration_2.png?raw=true "Step 2")
 
 3 – Pagantis / Paga+Tarde
@@ -55,7 +55,7 @@ Here you have a complete list of configurations you can change and it's explanat
 #### Edit using database
 1 - Open your database management (Frequently Cpanel->phpmyadmin) 
 
-2 - Connect to wordpress database.
+2 - Connect to oscommerce database.
 
 3 - Launch a query to check if the table exists: select * from pagantis_config
 ![Step 3](./sql_step3.png?raw=true "Step 1")

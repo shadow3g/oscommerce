@@ -104,3 +104,4 @@ Sending in the form data the key of the config you want to change and the new va
 ![Step 6](./sql_step7.png?raw=true "Step 6")
 
 ## :free: Promotion Per Products
+

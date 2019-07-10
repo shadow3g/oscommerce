@@ -24,7 +24,7 @@ In Pagantis admin panel, we can set the following options:
 | Simulator is enabled |  - Yes => Activate the installments simulator <br/> - No => Disabled the simulator
 
 
-## :clipboard: :heavy_plus_sign: Advanced configuration:
+## :heavy_plus_sign: Advanced configuration:
 The module has many configuration options you can set, but we recommend use it as is.
 
 If you want to manage it, you have 2 ways to update the values [using database](./configuration.md#edit-using-database) or [via HTTP](./configuration.md#edit-using-postman), see below.
@@ -105,3 +105,18 @@ Sending in the form data the key of the config you want to change and the new va
 
 ## :free: Promotion Per Products
 
+To config the promotions per product, we need to open the oscommerce admin panel and follow the next steps:
+
+1 – Modules => Payment
+![Step 1](./oscommerce_configuration_1.png?raw=true "Step 1")
+
+2 – Pagantis / Paga+Tarde 
+![Step 2](./oscommerce_configuration_2b.png?raw=true "Step 2")
+
+3 - Select products to promote => Save
+![Step 3](./oscommerce_configuration_3b.png?raw=true "Step 3")
+
+After select some products to promote, you can see the promotion message
+![Step 4](./oscommerce_configuration_4b.png?raw=true "Step 4")
+
+If you want to edit this message, you can do it modifying the field:PAGANTIS_PROMOTED_PRODUCT_CODE in our [advanced configuration](./configuration.md#advanced-configuration)

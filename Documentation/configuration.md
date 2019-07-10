@@ -10,7 +10,7 @@ To access to Paga+Tarde admin panel, we need to open the oscommerce admin panel 
 2 – Pagantis => Edit
 ![Step 2](./oscommerce_configuration_2.png?raw=true "Step 2")
 
-3 – Pagantis
+3 – Pagantis / Paga+Tarde
 ![Step 3](./oscommerce_configuration_3.png?raw=true "Step 3")
 
 ## :clipboard: Options
@@ -24,7 +24,7 @@ In Pagantis admin panel, we can set the following options:
 | Simulator is enabled |  - Yes => Activate the installments simulator <br/> - No => Disabled the simulator
 
 
-## :clipboard: Advanced configuration:
+## :clipboard: :heavy_plus_sign: Advanced configuration:
 The module has many configuration options you can set, but we recommend use it as is.
 
 If you want to manage it, you have 2 ways to update the values [using database](./configuration.md#edit-using-database) or [via HTTP](./configuration.md#edit-using-postman), see below.
@@ -55,17 +55,17 @@ Here you have a complete list of configurations you can change and it's explanat
 #### Edit using database
 1 - Open your database management (Frequently Cpanel->phpmyadmin) 
 
-2 - Connect to wordpress database. (Frequently called wordpress)
+2 - Connect to wordpress database.
 
-3 - Launch a query to check if the table exists: select * from wp_pagantis_config
+3 - Launch a query to check if the table exists: select * from pagantis_config
 ![Step 3](./sql_step3.png?raw=true "Step 1")
 
 4 - Find the config field to edit, in this example we are going to edit: PAGANTIS_TITlE 
 
-5 - Launch a query to edit their value: Update wp_pagantis_config set value='New title' where config='PAGANTIS_TITLE'
+5 - Launch a query to edit their value: Update pagantis_config set value='New title' where config='PAGANTIS_TITLE'
 ![Step 5](./sql_step5.png?raw=true "Step 5")
 
-6 - After the modification, you can check it launching the query: "select * from wp_pagantis_config"
+6 - After the modification, you can check it launching the query: "select * from pagantis_config"
 ![Step 6](./sql_step6.png?raw=true "Step 6")
 
 7 - Finally you can see the change in checkout page
@@ -103,4 +103,4 @@ Sending in the form data the key of the config you want to change and the new va
 6 - Finally you can see the change in checkout page
 ![Step 6](./sql_step7.png?raw=true "Step 6")
 
-## :clipboard: Promotion Per Products
+## :free: Promotion Per Products

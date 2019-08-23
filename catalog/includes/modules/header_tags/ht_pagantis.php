@@ -89,6 +89,7 @@ class ht_pagantis {
 
         //Show promoted html
         if ($this->isPromoted($productId) && $checkoutPage!='1') {
+            echo "<style> #promotedText{margin-left: 10%;} .pmt-no-interest{color: #00c1d5 }</style>";
             echo "<div id='promotedText' style='display:none'><br/>".$this->extraConfig['PAGANTIS_PROMOTED_PRODUCT_CODE']."</div>";
             echo '<script>'. PHP_EOL;
             echo '        function loadPromoted()'. PHP_EOL;

@@ -167,6 +167,9 @@ class ht_pagantis {
             echo '               '.$simulatorCode.'.product_simulator.type = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] . ';'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.skin = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] . ';'. PHP_EOL;
             echo '               '.$simulatorCode.'.product_simulator.position = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] . ';'. PHP_EOL;
+            echo '               '.$simulatorCode.'.product_simulator.amountParserConfig = {};'. PHP_EOL;
+            echo '               '.$simulatorCode.'.product_simulator.amountParserConfig.thousandSeparator = "' . $this->extraConfig['PAGANTIS_SIMULATOR_THOUSANDS_SEPARATOR'] . '";'. PHP_EOL;
+            echo '               '.$simulatorCode.'.product_simulator.amountParserConfig.decimalSeparator = "' . $this->extraConfig['PAGANTIS_SIMULATOR_DECIMAL_SEPARATOR'] .  '";'. PHP_EOL;
 
             //Amount in product page
             echo '               var promotedProduct = \'' . $this->isPromoted($productId) .'\';'. PHP_EOL;

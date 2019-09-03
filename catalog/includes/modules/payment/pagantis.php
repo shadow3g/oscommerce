@@ -60,6 +60,9 @@ class pagantis
         'PAGANTIS_PROMOTION' => '',
         'PAGANTIS_PROMOTED_PRODUCT_CODE' => 'Finance this product <span class="pmt-no-interest">without interest!</span>',
         'PAGANTIS_ALLOWED_COUNTRIES' => 'a:2:{i:0;s:2:"es";i:1;s:2:"it";}',
+        'PAGANTIS_SIMULATOR_THOUSANDS_SEPARATOR' => '.',
+        'PAGANTIS_SIMULATOR_DECIMAL_SEPARATOR' => ','
+
     );
 
     /**
@@ -67,7 +70,7 @@ class pagantis
      */
     public function __construct()
     {
-        $this->version = '8.1.2';
+        $this->version = '8.1.3';
         $this->code = 'pagantis';
         $this->sort_order = 0;
         $this->description = $this->getDescription();

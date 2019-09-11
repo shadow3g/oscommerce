@@ -42,13 +42,13 @@ class pagantis
     public $errorLinkMessage;
 
     public $defaultConfigs = array(
-        'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'pgSDK.simulator.types.SIMPLE',
-        'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'pgSDK.simulator.skins.BLUE',
+        'PAGANTIS_SIMULATOR_DISPLAY_TYPE'=>'sdk.simulator.types.SIMPLE',
+        'PAGANTIS_SIMULATOR_DISPLAY_SKIN'=>'sdk.simulator.skins.BLUE',
         'PAGANTIS_SIMULATOR_DISPLAY_POSITION'=>'hookDisplayProductButtons',
         'PAGANTIS_SIMULATOR_START_INSTALLMENTS'=>3,
         'PAGANTIS_SIMULATOR_MAX_INSTALLMENTS'=>12,
         'PAGANTIS_SIMULATOR_CSS_POSITION_SELECTOR'=>'default',
-        'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'=>'pgSDK.simulator.positions.INNER',
+        'PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'=>'sdk.simulator.positions.INNER',
         'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR'=>'default',
         'PAGANTIS_SIMULATOR_CSS_QUANTITY_SELECTOR'=>'default',
         'PAGANTIS_SIMULATOR_CSS_PRICE_SELECTOR_CHECKOUT'=>'default',
@@ -60,6 +60,9 @@ class pagantis
         'PAGANTIS_PROMOTION' => '',
         'PAGANTIS_PROMOTED_PRODUCT_CODE' => 'Finance this product <span class="pmt-no-interest">without interest!</span>',
         'PAGANTIS_ALLOWED_COUNTRIES' => 'a:2:{i:0;s:2:"es";i:1;s:2:"it";}',
+        'PAGANTIS_SIMULATOR_THOUSANDS_SEPARATOR' => '.',
+        'PAGANTIS_SIMULATOR_DECIMAL_SEPARATOR' => ','
+
     );
 
     /**
@@ -67,7 +70,7 @@ class pagantis
      */
     public function __construct()
     {
-        $this->version = '8.1.2';
+        $this->version = '8.1.3';
         $this->code = 'pagantis';
         $this->sort_order = 0;
         $this->description = $this->getDescription();

@@ -146,6 +146,7 @@ class ht_pagantis {
             echo '               var checkoutPage =     \'' . $checkoutPage.'\';'. PHP_EOL;
             echo '               var promotedAmount =     \'' . $promotedAmount.'\';'. PHP_EOL;
             echo '               var langCode =     \'' . $this->langCode.'\';'. PHP_EOL;
+            echo '               var sdk = '.$simulatorCode.';'. PHP_EOL;
 
             echo '               if (positionSelector === \'default\') {'. PHP_EOL;
             echo '                   positionSelector = \'.buttonSet\''. PHP_EOL;
@@ -158,33 +159,36 @@ class ht_pagantis {
             echo '               if (checkoutPriceSelector == \'default\' && checkoutPage == \'1\')  {'. PHP_EOL;
             echo '                   priceSelector = \'#columnRight > .infoBoxContainer > .infoBoxContents > tbody > tr:last-child > td\';'. PHP_EOL;
             echo '               }'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator = {};'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.locale = \'' . strtolower($this->langCode) . '\';'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.id = \'product-simulator\';'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.publicKey = \'' . $this->pk . '\';'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.selector = positionSelector;'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.numInstalments = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_START_INSTALLMENTS'] . '\';'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.type = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] . ';'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.skin = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] . ';'. PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.position = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] . ';'. PHP_EOL;
+
+            echo '               product_simulator = {};'. PHP_EOL;
+            echo '               product_simulator.locale = \'' . strtolower($this->langCode) . '\';'. PHP_EOL;
+            echo '               product_simulator.publicKey = \'' . $this->pk . '\';'. PHP_EOL;
+            echo '               product_simulator.selector = positionSelector;'. PHP_EOL;
+            echo '               product_simulator.numInstalments = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_START_INSTALLMENTS'] . '\';'. PHP_EOL;
+            echo '               product_simulator.type = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_TYPE'] . ';'. PHP_EOL;
+            echo '               product_simulator.skin = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_SKIN'] . ';'. PHP_EOL;
+            echo '               product_simulator.position = ' . $this->extraConfig['PAGANTIS_SIMULATOR_DISPLAY_CSS_POSITION'] . ';'. PHP_EOL;
+            echo '               product_simulator.amountParserConfig = {};'. PHP_EOL;
+            echo '               product_simulator.amountParserConfig.thousandSeparator = "' . $this->extraConfig['PAGANTIS_SIMULATOR_THOUSANDS_SEPARATOR'] . '";'. PHP_EOL;
+            echo '               product_simulator.amountParserConfig.decimalSeparator = "' . $this->extraConfig['PAGANTIS_SIMULATOR_DECIMAL_SEPARATOR'] .  '";'. PHP_EOL;
 
             //Amount in product page
             echo '               var promotedProduct = \'' . $this->isPromoted($productId) .'\';'. PHP_EOL;
             echo '               if(checkoutPage != \'1\' ) {';
-            echo '               '.$simulatorCode.'.product_simulator.itemAmountSelector = priceSelector;'. PHP_EOL;
+            echo '               product_simulator.itemAmountSelector = priceSelector;'. PHP_EOL;
             echo '                   if(promotedProduct == \'1\') { ' . PHP_EOL;
-            echo '                    '.$simulatorCode.'.product_simulator.itemPromotedAmountSelector = priceSelector;'. PHP_EOL;
+            echo '                    product_simulator.itemPromotedAmountSelector = priceSelector;'. PHP_EOL;
             echo '                   }' . PHP_EOL;
             echo '               }';
 
             //Amount in checkout page
             echo '               if(checkoutPage == \'1\' ) { ' . PHP_EOL;
-            echo '               '.$simulatorCode.'.product_simulator.totalAmountSelector = priceSelector;'. PHP_EOL;
+            echo '               product_simulator.totalAmountSelector = priceSelector;'. PHP_EOL;
             echo '                  if(promotedAmount != \'0\' && checkoutPage == \'1\' ) { ' . PHP_EOL;
-            echo '                  '   .$simulatorCode.'.product_simulator.totalPromotedAmount = promotedAmount;'. PHP_EOL;
+            echo '                      product_simulator.totalPromotedAmount = promotedAmount;'. PHP_EOL;
             echo '                  }' . PHP_EOL;
             echo '               }' . PHP_EOL;
-            echo '               '.$simulatorCode.'.simulator.init('.$simulatorCode.'.product_simulator);'. PHP_EOL;
+            echo '               sdk.simulator.init(product_simulator);'. PHP_EOL;
             echo '               clearInterval(window.OSSimulatorId);'. PHP_EOL;
             echo '               return true;'. PHP_EOL;
             echo '           }'. PHP_EOL;

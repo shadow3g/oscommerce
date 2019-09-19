@@ -162,6 +162,7 @@ class ht_pagantis {
 
             echo '               product_simulator = {};'. PHP_EOL;
             echo '               product_simulator.locale = \'' . strtolower($this->langCode) . '\';'. PHP_EOL;
+            echo '               product_simulator.country = \'' . strtolower($this->langCode) . '\';'. PHP_EOL;
             echo '               product_simulator.publicKey = \'' . $this->pk . '\';'. PHP_EOL;
             echo '               product_simulator.selector = positionSelector;'. PHP_EOL;
             echo '               product_simulator.numInstalments = \'' . $this->extraConfig['PAGANTIS_SIMULATOR_START_INSTALLMENTS'] . '\';'. PHP_EOL;

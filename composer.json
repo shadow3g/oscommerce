@@ -29,7 +29,7 @@
   },
   "require-dev": {
     "doctrine/instantiator": "1.0.5",
-    "pagantis/selenium-form-utils": "^3.0"
+    "pagantis/selenium-form-utils": "^3.0.1"
   },
   "autoload-dev": {
     "psr-4": {

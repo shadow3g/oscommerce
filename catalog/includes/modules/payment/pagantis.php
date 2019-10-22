@@ -70,7 +70,7 @@ class pagantis
      */
     public function __construct()
     {
-        $this->version = '8.1.4';
+        $this->version = '8.1.6';
         $this->code = 'pagantis';
         $this->sort_order = 0;
         $this->description = $this->getDescription();
@@ -226,7 +226,7 @@ class pagantis
             $userAddress
                 ->setZipCode($order->billing['postcode'])
                 ->setFullName($fullName)
-                ->setCountryCode('ES')
+                ->setCountryCode($order->billing['country']['iso_code'])
                 ->setCity($order->billing['city'])
                 ->setAddress($order->billing['street_address'])
                 ->setFixPhone($order->customer['telephone'])
@@ -235,12 +235,11 @@ class pagantis
                 ->setTaxId($tax_id);
 
             $orderBillingAddress = $userAddress;
-
             $orderShippingAddress = new Address();
             $orderShippingAddress
                 ->setZipCode($order->delivery['postcode'])
                 ->setFullName($fullName)
-                ->setCountryCode('ES')
+                ->setCountryCode($order->delivery['country']['iso_code'])
                 ->setCity($order->delivery['city'])
                 ->setAddress($order->delivery['street_address'])
                 ->setFixPhone($order->customer['telephone'])

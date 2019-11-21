@@ -341,7 +341,7 @@ class notifyController
             $resultsSelect = tep_db_query($query);
             $orderRow = tep_db_fetch_array($resultsSelect);
             if (isset($orderRow['timestamp'])) {
-                if ($_GET['from'] == 'notify') {
+                if ($this->origin == 'notify') {
                     throw new ConcurrencyException();
                 } else {
                     $query = sprintf(
@@ -351,12 +351,11 @@ class notifyController
                         "WHERE id='".$this->oscommerceOrderId."'"
                     );
                     $resultsSelect = tep_db_query($query);
-                    $orderRow = tep_db_fetch_array($resultsSelect);
-                    $resultsSeconds = $orderRow['rest'];
-                    $restSeconds = isset($resultsSeconds) ? ($resultsSeconds) : 0;
-                    $secondsToExpire=($restSeconds>self::CONCURRENCY_TIMEOUT)? self::CONCURRENCY_TIMEOUT : $restSeconds;
-                    if ($secondsToExpire > 0) {
-                        sleep($secondsToExpire + 1);
+                    $resultsArray = tep_db_fetch_array($resultsSelect);
+                    $restSeconds = isset($resultsArray['rest']) ? ($resultsArray['rest']) : 0;
+                    $expirationSec = ($restSeconds>self::CONCURRENCY_TIMEOUT)? self::CONCURRENCY_TIMEOUT : $restSeconds;
+                    if ($expirationSec > 0) {
+                        sleep($expirationSec + 1);
                     }
 
                     //Check if the notification have been processed
@@ -376,7 +375,7 @@ class notifyController
 
                     $logMessage = sprintf(
                         "User waiting %s seconds, default seconds %s, bd time to expire %s seconds => Url: %s",
-                        $secondsToExpire,
+                        $expirationSec,
                         self::CONCURRENCY_TIMEOUT,
                         $restSeconds,
                         $redirectUrl

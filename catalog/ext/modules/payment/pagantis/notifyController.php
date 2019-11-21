@@ -22,6 +22,9 @@ define('TABLE_PAGANTIS_CONCURRENCY', 'pagantis_concurrency');
 
 class notifyController
 {
+    /** Seconds to expire a locked request */
+    const CONCURRENCY_TIMEOUT = 10;
+
     /** @var mixed $pagantisOrder */
     protected $pagantisOrder;
 
@@ -313,7 +316,11 @@ class notifyController
     {
         try {
             if ($orderId == null) {
-                $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where  timestamp<".(time() - 5);
+                $query = sprintf(
+                    "delete from %s where timestamp<TIMESTAMPADD(SECOND, -%s, CURRENT_TIMESTAMP)",
+                    TABLE_PAGANTIS_CONCURRENCY,
+                    self::CONCURRENCY_TIMEOUT
+                );
                 tep_db_query($query);
             } elseif ($orderId!='') {
                 $query = "delete from ".TABLE_PAGANTIS_CONCURRENCY." where id='$orderId'";
@@ -333,14 +340,56 @@ class notifyController
             $query = "SELECT timestamp FROM ".TABLE_PAGANTIS_CONCURRENCY." where id='$this->oscommerceOrderId'";
             $resultsSelect = tep_db_query($query);
             $orderRow = tep_db_fetch_array($resultsSelect);
-
             if (isset($orderRow['timestamp'])) {
-                throw new ConcurrencyException();
+                if ($_GET['from'] == 'notify') {
+                    throw new ConcurrencyException();
+                } else {
+                    $query = sprintf(
+                        "SELECT TIMESTAMPDIFF(SECOND,NOW()-INTERVAL %s SECOND, timestamp) as rest FROM %s %s",
+                        self::CONCURRENCY_TIMEOUT,
+                        TABLE_PAGANTIS_CONCURRENCY,
+                        "WHERE id='".$this->oscommerceOrderId."'"
+                    );
+                    $resultsSelect = tep_db_query($query);
+                    $orderRow = tep_db_fetch_array($resultsSelect);
+                    $resultsSeconds = $orderRow['rest'];
+                    $restSeconds = isset($resultsSeconds) ? ($resultsSeconds) : 0;
+                    $secondsToExpire=($restSeconds>self::CONCURRENCY_TIMEOUT)? self::CONCURRENCY_TIMEOUT : $restSeconds;
+                    if ($secondsToExpire > 0) {
+                        sleep($secondsToExpire + 1);
+                    }
+
+                    //Check if the notification have been processed
+                    $query = sprintf(
+                        "select os_order_id from %s where os_order_reference='%s'",
+                        TABLE_PAGANTIS_ORDERS,
+                        $this->oscommerceOrderId
+                    );
+                    $resultsSelect = tep_db_query($query);
+                    $os_order_id = tep_db_fetch_array($resultsSelect);
+                    if (isset($os_order_id['os_order_id'])) {
+                        $redirectUrl = trim(tep_href_link(FILENAME_ACCOUNT_HISTORY_INFO, '', 'SSL', false));
+                        $redirectUrl.="?order_id=$this->oscommerceOrderId";
+                    } else {
+                        $redirectUrl = trim(tep_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL', false));
+                    }
+
+                    $logMessage = sprintf(
+                        "User waiting %s seconds, default seconds %s, bd time to expire %s seconds => Url: %s",
+                        $secondsToExpire,
+                        self::CONCURRENCY_TIMEOUT,
+                        $restSeconds,
+                        $redirectUrl
+                    );
+                    $this->insertLog(null, $logMessage);
+
+                    header("Location: $redirectUrl");
+                    exit;
+                }
+            } else {
+                $query = "INSERT INTO ".TABLE_PAGANTIS_CONCURRENCY." (id) VALUES ('$this->oscommerceOrderId');";
+                tep_db_query($query);
             }
-
-            $query = "INSERT INTO ".TABLE_PAGANTIS_CONCURRENCY." (id) VALUES ('$this->oscommerceOrderId')";
-            tep_db_query($query);
-
         } catch (Exception $exception) {
             throw new ConcurrencyException();
         }

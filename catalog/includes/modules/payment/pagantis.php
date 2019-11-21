@@ -70,7 +70,7 @@ class pagantis
      */
     public function __construct()
     {
-        $this->version = '8.1.7';
+        $this->version = '8.1.8';
         $this->code = 'pagantis';
         $this->sort_order = 0;
         $this->description = $this->getDescription();
@@ -303,7 +303,7 @@ class pagantis
                 ->setTotalAmount(intval($order->info['total'] * 100))
                 ->setPromotedAmount($promotedAmount);
 
-            $callback_url = $this->base_url.'/ext/modules/payment/pagantis/notify.php?order_id='.$this->os_order_reference;
+            $callback_url = $this->base_url.'/ext/modules/payment/pagantis/callback.php?order_id='.$this->os_order_reference;
             $checkoutProcessUrl = htmlspecialchars_decode(
                 tep_href_link(FILENAME_CHECKOUT_PROCESS, "order_id=$this->os_order_reference&from=order", 'SSL', true)
             );
